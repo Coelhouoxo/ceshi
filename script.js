@@ -300,8 +300,12 @@ if (streamToggle) {
             }
             
             // 恢复图片和文字设置
-            if(globalData.headerImg) document.getElementById('headerImg').src = globalData.headerImg;
-            if(globalData.avatarImg) document.getElementById('avatarImg').src = globalData.avatarImg;
+            for (const image of document.querySelectorAll('[data-home-image]')) {
+                const src = globalData.homeImages?.[image.id];
+                if (src) image.src = src;
+            }
+            restoreDesktopImage('headerImg', globalData.headerImg);
+            restoreDesktopImage('avatarImg', globalData.avatarImg);
             if(globalData.kaomoji) document.getElementById('homeKaomoji').innerText = globalData.kaomoji;
             if(globalData.handle) document.getElementById('homeHandle').innerText = globalData.handle;
             if(globalData.bio) document.getElementById('homeBio').innerText = globalData.bio;
@@ -311,18 +315,18 @@ if (streamToggle) {
             if(globalData.meSlogan) document.getElementById('meSlogan').innerText = globalData.meSlogan;
             if(globalData.apiEndpoint) document.getElementById('apiEndpoint').value = globalData.apiEndpoint;
             if(globalData.apiKey) document.getElementById('apiKey').value = globalData.apiKey;
-            if(globalData.kawaiiAvatarLeft) document.getElementById('kawaiiAvatarLeft').src = globalData.kawaiiAvatarLeft;
-            if(globalData.kawaiiAvatarRight) document.getElementById('kawaiiAvatarRight').src = globalData.kawaiiAvatarRight;
+            restoreDesktopImage('kawaiiAvatarLeft', globalData.kawaiiAvatarLeft);
+            restoreDesktopImage('kawaiiAvatarRight', globalData.kawaiiAvatarRight);
             if(globalData.kawaiiText) document.getElementById('kawaiiText').innerText = globalData.kawaiiText;
             if(globalData.kawaiiBottomText) document.getElementById('kawaiiBottomText').innerText = globalData.kawaiiBottomText;
             if(globalData.widgetTitle) document.getElementById('widgetTitle').innerText = globalData.widgetTitle;
-            if(globalData.captchaLabel && globalData.captchaLabel !== "I'm not a robot") document.getElementById('captchaLabel').innerText = globalData.captchaLabel;
-            if(globalData.captchaInput && globalData.captchaInput !== 'Type what u see') document.getElementById('captchaInput').innerText = globalData.captchaInput;
-            if(globalData.captchaImg) document.getElementById('captchaImg').src = globalData.captchaImg;
-            if(globalData.dockIcon1) document.getElementById('dockIcon1').src = globalData.dockIcon1;
-            if(globalData.dockIcon2) document.getElementById('dockIcon2').src = globalData.dockIcon2;
-            if(globalData.dockIcon3) document.getElementById('dockIcon3').src = globalData.dockIcon3;
-            if(globalData.dockIcon4) document.getElementById('dockIcon4').src = globalData.dockIcon4;
+            if (globalData.captchaLabel && globalData.captchaLabel !== '片刻') document.getElementById('captchaLabel').innerText = globalData.captchaLabel;
+            if (globalData.captchaInput && globalData.captchaInput !== '留一张给今天') document.getElementById('captchaInput').innerText = globalData.captchaInput;
+            restoreDesktopImage('captchaImg', globalData.captchaImg);
+            restoreDesktopImage('dockIcon1', globalData.dockIcon1);
+            restoreDesktopImage('dockIcon2', globalData.dockIcon2);
+            restoreDesktopImage('dockIcon3', globalData.dockIcon3);
+            restoreDesktopImage('dockIcon4', globalData.dockIcon4);
             if(globalData.app5Label) document.getElementById('app5Label').innerText = globalData.app5Label;
             if(globalData.app6Label) document.getElementById('app6Label').innerText = globalData.app6Label;
             if(globalData.app5Icon) { document.getElementById('app5Img').src = globalData.app5Icon; document.getElementById('app5Img').style.display = 'block'; document.getElementById('app5Default').style.display = 'none'; }
@@ -560,6 +564,12 @@ window.closePage = function(pageId) {
     }
 };
 
+function restoreDesktopImage(id, src) {
+    // Ignore bundled placeholders previously written to the settings database.
+    if (!src || /^https:\/\/placehold\.co\/(?:360x300\/transparent\/ccc\?text=Header\+Image|100x100\/(?:e0e0e0\/333\?text=A|eee\/999\?text=L|ddd\/888\?text=R)|150x80\/white\/333\?text=Anime\+Girl|40\/white\/ccc\?text=(?:🤍|🍷|🐰|🐱|%[0-9a-f]{2}.*))$/i.test(src)) return;
+    document.getElementById(id).src = src;
+}
+
 async function saveData() {
     // ★★★ 添加安全获取函数，防止元素不存在导致报错 ★★★
     const safeGetValue = (id, defaultVal = '') => {
@@ -581,6 +591,9 @@ async function saveData() {
 
     const settingsToSave = {
         id: 'main',
+        homeImages: Object.fromEntries(
+            Array.from(document.querySelectorAll('[data-home-image][src]'), image => [image.id, image.src])
+        ),
         headerImg: safeGetSrc('headerImg'),
         avatarImg: safeGetSrc('avatarImg'),
         kaomoji: safeGetText('homeKaomoji'),
@@ -2249,7 +2262,27 @@ function showMenu(e, t) {
     currentTargetImg = null; // 先重置
 
     // 特殊情况处理
-    if (t === 'settingsCharAvatar') { 
+    if (t === 'home') {
+        currentTargetImg = e.currentTarget.querySelector('img');
+        const appName = e.currentTarget.closest('.miu-app')?.querySelector('button.miu-app-name');
+        if (appName) {
+            const open = document.createElement('button');
+            open.type = 'button';
+            open.className = 'menu-item miu-menu-app';
+            open.textContent = '打开应用';
+            open.addEventListener('click', () => appName.click());
+            menu.prepend(open);
+        }
+        if (currentTargetImg?.id === 'app5Img' || currentTargetImg?.id === 'app6Img') {
+            const label = document.getElementById(currentTargetImg.id.replace('Img', 'Label'));
+            const rename = document.createElement('button');
+            rename.type = 'button';
+            rename.className = 'menu-item miu-menu-app';
+            rename.textContent = '修改名称';
+            rename.addEventListener('click', () => editText(label));
+            menu.append(rename);
+        }
+    } else if (t === 'settingsCharAvatar') {
         currentTargetImg = document.getElementById('settingsCharAvatar'); 
     } else if (t === 'settingsUserAvatar') { 
         currentTargetImg = document.getElementById('settingsUserAvatar'); 
@@ -2396,23 +2429,23 @@ document.addEventListener('click', () => {
 
 function changeByLink() { const u = prompt("链接:"); if(u && currentTargetImg) { handleImageUpdate(u); } menu.style.display='none'; }
 function triggerFileInput() { fileInput.click(); menu.style.display='none'; }
-fileInput.addEventListener('change', (e) => { const f = e.target.files[0]; if (f && uploadContext) { const r = new FileReader(); r.onload = (ev) => { handleBeautifyImageUpdate(ev.target.result); }; r.readAsDataURL(f); fileInput.value = ''; return; } if(f && currentTargetImg) { const r = new FileReader(); r.onload=(ev)=> { handleImageUpdate(ev.target.result); }; r.readAsDataURL(f); } fileInput.value=''; });
+fileInput.addEventListener('change', (e) => { const f = e.target.files[0]; if (f && uploadContext) { const r = new FileReader(); r.onload = (ev) => { handleBeautifyImageUpdate(ev.target.result); }; r.readAsDataURL(f); fileInput.value = ''; return; } if (f && currentTargetImg) { const target = currentTargetImg; const r = new FileReader(); r.onload = ev => handleImageUpdate(ev.target.result, target); r.readAsDataURL(f); } fileInput.value=''; });
 
-function handleImageUpdate(src) { 
-    if (currentTargetImg) {
+function handleImageUpdate(src, target = currentTargetImg) {
+    if (target) {
         
         // 找到这一行判断
-        if (currentTargetImg.id === 'cp-bg-layer' || currentTargetImg.id === 'cpTopCard') {
+        if (target.id === 'cp-bg-layer' || target.id === 'cpTopCard') {
             
             // 1. 设置图片路径
-            currentTargetImg.style.backgroundImage = `url(${src})`;
+            target.style.backgroundImage = `url(${src})`;
             
             // ★★★【修复2：在此处添加样式修正代码】★★★
             // 强制图片铺满且居中，防止图片太大只显示一个白色角落
-            if (currentTargetImg.id === 'cpTopCard') {
-                currentTargetImg.style.backgroundSize = 'cover';
-                currentTargetImg.style.backgroundPosition = 'center';
-                currentTargetImg.style.backgroundRepeat = 'no-repeat';
+            if (target.id === 'cpTopCard') {
+                target.style.backgroundSize = 'cover';
+                target.style.backgroundPosition = 'center';
+                target.style.backgroundRepeat = 'no-repeat';
             }
             
             // 2. 找到当前角色并保存
@@ -2421,7 +2454,7 @@ function handleImageUpdate(src) {
                 if (chat) {
                     if (!chat.coupleData) chat.coupleData = {};
                     
-                    if (currentTargetImg.id === 'cp-bg-layer') {
+                    if (target.id === 'cp-bg-layer') {
                         chat.coupleData.bgImage = src;
                     } else {
                         chat.coupleData.cardImage = src;
@@ -2431,43 +2464,43 @@ function handleImageUpdate(src) {
             }
             return; // 处理完直接退出
         }
-            if (currentTargetImg.id === 'wallet-bg-layer') {
-            currentTargetImg.style.backgroundImage = `url(${src})`;
+            if (target.id === 'wallet-bg-layer') {
+            target.style.backgroundImage = `url(${src})`;
             globalData.walletBg = src; // 存入全局配置
             saveData();
             return;
         }
         // 朋友圈背景处理
-        if (currentTargetImg.id === 'momentBgLayer') {
-            currentTargetImg.style.backgroundImage = `url(${src})`;
+        if (target.id === 'momentBgLayer') {
+            target.style.backgroundImage = `url(${src})`;
             globalData.momentPageBg = src; 
             saveData(); 
             return; 
         }
 
         // 普通图片更新
-        currentTargetImg.src = src; 
+        target.src = src;
 
         // 朋友圈 Banner 特殊处理
-        if (currentTargetImg.id === 'momentBannerImg') {
+        if (target.id === 'momentBannerImg') {
             globalData.momentBanner = src;
         }
-        else if (currentTargetImg.id === 'momentUserAvatar') {
+        else if (target.id === 'momentUserAvatar') {
             globalData.momentAvatar = src;
         }
         
         // Dock/App 图标逻辑 (保持不变)
-        if (currentTargetImg.id === 'app5Img') {
+        if (target.id === 'app5Img') {
             document.getElementById('app5Img').style.display = 'block';
             document.getElementById('app5Default').style.display = 'none';
         }
-        if (currentTargetImg.id === 'app6Img') {
+        if (target.id === 'app6Img') {
             document.getElementById('app6Img').style.display = 'block';
             document.getElementById('app6Default').style.display = 'none';
         }
 
         // 聊天设置头像逻辑 (保持不变)
-        if (currentTargetImg.id === 'settingsCharAvatar') { 
+        if (target.id === 'settingsCharAvatar') {
             const chat = chatList.find(c => c.id === currentChatId); 
             if (chat) chat.avatar = src; 
             const headerAvatar = document.getElementById('roomHeaderAvatar');
@@ -2475,11 +2508,11 @@ function handleImageUpdate(src) {
             renderMessages(chat); 
             renderChatList(); 
         } 
-        else if (currentTargetImg.id === 'settingsUserAvatar') { 
+        else if (target.id === 'settingsUserAvatar') {
             const chat = chatList.find(c => c.id === currentChatId); 
             if (chat) { chat.userAvatar = src; renderMessages(chat); }
         } 
-        if (currentTargetImg.id !== 'newCharAvatar' && currentTargetImg.id !== 'newMaskAvatar') {
+        if (target.id !== 'newCharAvatar' && target.id !== 'newMaskAvatar') {
             saveData(); 
         }
     }  

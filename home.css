@@ -53,10 +53,13 @@ body.has-wallpaper .miu-home {
 .miu-pages::-webkit-scrollbar, .miu-page::-webkit-scrollbar { display: none; }
 
 .miu-sheet {
-    display: flex;
-    flex-direction: column;
-    gap: var(--miu-gap);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-content: start;
+    align-items: start;
+    gap: var(--miu-gap) 0;
     width: min(100%, 432px);
+    min-height: 100%;
     margin-inline: auto;
     padding: calc(var(--safe-top) + clamp(14px, 3.7dvh, 46px)) clamp(20px, 7vw, 36px) 12px;
 }
@@ -106,8 +109,8 @@ body.has-wallpaper .miu-home {
 }
 
 .miu-photo {
-    background: linear-gradient(140deg, #f7f7f7, #c8c9ce);
-    color: #757680;
+    background: #ffffff52;
+    border: 0;
 }
 
 .miu-photo img, .miu-home .miu-tile img {
@@ -152,15 +155,11 @@ body.has-wallpaper .miu-home {
     font-size: 11px;
 }
 
-.miu-app-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: repeat(2, auto);
-    row-gap: var(--miu-gap);
-}
+.miu-sheet > [data-home-item] { grid-column: 1 / -1; min-width: 0; }
+.miu-sheet > .miu-app { grid-column: var(--column); }
+.miu-sheet > .camera-widget { grid-column: var(--column) / span 2; grid-row: span 2; }
 
 .miu-app {
-    grid-column: var(--column);
     display: grid;
     align-content: start;
     justify-items: center;
@@ -175,19 +174,28 @@ body.has-wallpaper .miu-home {
     font-weight: 600 !important;
 }
 
-.miu-app:disabled { cursor: default; opacity: 1; }
-.miu-app > span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-
-.miu-home .miu-tile {
-    width: clamp(42px, 6.4dvh, 54px);
-    aspect-ratio: 1;
-    border-radius: 11px;
-    background: linear-gradient(155deg, #fff, #ececef 62%, #d6d6db);
-    box-shadow: inset 0 0 0 2px #fff9, 0 2px 4px #27283112;
-    font-size: 17px;
+.miu-home .miu-app-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 2px;
+    border: 0;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 600;
 }
 
-.miu-home button.miu-tile:active, .miu-app:not(:disabled):active .miu-tile { transform: scale(.94); }
+.miu-home .miu-tile {
+    width: clamp(40px, 6.2dvh, 52px);
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: 11px;
+    background: #fdfdff75;
+}
+
+.miu-home button.miu-tile:active { transform: scale(.94); }
+.miu-home .miu-tile:has(img[src]:not(.miu-image-failed)) { background: transparent; }
 
 .miu-duo { display: grid; justify-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
 .miu-duo-pair { display: flex; gap: 13px; }
@@ -220,8 +228,7 @@ body.has-wallpaper .miu-home {
     width: 39px;
     height: 27px;
     border-radius: 6px;
-    background: linear-gradient(150deg, #9799a1, #44454c);
-    color: #fff;
+    background: #ffffff65;
 }
 .miu-todos { min-width: 0; border: 0; color: var(--miu-muted); font-size: 12px; }
 .miu-todos legend { margin-bottom: 5px; letter-spacing: .08em; }
@@ -231,6 +238,7 @@ body.has-wallpaper .miu-home {
 .miu-todos input:focus-visible { outline: 2px solid #60616a; outline-offset: 2px; }
 .miu-separator { display: flex; align-items: center; gap: 9px; color: #71727b; font-size: 11px; }
 .miu-separator::before, .miu-separator::after { content: ""; flex: 1; height: 1px; background: var(--miu-line); }
+.miu-calendar-widget { display: grid; gap: var(--miu-gap); }
 .miu-calendar-note { color: var(--miu-muted); text-align: center; font-size: 12px; cursor: pointer; }
 .miu-calendar-head { gap: 0; margin-bottom: 5px; font-size: 13px; letter-spacing: .055em; }
 .miu-calendar-head .miu-icon-button { width: 32px; height: 30px; font-size: 10px; }
@@ -239,70 +247,66 @@ body.has-wallpaper .miu-home {
 .miu-calendar-grid .miu-weekday { font-size: 9px; letter-spacing: .05em; }
 .miu-calendar-grid .miu-today { border-radius: 999px; background: #dcdce0; font-weight: 700; color: var(--miu-ink); }
 
-.miu-banner-top { justify-content: space-between; min-height: 30px; font-weight: 600; }
-.miu-banner-top > span { padding: 4px 10px; border-radius: 7px; background: #fff6; cursor: pointer; }
-.miu-home .miu-banner {
-    width: 100%;
-    height: clamp(53px, 11dvh, 89px);
-    margin-top: calc(var(--miu-gap) / -2);
-    border-radius: 12px;
-    background:
-        radial-gradient(ellipse at 72% -10%, #fff 0%, #ffffff00 56%),
-        repeating-linear-gradient(112deg, #fff0 0 21px, #fff5 22px 23px),
-        linear-gradient(120deg, #b7b8be, #eeeff0 48%, #b5b5bd);
-    font-size: 32px;
-}
-.miu-media-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, auto); align-items: center; gap: 9px 0; }
-.miu-memory {
-    grid-column: 3 / 5;
-    grid-row: 1 / 3;
-    margin-left: 6px;
-    padding: 9px;
-    border-radius: 12px;
-    text-align: center;
-    background: #ffffff9c;
-    border: 1px solid #fff;
-    box-shadow: 0 4px 15px #25263109;
-}
-.miu-memory figcaption { margin-bottom: 7px; font-size: 12px; font-weight: 650; }
-.miu-home .miu-memory-photo {
-    width: 100%;
-    height: clamp(55px, 11dvh, 86px);
-    border-radius: 7px;
-    background: linear-gradient(145deg, #dedee4, #f0f0f2 55%, #ceced4);
-    font-size: 18px;
-}
-.miu-memory p { margin-top: 7px; color: var(--miu-muted); font-size: 10px; cursor: pointer; }
-
-.miu-player {
+.miu-week-card { display: grid; gap: 13px; padding: 4px 0; }
+.miu-week-head { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 12px; }
+.miu-week-portrait { position: relative; }
+.miu-week-portrait > i {
+    position: absolute;
+    right: 0;
+    bottom: 0;
     display: grid;
-    gap: 8px;
-    padding: 12px 13px 9px;
-    border: 1px solid var(--miu-line);
-    border-radius: 19px;
-    background: linear-gradient(135deg, #fff9, #dedee467 52%, #fff8);
-    box-shadow: 0 6px 18px #25263108;
+    place-items: center;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #3f4047;
+    color: #fff;
+    font-size: 9px;
+    pointer-events: none;
 }
-.miu-record { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 8px; background: #d9d9df; color: #45464e; font-size: 20px; }
-.miu-track-time { display: flex; align-items: center; gap: 7px; font-size: 10px; font-variant-numeric: tabular-nums; color: var(--miu-muted); }
-.miu-track-time progress {
-    flex: 1;
-    min-width: 0;
-    height: 5px;
-    border: 0;
-    border-radius: 99px;
-    appearance: none;
-    background: #c7c7cd;
-    color: #51525b;
-    accent-color: #51525b;
-    overflow: hidden;
-}
-.miu-track-time progress::-webkit-progress-bar { background: #c7c7cd; }
-.miu-track-time progress::-webkit-progress-value { background: #51525b; }
-.miu-track-time progress::-moz-progress-bar { background: #51525b; }
-.miu-player-controls { display: flex; justify-content: space-between; align-items: center; }
-.miu-player-controls .miu-icon-button { font-size: 15px; }
-.miu-player-controls #miuPlay { font-size: 19px; }
+.miu-week-avatar { width: 64px; height: 64px; border-radius: 50%; }
+.miu-week-copy > strong { font: 700 20px/1.2 Georgia, serif; }
+.miu-week-copy > strong i { font-size: 10px; vertical-align: .15em; }
+.miu-week-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-top: 6px; text-align: center; }
+.miu-week-days span { display: grid; justify-items: center; gap: 3px; font-size: 9px; color: var(--miu-muted); }
+.miu-week-days b { display: grid; place-items: center; min-width: 20px; min-height: 20px; color: var(--miu-ink); font-size: 11px; font-weight: 600; }
+.miu-week-days [aria-current] b { background: #4d4e591d; border-radius: 50%; }
+.miu-week-timeline { position: relative; display: grid; gap: 7px; }
+.miu-week-timeline::before { content: ""; position: absolute; top: 14px; bottom: 14px; left: 11px; width: 1px; background: var(--miu-line); }
+.miu-week-entry { display: flex; align-items: center; gap: 9px; min-height: 30px; font-size: 11px; }
+.miu-week-entry > time { margin-left: auto; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
+.miu-week-mark { z-index: 1; display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: #4d4e5917; color: #53545c; font-size: 10px; }
+.miu-week-note { color: var(--miu-muted); }
+.miu-week-photos { display: flex; gap: 4px; margin-left: auto; }
+.miu-week-photos .miu-photo { width: clamp(29px, 10vw, 45px); aspect-ratio: 1; border-radius: 7px; }
+
+.miu-home .camera-widget { align-self: start; }
+.miu-home .camera-widget .captcha-top { width: auto; max-width: 100%; align-self: center; white-space: nowrap; }
+.miu-home .camera-widget .captcha-input { min-width: 0; overflow: hidden; white-space: nowrap; }
+.miu-home .camera-widget .captcha-verify-btn { padding-inline: 5px; }
+.miu-home .camera-widget .captcha-img-container { border: 1px solid #eee; background: transparent; }
+
+.miu-player { display: grid; gap: 7px; font-size: 11px; }
+.miu-player-head, .miu-player-meta, .miu-player-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.miu-home .miu-player-tab, .miu-player-meta button { padding: 4px 7px; border: 1px solid #dddddf65; border-radius: 3px; background: #ffffff5e; font-size: 10px; }
+.miu-player-tab i { margin-left: 6px; }
+.miu-player-card { padding: 10px; border: 1px solid #e0e0e490; border-radius: 6px; background: #ffffff50; }
+.miu-track { gap: 9px; }
+.miu-track .miu-record { width: 53px; aspect-ratio: 1; border-radius: 12px; background: #e2e2e78c; }
+#miuTrackName { font-size: 13px; }
+.miu-player-meta { margin-top: 7px; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
+.miu-player-meta > span > span + span { margin-left: 5px; }
+.miu-bracket { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-evenly; gap: 5px; padding-inline: 9px; }
+.miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 5px; width: 4px; border: 1px solid #55576185; pointer-events: none; }
+.miu-bracket::before { left: 0; border-right: 0; }
+.miu-bracket::after { right: 0; border-left: 0; }
+.miu-player-controls .miu-icon-button { width: 30px; height: 30px; font-size: 12px; }
+.miu-player-controls #miuPlay { font-size: 15px; }
+.miu-player-progress { height: 30px; justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.miu-player-progress progress { width: 42%; min-width: 16px; height: 7px; border: 0; appearance: none; color: #53545e; accent-color: #53545e; background: #d3d3d8; }
+.miu-player-progress progress::-webkit-progress-bar { background: #d3d3d8; }
+.miu-player-progress progress::-webkit-progress-value { background: #53545e; }
+.miu-player-progress progress::-moz-progress-bar { background: #53545e; }
 
 .miu-pagination {
     position: relative;
@@ -327,6 +331,24 @@ body.has-wallpaper .miu-home {
 .miu-pagination button::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a6a6ae; box-shadow: 0 0 0 2px #f5f5f6; }
 .miu-pagination button[aria-current]::after { background: #4b4c54; }
 
-.miu-dock { display: flex; justify-content: center; align-items: center; gap: clamp(13px, 5vw, 25px); padding: 8px 16px calc(10px + var(--safe-bottom)); }
-.miu-dock .dock-btn { height: auto; }
-.miu-media-grid .miu-app:nth-child(2) { grid-row: 2; }
+.miu-dock { min-height: calc(65px + var(--safe-bottom)); display: flex; justify-content: center; align-items: center; gap: clamp(13px, 5vw, 25px); padding: 8px 16px calc(10px + var(--safe-bottom)); }
+.miu-dock .miu-app { min-width: 44px; gap: 3px; }
+.miu-dock .miu-app-name { font-size: 9px; }
+.miu-home [data-home-item] { -webkit-touch-callout: none; }
+.miu-home .miu-drag-source { opacity: .3; }
+.miu-home .miu-drop-target { outline: 1px dashed #767780; outline-offset: 3px; border-radius: 8px; }
+.miu-home .miu-drop-page { background: #77778130; }
+.miu-drag-preview {
+    position: fixed;
+    z-index: var(--z-max);
+    top: 0;
+    left: 0;
+    margin: 0;
+    pointer-events: none;
+    border-radius: 12px;
+    background: #f9f9f9ee;
+    box-shadow: 0 8px 24px #22232a34;
+    overflow: hidden;
+    opacity: .92;
+}
+.miu-menu-app { border: 0; background: transparent; text-align: left; }
