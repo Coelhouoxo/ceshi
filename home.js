@@ -1,4 +1,19 @@
 (() => {
+    // Older Android shortcuts may still be running with the standalone manifest.
+    if (/Android/i.test(navigator.userAgent) && matchMedia('(display-mode: standalone)').matches &&
+        document.fullscreenEnabled && document.documentElement.requestFullscreen) {
+        const fullscreenOnInteraction = event => {
+            if (!event.isTrusted || navigator.userActivation?.isActive === false) return;
+            document.removeEventListener('pointerup', fullscreenOnInteraction, true);
+            document.removeEventListener('keydown', fullscreenOnInteraction, true);
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+            }
+        };
+        document.addEventListener('pointerup', fullscreenOnInteraction, true);
+        document.addEventListener('keydown', fullscreenOnInteraction, true);
+    }
+
     const pages = document.getElementById('miuPages');
     const slides = Array.from(pages.children);
     const dots = Array.from(document.querySelectorAll('.miu-pagination button'));
@@ -103,7 +118,7 @@
         suppressClickUntil = 0;
         const rect = item.getBoundingClientRect();
         const state = {
-            item, icon: event.target.closest('[data-home-edit-icon]'), startX: point.clientX, startY: point.clientY,
+            item, icon: event.target.closest('[data-home-edit-icon], [data-home-pick-image]'), field: event.target.closest('[data-home-text]'), startX: point.clientX, startY: point.clientY,
             x: point.clientX, y: point.clientY,
             offsetX: point.clientX - rect.left, offsetY: point.clientY - rect.top,
             edge: 0, edgeAt: 0
@@ -220,7 +235,11 @@
         clearInterval(state.scroll);
         if (!state.held) return;
         suppressClickUntil = performance.now() + 500;
-        if (commit && !state.moved && state.icon) openIconMenu(state.icon);
+        if (commit && !state.moved) {
+            const field = state.field || state.item.querySelector('[data-home-text]');
+            if (state.icon) openIconMenu(state.icon);
+            else if (field) openEditor(field);
+        }
         if (!state.preview) return;
         const drop = commit && state.moved ? findDrop(state) : null;
         state.item.classList.remove('miu-drag-source');
@@ -266,16 +285,14 @@
         if (event.pointerType === 'mouse') finishGesture(false);
     });
     window.addEventListener('blur', () => finishGesture(false));
-    function openIconMenu(icon) {
-        showMenu({ currentTarget: icon, detail: 0, stopPropagation() {} }, 'home');
-    }
-
     home.addEventListener('contextmenu', event => {
         if (event.target.closest('[data-home-item]')) event.preventDefault();
         const icon = event.target.closest('[data-home-edit-icon]');
-        if (icon && !gesture) {
+        const field = event.target.closest('[data-home-text]');
+        if (!gesture && (icon || field)) {
             event.stopPropagation();
-            openIconMenu(icon);
+            if (icon) openIconMenu(icon);
+            else openEditor(field);
         }
     });
     home.addEventListener('click', event => {
@@ -290,6 +307,212 @@
         image.addEventListener('error', showFallback);
         image.addEventListener('load', () => image.classList.remove('miu-image-failed'));
     });
+
+    const editor = document.getElementById('miuEditor');
+    const editorTitle = document.getElementById('miuEditorTitle');
+    const photoOptions = document.getElementById('miuEditorPhoto');
+    const editorPreview = document.getElementById('miuEditorPreview');
+    const editorClear = document.getElementById('miuEditorClear');
+    const editorReset = document.getElementById('miuEditorReset');
+    const editorRow = document.getElementById('miuEditorInputRow');
+    const editorInput = document.getElementById('miuEditorInput');
+    const editorFile = document.getElementById('miuEditorFile');
+    const editorError = document.getElementById('miuEditorError');
+    const textKey = 'miu-home-text-v1';
+    const defaults = new WeakMap();
+    const customText = new Map();
+    let editing;
+
+    try {
+        for (const [key, value] of Object.entries(JSON.parse(localStorage.getItem(textKey)) || {})) {
+            if (typeof value === 'string') customText.set(key, value);
+        }
+    } catch {
+        // Desktop editing still works with storage disabled.
+    }
+
+    function renderText(field, original) {
+        defaults.set(field, original);
+        const text = customText.get(field.dataset.homeText) ?? original;
+        field.textContent = text;
+        if (field.hasAttribute('data-home-percent')) {
+            document.getElementById('miuMemoProgress').value = Number.parseFloat(text);
+        }
+    }
+
+    function registerText(field) {
+        if (!field.closest('[data-home-launch-label]')) {
+            field.tabIndex = 0;
+            field.setAttribute('role', 'button');
+        }
+        renderText(field, field.textContent);
+    }
+    home.querySelectorAll('[data-home-text]').forEach(registerText);
+
+    function positionEditor() {
+        if (!editing) return;
+        const rect = editing.anchor.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const leftEdge = viewport?.offsetLeft ?? 0;
+        const topEdge = viewport?.offsetTop ?? 0;
+        const width = viewport?.width ?? document.documentElement.clientWidth;
+        const height = viewport?.height ?? document.documentElement.clientHeight;
+        const left = Math.max(leftEdge + 8, Math.min(rect.left, leftEdge + width - editor.offsetWidth - 8));
+        const below = rect.bottom + 7;
+        const proposed = below + editor.offsetHeight < topEdge + height - 8 ? below : rect.top - editor.offsetHeight - 7;
+        const top = Math.max(topEdge + 8, Math.min(proposed, topEdge + height - editor.offsetHeight - 8));
+        editor.style.left = left + 'px';
+        editor.style.top = top + 'px';
+    }
+
+    function closeEditor(restoreFocus = false) {
+        const anchor = editing?.anchor;
+        editing = undefined;
+        editor.hidden = true;
+        editorPreview.removeAttribute('src');
+        if (restoreFocus) anchor?.focus({ preventScroll: true });
+    }
+
+    function openEditor(anchor, image = null) {
+        const field = image ? null : anchor;
+        const isPercent = field?.hasAttribute('data-home-percent');
+        editing = { anchor, image, field, isPercent, url: false };
+        editorTitle.textContent = image ? '更换图片' : '修改内容';
+        editorInput.type = isPercent ? 'number' : 'text';
+        editorInput.min = isPercent ? '0' : '';
+        editorInput.max = isPercent ? '100' : '';
+        editorInput.value = field ? (isPercent ? Number.parseFloat(field.textContent) : field.textContent) : '';
+        editorInput.placeholder = '输入内容';
+        editorInput.required = Boolean(isPercent);
+        editorRow.hidden = Boolean(image);
+        photoOptions.hidden = !image;
+        const src = image?.getAttribute('src');
+        editorPreview.hidden = !src;
+        if (src) editorPreview.src = src;
+        else editorPreview.removeAttribute('src');
+        editorClear.hidden = !src;
+        editorReset.hidden = !field;
+        editorError.textContent = '';
+        editor.hidden = false;
+        positionEditor();
+        if (field) editorInput.focus({ preventScroll: true });
+    }
+
+    function openIconMenu(anchor) {
+        const image = anchor.querySelector('img');
+        if (image) openEditor(anchor, image);
+    }
+
+    function saveText(state, reset = false) {
+        const { field, isPercent } = state;
+        const original = defaults.get(field) ?? '';
+        const value = reset ? original : isPercent ? editorInput.value + '%' : editorInput.value;
+        if (field.hasAttribute('data-home-legacy')) {
+            field.textContent = value;
+            saveData();
+        } else {
+            if (reset) customText.delete(field.dataset.homeText);
+            else customText.set(field.dataset.homeText, value);
+            renderText(field, original);
+            try {
+                localStorage.setItem(textKey, JSON.stringify(Object.fromEntries(customText)));
+            } catch {
+                // Keep the current edit usable for this session.
+            }
+        }
+        closeEditor(true);
+    }
+
+    function saveImage(state, src) {
+        if (editing !== state) return;
+        if (src) {
+            handleImageUpdate(src, state.image);
+        } else {
+            state.image.removeAttribute('src');
+            saveData();
+        }
+        closeEditor(true);
+    }
+
+    editor.addEventListener('click', event => {
+        const action = event.target.closest('[data-editor-action]')?.dataset.editorAction;
+        if (!editing || !action) return;
+        switch (action) {
+            case 'close': closeEditor(true); break;
+            case 'file': editorFile.click(); break;
+            case 'url':
+                editing.url = true;
+                editorInput.type = 'url';
+                editorInput.required = true;
+                editorInput.placeholder = 'https://';
+                editorInput.value = /^https?:/i.test(editing.image.src) ? editing.image.src : '';
+                editorRow.hidden = false;
+                positionEditor();
+                editorInput.focus({ preventScroll: true });
+                break;
+            case 'clear': saveImage(editing, ''); break;
+            case 'reset': saveText(editing, true); break;
+        }
+    });
+
+    editor.addEventListener('submit', event => {
+        event.preventDefault();
+        if (!editing) return;
+        if (editing.field) {
+            saveText(editing);
+        } else if (editing.url) {
+            const src = editorInput.value.trim();
+            if (!/^https?:\/\//i.test(src)) {
+                editorError.textContent = '请输入 http 或 https 图片链接。';
+                positionEditor();
+                return;
+            }
+            saveImage(editing, src);
+        }
+    });
+
+    editorFile.addEventListener('change', () => {
+        const state = editing;
+        const file = editorFile.files[0];
+        editorFile.value = '';
+        if (!state?.image || !file) return;
+        const reader = new FileReader();
+        reader.addEventListener('load', () => saveImage(state, reader.result));
+        reader.addEventListener('error', () => {
+            if (editing === state) editorError.textContent = '图片读取失败。';
+        });
+        reader.readAsDataURL(file);
+    });
+
+    home.addEventListener('click', event => {
+        const photo = event.target.closest('[data-home-pick-image]');
+        const targetId = event.target.closest('[data-home-edit-target]')?.dataset.homeEditTarget;
+        const field = targetId ? document.getElementById(targetId) : event.target.closest('[data-home-text]');
+        if (!photo && (!field || field.closest('[data-home-launch-label]'))) return;
+        event.preventDefault();
+        if (photo) openIconMenu(photo);
+        else openEditor(field);
+    });
+
+    home.addEventListener('keydown', event => {
+        const field = event.target.closest('[data-home-text]');
+        if (!field || field.closest('[data-home-launch-label]') || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        openEditor(field);
+    });
+    document.addEventListener('pointerdown', event => {
+        if (editing && !editor.contains(event.target)) closeEditor();
+    });
+    document.addEventListener('keydown', event => {
+        if (editing && event.key === 'Escape') {
+            event.preventDefault();
+            closeEditor(true);
+        }
+    });
+    window.addEventListener('resize', positionEditor);
+    window.visualViewport?.addEventListener('resize', positionEditor);
+    window.visualViewport?.addEventListener('scroll', positionEditor);
+    pages.addEventListener('scroll', () => closeEditor(), { passive: true });
 
     const clock = document.getElementById('realTimeDisplay');
     const miniClock = document.querySelector('.miu-mini-clock time');
@@ -309,12 +532,7 @@
     }
     const monthFormat = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
     const weekTime = document.getElementById('miuWeekTime');
-    const weekDate = document.getElementById('miuWeekDate');
-    const weekDays = document.getElementById('miuWeekDays');
     const memoDate = document.getElementById('miuMemoDate');
-    const memoPercent = document.getElementById('miuMemoPercent');
-    const memoProgress = document.getElementById('miuMemoProgress');
-    const chipDateFormat = new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' });
     const memoDateFormat = new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
     const calendarMonth = document.getElementById('miuCalendarMonth');
     const calendarDays = document.getElementById('miuCalendarDays');
@@ -328,18 +546,24 @@
         const firstColumn = (displayedMonth.getDay() + 6) % 7;
         const monthLength = new Date(year, month + 1, 0).getDate();
         const currentMonth = year === today.getFullYear() && month === today.getMonth();
-        calendarMonth.textContent = monthFormat.format(displayedMonth).toUpperCase();
+        renderText(calendarMonth, monthFormat.format(displayedMonth).toUpperCase());
         calendarDays.replaceChildren();
 
-        for (const weekday of weekdays) {
+        weekdays.forEach((weekday, index) => {
             const heading = document.createElement('span');
             heading.className = 'miu-weekday';
             heading.textContent = weekday;
+            heading.dataset.homeText = 'calendar-weekday-' + index;
+            registerText(heading);
             calendarDays.append(heading);
-        }
+        });
         for (let day = 1 - firstColumn; day <= monthLength; day++) {
             const cell = document.createElement('span');
-            if (day > 0) cell.textContent = day;
+            if (day > 0) {
+                cell.textContent = day;
+                cell.dataset.homeText = 'calendar-day-' + year + '-' + month + '-' + day;
+                registerText(cell);
+            }
             if (currentMonth && day === today.getDate()) {
                 cell.className = 'miu-today';
                 cell.setAttribute('aria-current', 'date');
@@ -348,41 +572,25 @@
         }
     }
 
-    function renderWeek() {
-        weekDate.textContent = dateFormat.format(today);
-        weekDays.replaceChildren();
-        ['昨天', '今天', '明天'].forEach((label, index) => {
-            const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() + index - 1);
-            const chip = document.createElement('span');
-            chip.textContent = label + ' ' + chipDateFormat.format(day);
-            if (index === 1) chip.setAttribute('aria-current', 'date');
-            weekDays.append(chip);
-        });
-    }
-
     function updateTime() {
         const now = new Date();
         const time = [now.getHours(), now.getMinutes()].map(value => String(value).padStart(2, '0')).join(':');
         if (clock.dateTime !== time) {
             for (const label of [clock, miniClock, weekTime]) {
                 label.dateTime = time;
-                label.textContent = time;
+                renderText(label, time);
             }
-            dateLabel.textContent = formatClockDate(now);
+            renderText(dateLabel, formatClockDate(now));
             memoDate.dateTime = clock.dateTime;
-            memoDate.textContent = memoDateFormat.format(now) + '　' + time;
-            const minutes = now.getHours() * 60 + now.getMinutes();
-            memoProgress.value = minutes;
-            memoPercent.textContent = Math.floor(minutes * 100 / memoProgress.max) + '%';
+            renderText(memoDate, memoDateFormat.format(now) + '　' + time);
         }
         if (today.toDateString() !== now.toDateString()) {
             if (displayedMonth.getMonth() === today.getMonth() && displayedMonth.getFullYear() === today.getFullYear()) {
                 displayedMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             }
             today = now;
-            dateLabel.textContent = formatClockDate(now);
+            renderText(dateLabel, formatClockDate(now));
             renderCalendar();
-            renderWeek();
         }
     }
 
@@ -396,7 +604,6 @@
     });
     updateTime();
     renderCalendar();
-    renderWeek();
     setInterval(updateTime, 1000);
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) updateTime();

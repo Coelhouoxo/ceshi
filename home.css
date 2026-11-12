@@ -278,7 +278,7 @@ body.has-wallpaper .miu-home {
 }
 .miu-week-avatar { width: 100%; aspect-ratio: 1; border-radius: 50%; background: #fff9; box-shadow: inset 0 0 0 1px #665d661c; }
 .miu-week-copy > strong { display: block; color: #27242a; font: 700 20px/1.18 Georgia, "Songti SC", serif; }
-.miu-week-copy > strong span { font-size: 11px; vertical-align: .22em; }
+.miu-week-copy > strong .miu-week-star { font-size: 11px; vertical-align: .22em; }
 .miu-week-copy > p, .miu-week-date { margin-top: 4px; font-size: 11px; color: #716970; }
 .miu-week-date i { margin-right: 2px; color: #766c75; }
 .miu-week-days { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
@@ -290,7 +290,6 @@ body.has-wallpaper .miu-home {
     line-height: 1.2;
     white-space: nowrap;
 }
-.miu-week-days [aria-current] { color: #514651; background: #fff9; }
 .miu-week-timeline { position: relative; display: grid; gap: 7px; }
 .miu-week-timeline::before { content: ""; position: absolute; top: 12px; bottom: 7px; left: 12px; width: 1px; background: #6b5d6b32; }
 .miu-week-entry { display: flex; align-items: center; gap: 7px; min-height: 30px; font-size: 11px; }
@@ -315,17 +314,28 @@ body.has-wallpaper .miu-home {
 
 .miu-memo { display: grid; gap: 7px; font-size: 11px; color: #454147; }
 .miu-memo-head, .miu-memo-meta, .miu-memo-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.miu-memo-head > span, .miu-memo-meta > span { padding: 4px 7px; border: 1px solid #c7bfc52f; border-radius: 2px; background: #ffffff65; font-size: 10px; }
+.miu-memo-head > span, .miu-memo-meta > span:last-child { padding: 4px 7px; border: 1px solid #c7bfc52f; border-radius: 2px; background: #ffffff65; font-size: 10px; }
 .miu-memo-head > span:first-child { min-width: 38%; display: flex; justify-content: space-between; align-items: center; }
 .miu-memo-head i { margin-left: 5px; }
 .miu-memo-card { padding: 10px 11px 7px; border: 1px solid #d6ccd350; border-radius: 4px; background: linear-gradient(120deg, #fffc, #fbf8faac 64%, #eee7ec6e); }
-.miu-memo-profile { display: flex; align-items: center; gap: 10px; }
-.miu-memo-photo { width: 57px; aspect-ratio: 1; border-radius: 13px; background: #e6e2e5aa; box-shadow: inset 0 0 0 2px #fffa; }
+.miu-memo-profile { display: flex; align-items: center; gap: 11px; }
+.miu-home .miu-memo-frame {
+    flex: none;
+    width: clamp(55px, 17vw, 68px);
+    aspect-ratio: 1;
+    display: grid;
+    padding: 3px;
+    border: 1px solid #aca9af6b;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #fff, #eeebef);
+    box-shadow: 0 0 0 1px #fffc, inset 0 0 0 1px #fffc, 0 1px 2px #655d691c;
+}
+.miu-memo-photo { width: 100%; height: 100%; border-radius: 12px; background: #e5e2e6a6; box-shadow: inset 0 0 0 1px #b1aab33b; }
 .miu-memo-profile strong { display: block; font-size: 14px; }
 .miu-memo-profile p { margin-top: 4px; color: #716970; font-size: 10px; }
 .miu-memo-mark { align-self: start; margin-left: auto; color: #817881; white-space: nowrap; }
 .miu-memo-meta { margin-top: 7px; color: #716970; font-size: 10px; font-variant-numeric: tabular-nums; }
-.miu-memo-meta > span { min-width: 64px; text-align: center; }
+.miu-memo-meta > span:last-child { min-width: 64px; text-align: center; }
 .miu-bracket { position: relative; min-width: 0; display: flex; align-items: center; gap: 5px; min-height: 24px; padding-inline: 8px; }
 .miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 3px; width: 4px; border: 1px solid #55495399; pointer-events: none; }
 .miu-bracket::before { left: 0; border-right: 0; }
@@ -333,7 +343,8 @@ body.has-wallpaper .miu-home {
 .miu-memo-note { width: 72%; font-weight: 600; }
 .miu-memo-bottom { gap: 12px; }
 .miu-memo-bottom > div { flex: 1; }
-.miu-memo-progress { justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.miu-memo-progress { justify-content: space-between; font-variant-numeric: tabular-nums; }
+.miu-memo-progress-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-width: 0; width: 55%; border-left: 1px solid #7a6e7855; padding-left: 4px; }
 .miu-memo-progress progress { width: 36%; min-width: 16px; height: 8px; border: 0; appearance: none; color: #655c64; accent-color: #655c64; background: #dcd4da; }
 .miu-memo-progress progress::-webkit-progress-bar { background: #dcd4da; }
 .miu-memo-progress progress::-webkit-progress-value { background: #655c64; }
@@ -346,18 +357,6 @@ body.has-wallpaper .miu-home {
     justify-content: center;
     min-height: 32px;
 }
-.miu-page-wave {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    fill: none;
-    stroke: #9a9ba4;
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-dasharray: .2 5;
-    pointer-events: none;
-}
 .miu-pagination button { z-index: 1; display: grid; place-items: center; border: 0; background: none; width: 24px; height: 30px; border-radius: 8px; }
 .miu-pagination button::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a6a6ae; box-shadow: 0 0 0 2px #f5f5f6; }
 .miu-pagination button[aria-current]::after { background: #4b4c54; }
@@ -365,20 +364,22 @@ body.has-wallpaper .miu-home {
 .miu-dock {
     flex: none;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, auto);
     align-items: center;
-    width: min(calc(100% - 24px), 390px);
+    width: fit-content;
+    max-width: calc(100% - 20px);
+    gap: clamp(8px, 3vw, 12px);
     margin: 4px auto calc(9px + var(--safe-bottom));
-    padding: 10px 15px;
-    border: 1px solid #ffffffb8;
-    border-radius: 27px;
+    padding: 7px 10px;
+    border: 1px solid #ffffffbc;
+    border-radius: 999px;
     background: linear-gradient(155deg, #ffffff47, #ffffff1b 52%, #ffffff30);
     -webkit-backdrop-filter: blur(10px) saturate(128%);
     backdrop-filter: blur(10px) saturate(128%);
     box-shadow: inset 0 1px 1px #ffffff85, inset 0 -1px 1px #ffffff60, 0 4px 14px #44303912;
 }
 .miu-home .miu-dock .miu-tile {
-    width: clamp(43px, 14vw, 55px);
+    width: clamp(42px, 13vw, 51px);
     border-radius: 13px;
     background: #fff9;
     color: #474049;
@@ -409,3 +410,37 @@ body.has-wallpaper .miu-home {
     opacity: .92;
 }
 .miu-menu-app { border: 0; background: transparent; text-align: left; }
+
+.miu-home [data-home-text] { cursor: text; }
+.miu-home [data-home-text]:empty { display: inline-block; min-width: 1ch; min-height: 1em; }
+.miu-home [data-home-text]:focus-visible { outline: 1px solid #857382; outline-offset: 2px; border-radius: 3px; }
+.miu-editor {
+    position: fixed;
+    z-index: var(--z-max);
+    display: grid;
+    gap: 7px;
+    width: min(250px, calc(100vw - 16px));
+    max-height: calc(100dvh - 16px);
+    overflow: auto;
+    padding: 9px;
+    border: 1px solid #fff9;
+    border-radius: 13px;
+    background: #fff9fbf2;
+    color: #453a44;
+    box-shadow: 0 8px 24px #4f34432b, inset 0 1px #fff;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    font: 12px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.miu-editor [hidden], .miu-editor[hidden], .miu-editor small:empty { display: none; }
+.miu-editor-head, .miu-editor-input-row { display: flex; align-items: center; gap: 6px; }
+.miu-editor-head { justify-content: space-between; padding-left: 3px; }
+.miu-editor button { border: 0; border-radius: 7px; background: #eee4eb; color: inherit; font: inherit; padding: 6px 8px; cursor: pointer; }
+.miu-editor button.miu-editor-close { background: transparent; font-size: 18px; line-height: 1; padding: 1px 5px; }
+.miu-editor-photo { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.miu-editor-photo img { width: 24px; height: 24px; border-radius: 5px; object-fit: cover; }
+.miu-editor-input-row input { flex: 1; min-width: 0; padding: 6px; border: 1px solid #dcd2db; border-radius: 7px; background: #fff; color: inherit; font-size: 16px; }
+.miu-editor-input-row button { flex: none; }
+.miu-editor #miuEditorReset { justify-self: start; background: transparent; padding: 1px 3px; color: #786a77; }
+.miu-editor small { color: #8a3953; }
+.miu-editor :focus-visible { outline: 1px solid #857382; }

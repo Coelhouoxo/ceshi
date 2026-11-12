@@ -17,12 +17,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <!-- 引入样式文件 -->
-     <link rel="manifest" href="manifest.json">
+     <link rel="manifest" href="manifest.json?v=7">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
-    <link rel="stylesheet" href="home.css?v=6">
+    <link rel="stylesheet" href="home.css?v=7">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -31,54 +31,54 @@
                 <section class="miu-page" aria-label="第 1 页">
                     <div class="miu-sheet">
                         <div class="miu-clock" data-home-item="clock">
-                            <div id="realDateDisplay"></div>
-                            <time id="realTimeDisplay">--:--</time>
+                            <div id="realDateDisplay" data-home-text="clock-date"></div>
+                            <time id="realTimeDisplay" data-home-text="clock-time">--:--</time>
                         </div>
                         <div class="miu-profile" data-home-item="profile">
-                            <button type="button" class="miu-photo miu-profile-photo" onclick="showMenu(event, 'home')" aria-label="更换桌面头像">
+                            <button type="button" class="miu-photo miu-profile-photo" data-home-pick-image aria-label="更换桌面头像">
                                 <img id="avatarImg" alt="" draggable="false">
                             </button>
                             <div class="miu-identity">
-                                <div id="homeHandle" onclick="editText(this)">@Yueyuemiao77</div>
-                                <div id="homeBio" onclick="editText(this)">♫ ₊˚ 幸せのメロディー ✧ ⁺</div>
+                                <div id="homeHandle" data-home-text="homeHandle" data-home-legacy>@Yueyuemiao77</div>
+                                <div id="homeBio" data-home-text="homeBio" data-home-legacy>♫ ₊˚ 幸せのメロディー ✧ ⁺</div>
                             </div>
                             <button type="button" class="miu-icon-button miu-profile-settings" onclick="openDesktopSettings('beautify')" aria-label="美化设置"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
                         </div>
-                        <div class="miu-location" data-home-item="location" onclick="editLocation()">
-                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="locationText">和鸟</span>
+                        <div class="miu-location" data-home-item="location">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="locationText" data-home-text="locationText" data-home-legacy>和鸟</span>
                         </div>
                         <div class="miu-app" data-home-item="chat" style="--column:1">
                             <button type="button" class="miu-tile" data-home-edit-icon onclick="openApp('Page 1')" aria-label="聊天"><img id="miuIcon-chat" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openApp('Page 1')">聊天</button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openApp('Page 1')"><span data-home-text="shortcut-聊天">聊天</span></button>
                         </div>
                         <div class="miu-app" data-home-item="couple" style="--column:3">
                             <button type="button" class="miu-tile" data-home-edit-icon onclick="openCoupleSpace()" aria-label="情侣空间"><img id="miuIcon-couple" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openCoupleSpace()">情侣空间</button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openCoupleSpace()"><span data-home-text="shortcut-情侣空间">情侣空间</span></button>
                         </div>
                         <div class="miu-app" data-home-item="api" style="--column:2">
                             <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('api')" aria-label="API"><img id="miuIcon-api" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openDesktopSettings('api')">API</button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openDesktopSettings('api')"><span data-home-text="shortcut-API">API</span></button>
                         </div>
                         <div class="miu-app" data-home-item="dock-forum" style="--column:3">
                             <button type="button" class="miu-tile" data-home-edit-icon onclick="openApp('Page 4')" aria-label="论坛"><img id="dockIcon4" alt="" draggable="false"></button>
-                            <button type="button" class="miu-app-name" onclick="openApp('Page 4')">论坛</button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openApp('Page 4')"><span data-home-text="shortcut-论坛">论坛</span></button>
                         </div>
                         <div class="miu-app" data-home-item="books" style="--column:4">
                             <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('books')" aria-label="世界书"><img id="miuIcon-books" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openDesktopSettings('books')">世界书</button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openDesktopSettings('books')"><span data-home-text="shortcut-世界书">世界书</span></button>
                         </div>
                         <div class="miu-duo" data-home-item="duo">
                             <div class="miu-duo-pair">
                                 <div>
-                                    <span id="homeKaomoji" onclick="editText(this)">• ᴗ •</span>
-                                    <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换左头像"><img id="kawaiiAvatarLeft" alt="" draggable="false"></button>
+                                    <span id="homeKaomoji" data-home-text="homeKaomoji" data-home-legacy>• ᴗ •</span>
+                                    <button type="button" class="miu-photo" data-home-pick-image aria-label="更换左头像"><img id="kawaiiAvatarLeft" alt="" draggable="false"></button>
                                 </div>
                                 <div>
-                                    <span id="kawaiiText" onclick="editText(this)">○ ᵕ ○</span>
-                                    <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换右头像"><img id="kawaiiAvatarRight" alt="" draggable="false"></button>
+                                    <span id="kawaiiText" data-home-text="kawaiiText" data-home-legacy>○ ᵕ ○</span>
+                                    <button type="button" class="miu-photo" data-home-pick-image aria-label="更换右头像"><img id="kawaiiAvatarRight" alt="" draggable="false"></button>
                                 </div>
                             </div>
-                            <p id="kawaiiBottomText" onclick="editText(this)">보고 싶어요 ♡</p>
+                            <p id="kawaiiBottomText" data-home-text="kawaiiBottomText" data-home-legacy>보고 싶어요 ♡</p>
                         </div>
                     </div>
                 </section>
@@ -86,23 +86,23 @@
                     <div class="miu-sheet">
                         <div class="miu-planner" data-home-item="planner">
                             <div class="miu-mini-clock">
-                                <span>TIME</span>
-                                <time class="k-time-text">--:--</time>
-                                <button type="button" class="miu-photo miu-mini-emblem" onclick="showMenu(event, 'home')" aria-label="更换待办小图"><img id="miuPlannerPhoto" alt="" draggable="false" data-home-image></button>
+                                <span data-home-text="mini-title">TIME</span>
+                                <time class="k-time-text" data-home-text="mini-time">--:--</time>
+                                <button type="button" class="miu-photo miu-mini-emblem" data-home-pick-image aria-label="更换待办小图"><img id="miuPlannerPhoto" alt="" draggable="false" data-home-image></button>
                             </div>
                             <fieldset class="miu-todos">
-                                <legend>To do list</legend>
-                                <label><input type="checkbox"> 早点休息</label>
-                                <label><input type="checkbox"> 听一首歌</label>
-                                <label><input type="checkbox"> 记录今天</label>
+                                <legend data-home-text="todo-title">To do list</legend>
+                                <label><input type="checkbox"> <span data-home-text="todo-1">早点休息</span></label>
+                                <label><input type="checkbox"> <span data-home-text="todo-2">听一首歌</span></label>
+                                <label><input type="checkbox"> <span data-home-text="todo-3">记录今天</span></label>
                             </fieldset>
                         </div>
                         <div class="miu-calendar-widget" data-home-item="calendar">
-                            <div class="miu-separator" aria-hidden="true">✧</div>
-                            <p class="miu-calendar-note" id="widgetTitle" onclick="editText(this)">영원히 함께하자</p>
+                            <div class="miu-separator" data-home-text="calendar-divider">✧</div>
+                            <p class="miu-calendar-note" id="widgetTitle" data-home-text="widgetTitle" data-home-legacy>영원히 함께하자</p>
                             <div class="miu-calendar" aria-label="日历">
                                 <div class="miu-calendar-head">
-                                    <span id="miuCalendarMonth" aria-live="polite"></span>
+                                    <span id="miuCalendarMonth" data-home-text="calendar-month" aria-live="polite"></span>
                                     <button type="button" class="miu-icon-button" id="miuPreviousMonth" aria-label="上个月"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
                                     <button type="button" class="miu-icon-button" id="miuNextMonth" aria-label="下个月"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
                                 </div>
@@ -110,20 +110,20 @@
                             </div>
                         </div>
                         <div class="miu-app" data-home-item="cloud" style="--column:2">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换(˶ᵔ ᵕ ᵔ˶)图标"><img id="miuIcon-cloud" alt="" draggable="false" data-home-image></button>
-                            <span class="miu-app-name">(˶ᵔ ᵕ ᵔ˶)</span>
+                            <button type="button" class="miu-tile" data-home-pick-image aria-label="更换(˶ᵔ ᵕ ᵔ˶)图标"><img id="miuIcon-cloud" alt="" draggable="false" data-home-image></button>
+                            <span class="miu-app-name" data-home-text="app-name-0">(˶ᵔ ᵕ ᵔ˶)</span>
                         </div>
                         <div class="miu-app" data-home-item="beautify" style="--column:4">
                             <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('beautify')" aria-label="美化"><img id="miuIcon-beautify" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openDesktopSettings('beautify')">美化</button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openDesktopSettings('beautify')"><span data-home-text="shortcut-美化">美化</span></button>
                         </div>
                         <div class="miu-app" data-home-item="feather" style="--column:1">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换(｡•́‿•̀｡)图标"><img id="miuIcon-feather" alt="" draggable="false" data-home-image></button>
-                            <span class="miu-app-name">(｡•́‿•̀｡)</span>
+                            <button type="button" class="miu-tile" data-home-pick-image aria-label="更换(｡•́‿•̀｡)图标"><img id="miuIcon-feather" alt="" draggable="false" data-home-image></button>
+                            <span class="miu-app-name" data-home-text="app-name-1">(｡•́‿•̀｡)</span>
                         </div>
                         <div class="miu-app" data-home-item="star" style="--column:3">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换(づ˘⌣˘)づ图标"><img id="miuIcon-star" alt="" draggable="false" data-home-image></button>
-                            <span class="miu-app-name">(づ˘⌣˘)づ</span>
+                            <button type="button" class="miu-tile" data-home-pick-image aria-label="更换(づ˘⌣˘)づ图标"><img id="miuIcon-star" alt="" draggable="false" data-home-image></button>
+                            <span class="miu-app-name" data-home-text="app-name-2">(づ˘⌣˘)づ</span>
                         </div>
                     </div>
                 </section>
@@ -132,31 +132,35 @@
                         <div class="miu-week-card" data-home-item="week" aria-label="日常侧记">
                             <div class="miu-week-head">
                                 <div class="miu-week-portrait">
-                                    <button type="button" class="miu-photo miu-week-avatar" id="bubbleWrapper" onclick="showMenu(event, 'home')" aria-label="更换侧记头像"><img id="headerImg" alt="" draggable="false"></button>
+                                    <button type="button" class="miu-photo miu-week-avatar" id="bubbleWrapper" data-home-pick-image aria-label="更换侧记头像"><img id="headerImg" alt="" draggable="false"></button>
                                     <i class="fa-solid fa-camera" aria-hidden="true"></i>
                                 </div>
                                 <div class="miu-week-copy">
-                                    <strong>日常侧记 <span aria-hidden="true">✦</span></strong>
-                                    <p>把喜欢的小事留在这里。</p>
-                                    <div class="miu-week-date"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="miuWeekDate"></span></div>
-                                    <div id="miuWeekDays" class="miu-week-days" aria-label="最近三天"></div>
+                                    <strong><span data-home-text="profile-title">日常侧记</span> <span class="miu-week-star" data-home-text="profile-mark">✦</span></strong>
+                                    <p data-home-text="profile-line">Find beauty in the ordinary.</p>
+                                    <div class="miu-week-date"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span data-home-text="profile-location">IP Location: [ Tokyo ]</span></div>
+                                    <div class="miu-week-days" aria-label="标签">
+                                        <span data-home-text="profile-tag-1">ENFP</span>
+                                        <span data-home-text="profile-tag-2">Writer</span>
+                                        <span data-home-text="profile-tag-3">Urban Explorer</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="miu-week-timeline">
                                 <div class="miu-week-entry">
                                     <i class="fa-solid fa-pen-nib miu-week-mark" aria-hidden="true"></i>
-                                    <p>慢一点，也会走到想去的地方。</p>
-                                    <time id="miuWeekTime">--:--</time>
+                                    <p data-home-text="timeline-note">慢一点，也会走到想去的地方。</p>
+                                    <time id="miuWeekTime" data-home-text="timeline-time">--:--</time>
                                     <i class="fa-solid fa-check miu-week-status" aria-hidden="true"></i>
                                 </div>
                                 <div class="miu-week-entry">
                                     <i class="fa-regular fa-bookmark miu-week-mark" aria-hidden="true"></i>
                                     <div class="miu-week-album">
-                                        <div><small>相片收集</small><strong>今天的片段</strong></div>
+                                        <div><small data-home-text="album-caption">相片收集</small><strong data-home-text="album-title">今天的片段</strong></div>
                                         <div class="miu-week-photos">
-                                            <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第一张照片"><img id="miuWeekPhoto1" alt="" draggable="false" data-home-image></button>
-                                            <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第二张照片"><img id="miuWeekPhoto2" alt="" draggable="false" data-home-image></button>
-                                            <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第三张照片"><img id="miuWeekPhoto3" alt="" draggable="false" data-home-image></button>
+                                            <button type="button" class="miu-photo" data-home-pick-image aria-label="更换第一张照片"><img id="miuWeekPhoto1" alt="" draggable="false" data-home-image></button>
+                                            <button type="button" class="miu-photo" data-home-pick-image aria-label="更换第二张照片"><img id="miuWeekPhoto2" alt="" draggable="false" data-home-image></button>
+                                            <button type="button" class="miu-photo" data-home-pick-image aria-label="更换第三张照片"><img id="miuWeekPhoto3" alt="" draggable="false" data-home-image></button>
                                         </div>
                                     </div>
                                     <span class="miu-week-status miu-week-status-open" aria-hidden="true"></span>
@@ -165,44 +169,46 @@
                         </div>
                         <div class="miu-app" data-home-item="check-phone" style="--column:1">
                             <button type="button" class="miu-tile" id="app5IconWrapper" data-home-edit-icon onclick="openCheckPhoneSelector()" aria-label="查手机"><img id="app5Img" alt="" draggable="false"><span id="app5Default" hidden></span></button>
-                            <button type="button" class="miu-app-name" onclick="openCheckPhoneSelector()"><span id="app5Label">查手机</span></button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openCheckPhoneSelector()"><span id="app5Label" data-home-text="app5Label" data-home-legacy>查手机</span></button>
                         </div>
                         <div class="camera-widget" data-home-item="camera" style="--column:3">
-                            <div class="captcha-top"><div class="captcha-checkbox"></div><div class="captcha-label" id="captchaLabel" onclick="editText(this)">I'm not a robot</div></div>
+                            <div class="captcha-top"><div class="captcha-checkbox"></div><div class="captcha-label" id="captchaLabel" data-home-text="captchaLabel" data-home-legacy>I'm not a robot</div></div>
                             <div class="captcha-body">
-                                <div class="captcha-input-row"><div class="captcha-input" id="captchaInput" onclick="editText(this)">Type what u see</div><div class="captcha-verify-btn">Verify</div></div>
+                                <div class="captcha-input-row"><div class="captcha-input" id="captchaInput" data-home-text="captchaInput" data-home-legacy>Type what u see</div><div class="captcha-verify-btn" data-home-text="camera-action">Verify</div></div>
                                 <div class="captcha-content-row">
-                                    <button type="button" class="miu-photo captcha-img-container" onclick="showMenu(event, 'home')" aria-label="更换 Miu 小组件图片"><img id="captchaImg" alt="" draggable="false"></button>
+                                    <button type="button" class="miu-photo captcha-img-container" data-home-pick-image aria-label="更换 Miu 小组件图片"><img id="captchaImg" alt="" draggable="false"></button>
                                     <div class="captcha-icons-col"><i class="fas fa-sync-alt c-icon" aria-hidden="true"></i><i class="fas fa-headphones c-icon" aria-hidden="true"></i></div>
                                 </div>
                             </div>
                         </div>
                         <div class="miu-app" data-home-item="gallery" style="--column:2">
                             <button type="button" class="miu-tile" id="app6IconWrapper" data-home-edit-icon onclick="openGalleryApp()" aria-label="真实相册"><img id="app6Img" alt="" draggable="false"><span id="app6Default" hidden></span></button>
-                            <button type="button" class="miu-app-name" onclick="openGalleryApp()"><span id="app6Label">真实相册</span></button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openGalleryApp()"><span id="app6Label" data-home-text="app6Label" data-home-legacy>真实相册</span></button>
                         </div>
                         <div class="miu-memo" data-home-item="player" aria-label="纸上存档">
                             <div class="miu-memo-head">
-                                <span>纸上存档 <i class="fa-solid fa-angle-down" aria-hidden="true"></i></span>
-                                <span>今日手记 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span>
+                                <span><span data-home-text="memo-heading">纸上存档</span> <i class="fa-solid fa-angle-down" aria-hidden="true"></i></span>
+                                <span><span data-home-text="memo-section">今日手记</span> <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span>
                             </div>
                             <div class="miu-memo-card">
                                 <div class="miu-memo-profile">
-                                    <button type="button" class="miu-photo miu-memo-photo" onclick="showMenu(event, 'home')" aria-label="更换存档封面"><img id="miuPlayerPhoto" alt="" draggable="false" data-home-image></button>
-                                    <div><strong>白日收藏簿</strong><p>留一页给今天的好心情。</p></div>
+                                    <button type="button" class="miu-memo-frame" data-home-pick-image aria-label="更换存档头像">
+                                        <span class="miu-photo miu-memo-photo"><img id="miuPlayerPhoto" alt="" draggable="false" data-home-image></span>
+                                    </button>
+                                    <div><strong data-home-text="memo-title">白日收藏簿</strong><p data-home-text="memo-bio">留一页给今天的好心情。</p></div>
                                     <span class="miu-memo-mark" aria-hidden="true">··· <i class="fa-solid fa-pen"></i></span>
                                 </div>
                                 <div class="miu-memo-meta">
-                                    <time id="miuMemoDate"></time>
-                                    <span>日常记录</span>
+                                    <span><i class="fa-regular fa-clock" aria-hidden="true"></i> <time id="miuMemoDate" data-home-text="memo-date"></time></span>
+                                    <span data-home-text="memo-detail">日常记录</span>
                                 </div>
                             </div>
-                            <div class="miu-bracket miu-memo-note">把今天写进一小格。</div>
+                            <div class="miu-bracket miu-memo-note" data-home-text="memo-line">把今天写进一小格。</div>
                             <div class="miu-memo-bottom">
-                                <div class="miu-bracket miu-memo-contact"><i class="fa-regular fa-envelope" aria-hidden="true"></i> <span>留给明天</span></div>
-                                <div class="miu-bracket miu-memo-progress" aria-label="今日已过时间">
-                                    <span id="miuMemoPercent">0%</span>
-                                    <progress id="miuMemoProgress" max="1440" value="0" aria-label="今日进度"></progress>
+                                <div class="miu-bracket miu-memo-contact"><i class="fa-solid fa-phone" aria-hidden="true"></i> <span data-home-text="memo-call">··· ]</span> <i class="fa-regular fa-comment-dots" aria-hidden="true"></i> <span data-home-text="memo-reply">もしもし…</span></div>
+                                <div class="miu-bracket miu-memo-progress">
+                                    <span data-home-text="memo-count">0</span>
+                                    <span class="miu-memo-progress-value"><span id="miuMemoPercent" data-home-text="memo-percent" data-home-percent>65%</span> <progress id="miuMemoProgress" data-home-edit-target="miuMemoPercent" max="100" value="65" aria-label="存档状态"></progress></span>
                                 </div>
                             </div>
                         </div>
@@ -210,9 +216,6 @@
                 </section>
             </div>
             <nav class="miu-pagination" aria-label="桌面翻页">
-                <svg class="miu-page-wave" viewBox="0 0 400 34" preserveAspectRatio="none" aria-hidden="true">
-                    <path d="M0 5 C70 5 70 29 130 29 S197 5 260 5 S330 29 400 29 M0 29 C70 29 70 5 130 5 S197 29 260 29 S330 5 400 5"/>
-                </svg>
                 <button type="button" aria-label="第 1 页" aria-current="page"></button>
                 <button type="button" aria-label="第 2 页"></button>
                 <button type="button" aria-label="第 3 页"></button>
@@ -229,6 +232,26 @@
                 </div>
             </div>
         </main>
+
+        <form id="miuEditor" class="miu-editor" role="dialog" aria-labelledby="miuEditorTitle" hidden>
+            <div class="miu-editor-head">
+                <strong id="miuEditorTitle"></strong>
+                <button type="button" class="miu-editor-close" data-editor-action="close" aria-label="关闭">×</button>
+            </div>
+            <div id="miuEditorPhoto" class="miu-editor-photo" hidden>
+                <img id="miuEditorPreview" alt="" hidden>
+                <button type="button" data-editor-action="file"><i class="fa-regular fa-image" aria-hidden="true"></i> 本地图片</button>
+                <button type="button" data-editor-action="url"><i class="fa-solid fa-link" aria-hidden="true"></i> 图片链接</button>
+                <button type="button" data-editor-action="clear" id="miuEditorClear">清空</button>
+            </div>
+            <div id="miuEditorInputRow" class="miu-editor-input-row" hidden>
+                <input id="miuEditorInput" aria-label="编辑内容" autocomplete="off">
+                <button type="submit" class="miu-editor-save">保存</button>
+            </div>
+            <button type="button" id="miuEditorReset" data-editor-action="reset" hidden>恢复默认</button>
+            <small id="miuEditorError" role="status"></small>
+            <input type="file" id="miuEditorFile" accept="image/*" hidden>
+        </form>
 
         <div class="popover-menu" id="popMenu"><div class="menu-item" onclick="changeByLink()"><i class="fas fa-link"></i> 图片链接</div><div class="menu-item" onclick="triggerFileInput()"><i class="fas fa-image"></i> 本地图片</div></div>
         <input type="file" id="fileInput" accept="image/*" style="display: none;">
@@ -1683,7 +1706,7 @@
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
     <script data-cfasync="false" src="script.js?v=4"></script>
-    <script data-cfasync="false" src="home.js?v=6" defer></script>
+    <script data-cfasync="false" src="home.js?v=7" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>
