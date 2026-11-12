@@ -1288,140 +1288,114 @@ function selectCharForWb(id, name) {
 }
 
 function openBeautifyPage() {
-    document.getElementById('beautifyPage').classList.add('active');
-    
-    // 1. 加载 Dock 和 APP 图标预览
-    document.getElementById('previewDock1').src = document.getElementById('dockIcon1').src;
-    document.getElementById('previewDock2').src = document.getElementById('dockIcon2').src;
-    document.getElementById('previewDock3').src = document.getElementById('dockIcon3').src;
-    document.getElementById('previewDock4').src = document.getElementById('dockIcon4').src;
-    
-    if(document.getElementById('app5Img').src) { 
-        document.getElementById('previewApp5').src = document.getElementById('app5Img').src; 
-        document.getElementById('previewApp5').style.display = 'block'; 
-        document.getElementById('previewApp5Default').style.display = 'none'; 
-    }
-    if(document.getElementById('app6Img').src) { 
-        document.getElementById('previewApp6').src = document.getElementById('app6Img').src; 
-        document.getElementById('previewApp6').style.display = 'block'; 
-        document.getElementById('previewApp6Default').style.display = 'none'; 
-    }
-    
-    // 1. 主屏幕预览
-    const homeBg = document.body.style.backgroundImage;
-    const wpImg = document.getElementById('wallpaperPreviewImg');
-    const wpPh = document.getElementById('wallpaperPlaceholder');
-    if (homeBg && homeBg !== 'none' && homeBg !== 'url("")') { 
-        wpImg.src = homeBg.slice(5, -2).replace(/['"]/g, ""); wpImg.style.display = 'block'; wpPh.style.display = 'none'; 
-    } else { 
-        wpImg.style.display = 'none'; wpImg.src = ''; wpPh.style.display = 'flex'; 
-    }
-    // 2. WeChat 预览
-    const chatPage = document.getElementById('chatAppPage');
-    const wcBg = chatPage.style.backgroundImage;
-    const wcPreviewImg = document.getElementById('wcWallpaperPreviewImg');
-    const wcPlaceholder = document.getElementById('wcWallpaperPlaceholder');
-    if (wcBg && wcBg !== 'none' && wcBg !== 'url("")') { 
-        wcPreviewImg.src = wcBg.slice(5, -2).replace(/['"]/g, ""); wcPreviewImg.style.display = 'block'; wcPlaceholder.style.display = 'none'; 
-    } else { 
-        wcPreviewImg.style.display = 'none'; wcPreviewImg.src = ''; wcPlaceholder.style.display = 'flex'; 
-    }
-    // ★★★ 3. 新增：聊天页预览 ★★★
-    const room = document.getElementById('chatRoom');
-    const roomBg = room.style.backgroundImage;
-    const roomPreviewImg = document.getElementById('chatRoomWallpaperPreviewImg');
-    const roomPlaceholder = document.getElementById('chatRoomWallpaperPlaceholder');
-    if (roomBg && roomBg !== 'none' && roomBg !== 'url("")') { 
-        roomPreviewImg.src = roomBg.slice(5, -2).replace(/['"]/g, ""); 
-        roomPreviewImg.style.display = 'block'; 
-        roomPlaceholder.style.display = 'none'; 
-    } else { 
-        roomPreviewImg.style.display = 'none'; 
-        roomPreviewImg.src = ''; 
-        roomPlaceholder.style.display = 'flex'; 
-    }
-    // ★★★ 4. 新增：语音通话壁纸预览 ★★★
-    const vcBg = globalData.voiceCallWallpaper;
-    const vcPreviewImg = document.getElementById('vcWallpaperPreviewImg');
-    const vcPlaceholder = document.getElementById('vcWallpaperPlaceholder');
-    if (vcBg && vcBg !== 'none' && vcBg !== 'url("")') { 
-        vcPreviewImg.src = vcBg; 
-        vcPreviewImg.style.display = 'block'; 
-        vcPlaceholder.style.display = 'none'; 
-    } else { 
-        vcPreviewImg.style.display = 'none'; 
-        vcPreviewImg.src = ''; 
-        vcPlaceholder.style.display = 'flex'; 
-    }
-    // ★★★ 5. 新增：线下剧场壁纸预览 ★★★
-    const offBg = globalData.offlineWallpaper;
-    const offPreviewImg = document.getElementById('offlineWallpaperPreviewImg');
-    const offPlaceholder = document.getElementById('offlineWallpaperPlaceholder');
-    if (offBg && offBg !== 'none' && offBg !== 'url("")') { 
-        offPreviewImg.src = offBg; 
-        offPreviewImg.style.display = 'block'; 
-        offPlaceholder.style.display = 'none'; 
-    } else { 
-        offPreviewImg.style.display = 'none'; 
-        offPreviewImg.src = ''; 
-        offPlaceholder.style.display = 'flex'; 
-    }
+    const page = document.getElementById('beautifyPage');
+    if (!page.classList.contains('active')) page.querySelector('.personal-scroll').scrollTop = 0;
+    refreshBeautifyPage();
+    page.classList.add('active');
 }
 
-function closeBeautifyPage() { 
+function refreshBeautifyPage() {
+    const setPreview = (id, src) => {
+        const image = document.getElementById(id);
+        if (src && src !== 'none') image.src = src;
+        else image.removeAttribute('src');
+        image.hidden = !image.hasAttribute('src');
+    };
+    const cssImage = element => {
+        const match = element.style.backgroundImage.match(/^url\((["']?)(.*?)\1\)$/);
+        return match?.[2] || '';
+    };
+    for (const i of [1, 2, 3, 4]) {
+        const src = document.getElementById('dockIcon' + i).getAttribute('src');
+        setPreview('previewDock' + i, src);
+        if (i < 4) {
+            setPreview('personalDock' + i, src);
+            setPreview('personalEditDock' + i, src);
+        }
+    }
+    for (const i of [5, 6]) {
+        setPreview('previewApp' + i, document.getElementById('app' + i + 'Img').getAttribute('src'));
+    }
+    setPreview('wallpaperPreviewImg', cssImage(document.body));
+    setPreview('chatRoomWallpaperPreviewImg', cssImage(document.getElementById('chatRoom')));
+    setPreview('wcWallpaperPreviewImg', cssImage(document.getElementById('chatAppPage')));
+    setPreview('vcWallpaperPreviewImg', globalData.voiceCallWallpaper);
+    setPreview('offlineWallpaperPreviewImg', globalData.offlineWallpaper);
+    document.getElementById('personalPreviewDate').textContent = document.getElementById('realDateDisplay').textContent;
+    document.getElementById('personalPreviewTime').textContent = document.getElementById('realTimeDisplay').textContent;
+}
+
+function closeBeautifyPage() {
+    const editor = document.getElementById('personalEditor');
+    if (editor.open) editor.close();
     document.getElementById('beautifyPage').classList.remove('active');
     leaveDesktopSettings('beautify');
-    saveData(); 
+    saveData();
 }
 
-function changeWallpaper(type) {
-    if (type.startsWith('wechat')) {
-        uploadContext = { type: 'wechatWallpaper' };
-        if (type === 'wechat_link') { 
-            const u = prompt("请输入图片链接:"); 
-            if(u) handleBeautifyImageUpdate(u); 
-        } else { 
-            document.getElementById('fileInput').click(); 
+function bindPersonalSettings() {
+    const page = document.getElementById('beautifyPage');
+    const editor = document.getElementById('personalEditor');
+    const title = document.getElementById('personalEditorTitle');
+    const back = document.getElementById('personalEditorBack');
+    const clear = editor.querySelector('[data-personal-source="clear"]');
+    const wallpapers = {
+        home: ['wallpaper', clearWallpaper], chatroom: ['chatRoomWallpaper', clearChatRoomWallpaper],
+        wechat: ['wechatWallpaper', clearWechatWallpaper], voice: ['voiceCallWallpaper', clearVoiceCallWallpaper],
+        offline: ['offlineWallpaper', clearOfflineWallpaper]
+    };
+    let selected;
+    let parent;
+    let parentLabel;
+    function showPanel(key, label, fromGroup = false) {
+        if (fromGroup) { parent = selected; parentLabel = title.textContent; }
+        else parent = null;
+        selected = key;
+        title.textContent = label;
+        for (const panel of editor.querySelectorAll('[data-personal-panel]')) {
+            panel.hidden = panel.dataset.personalPanel !== (['dock', 'apps'].includes(key) ? key : 'image');
         }
-    } 
-    else if (type.startsWith('chatroom')) {
-        uploadContext = { type: 'chatRoomWallpaper' };
-        if (type === 'chatroom_link') {
-            const u = prompt("请输入图片链接:"); 
-            if(u) handleBeautifyImageUpdate(u); 
-        } else {
-            document.getElementById('fileInput').click(); 
-        }
+        clear.hidden = !Object.hasOwn(wallpapers, key);
+        back.setAttribute('aria-label', parent ? '返回' : '关闭');
+        back.firstElementChild.className = parent ? 'fa-solid fa-chevron-left' : 'fa-solid fa-xmark';
+        if (!editor.open) editor.showModal();
+        else back.focus();
     }
-    else if (type.startsWith('voice')) {
-        uploadContext = { type: 'voiceCallWallpaper' };
-        if (type === 'voice_link') {
-            const u = prompt("请输入图片链接:"); 
-            if(u) handleBeautifyImageUpdate(u); 
-        } else {
-            document.getElementById('fileInput').click(); 
+    back.addEventListener('click', () => {
+        if (parent) showPanel(parent, parentLabel);
+        else editor.close();
+    });
+    editor.addEventListener('click', event => { if (event.target === editor) editor.close(); });
+    page.addEventListener('click', event => {
+        const entry = event.target.closest('[data-personal-open]');
+        if (entry) {
+            const key = entry.dataset.personalOpen;
+            const label = entry.querySelector('.personal-row-label')?.textContent ||
+                (key === 'home' ? '主屏幕' : '聊天页');
+            showPanel(key, label, editor.open);
+            return;
         }
-    }
-    else if (type.startsWith('offline')) {
-        uploadContext = { type: 'offlineWallpaper' };
-        if (type === 'offline_link') {
-            const u = prompt("请输入图片链接:"); 
-            if(u) handleBeautifyImageUpdate(u); 
-        } else {
-            document.getElementById('fileInput').click(); 
-        }
-    }
-    else {
-        uploadContext = { type: 'wallpaper' };
-        if (type === 'link') { 
-            const u = prompt("请输入图片链接:"); 
-            if(u) handleBeautifyImageUpdate(u); 
-        } else { 
-            document.getElementById('fileInput').click(); 
-        }
-    }
+        const action = event.target.closest('[data-personal-source]')?.dataset.personalSource;
+        if (!action) return;
+        editor.close();
+        const wallpaper = wallpapers[selected];
+        if (wallpaper) {
+            if (action === 'clear') wallpaper[1]();
+            else choosePersonalImage(action, { type: wallpaper[0] });
+        } else if (selected.startsWith('dock')) choosePersonalImage(action, { type: 'dock', index: Number(selected.slice(4)) });
+        else if (selected.startsWith('app')) choosePersonalImage(action, { type: 'app', index: Number(selected.slice(3)) });
+    });
+}
+bindPersonalSettings();
 
-    
+function choosePersonalImage(source, context) {
+    if (source === 'link') {
+        const url = prompt('请输入图片链接')?.trim();
+        if (url) handleBeautifyImageUpdate(url, context);
+    } else {
+        uploadContext = context;
+        document.getElementById('fileInput').click();
+    }
 }
 
 function clearWechatWallpaper() {
@@ -1429,81 +1403,84 @@ function clearWechatWallpaper() {
     chatPage.style.backgroundImage = ''; 
     chatPage.style.backgroundSize = '';
     chatPage.style.backgroundPosition = '';
-    openBeautifyPage(); 
+    refreshBeautifyPage();
     saveData();
 }
 
 function clearWallpaper() { 
     document.body.style.backgroundImage = ''; 
     document.body.classList.remove('has-wallpaper'); 
-    openBeautifyPage(); 
+    refreshBeautifyPage();
     saveData(); 
 }
 
 function clearVoiceCallWallpaper() {
     globalData.voiceCallWallpaper = ''; // 清空数据
     saveData(); // 保存
-    openBeautifyPage(); // 刷新预览
+    refreshBeautifyPage(); // 刷新预览
 }
 
-function handleBeautifyImageUpdate(src) {
-    if (!uploadContext) return;
-    
-    if (uploadContext.type === 'dock') {
-        const id = 'dockIcon' + uploadContext.index; 
-        const previewId = 'previewDock' + uploadContext.index;
-        document.getElementById(id).src = src; 
-        document.getElementById(previewId).src = src;
-    } else if (uploadContext.type === 'app') {
-        const imgId = 'app' + uploadContext.index + 'Img'; document.getElementById(imgId).src = src; document.getElementById(imgId).style.display = 'block'; document.getElementById('app' + uploadContext.index + 'Default').style.display = 'none'; document.getElementById('previewApp' + uploadContext.index).src = src; document.getElementById('previewApp' + uploadContext.index).style.display = 'block'; document.getElementById('previewApp' + uploadContext.index + 'Default').style.display = 'none';
-    } else if (uploadContext.type === 'wallpaper') {
+function handleBeautifyImageUpdate(src, context = uploadContext) {
+    if (!context) return;
+
+    if (context.type === 'dock') {
+        document.getElementById('dockIcon' + context.index).src = src;
+        refreshBeautifyPage();
+    } else if (context.type === 'app') {
+        const index = context.index;
+        const image = document.getElementById('app' + index + 'Img');
+        image.src = src;
+        image.style.display = 'block';
+        document.getElementById('app' + index + 'Default').style.display = 'none';
+        refreshBeautifyPage();
+    } else if (context.type === 'wallpaper') {
         document.body.style.backgroundImage = `url(${src})`; 
         document.body.classList.add('has-wallpaper'); 
-        openBeautifyPage();
-    } else if (uploadContext.type === 'wechatWallpaper') {
+        refreshBeautifyPage();
+    } else if (context.type === 'wechatWallpaper') {
         const chatPage = document.getElementById('chatAppPage');
         chatPage.style.backgroundImage = `url(${src})`; 
         chatPage.style.backgroundSize = 'cover'; 
         chatPage.style.backgroundPosition = 'center'; 
-        openBeautifyPage();
+        refreshBeautifyPage();
     } 
-    else if (uploadContext.type === 'chatRoomWallpaper') {
+    else if (context.type === 'chatRoomWallpaper') {
         const room = document.getElementById('chatRoom');
         room.style.backgroundImage = `url(${src})`;
         room.style.backgroundSize = 'cover';
         room.style.backgroundPosition = 'center';
         room.style.backgroundRepeat = 'no-repeat';
-        openBeautifyPage(); 
+        refreshBeautifyPage();
     }
-else if (uploadContext.type === 'voiceCallWallpaper') {
+else if (context.type === 'voiceCallWallpaper') {
         globalData.voiceCallWallpaper = src;
-        openBeautifyPage(); 
+        refreshBeautifyPage();
     }
-        else if (uploadContext.type === 'momentPageBg') {
+        else if (context.type === 'momentPageBg') {
         document.getElementById('momentBgLayer').style.backgroundImage = `url(${src})`;
         globalData.momentPageBg = src; 
     }
-    else if (uploadContext.type === 'momentBanner') {
+    else if (context.type === 'momentBanner') {
         document.getElementById('momentBannerImg').src = src;
         globalData.momentBanner = src; 
     }
-    else if (uploadContext.type === 'momentAvatar') {
+    else if (context.type === 'momentAvatar') {
         document.getElementById('momentUserAvatar').src = src;
         globalData.momentAvatar = src; 
     }
-    else if (uploadContext.type === 'offlineWallpaper') {
+    else if (context.type === 'offlineWallpaper') {
         globalData.offlineWallpaper = src;
-        openBeautifyPage(); 
+        refreshBeautifyPage();
     }
 
     saveData(); 
-    uploadContext = null;
+    if (uploadContext === context) uploadContext = null;
 }
 
 function clearOfflineWallpaper() {
     globalData.offlineWallpaper = '';
     saveData();
-    openBeautifyPage();
+    refreshBeautifyPage();
 }
 
 async function exportBackup() { try { const settings = await db.globalSettings.get('main'); const chats = await db.chats.toArray(); const configs = await db.apiConfig.toArray(); const backupData = { version: "2.0", timestamp: new Date().toISOString(), settings: settings || {}, chats: chats || [], apiConfig: configs || [] }; const blob = new Blob([JSON.stringify(backupData)], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); alert("备份已开始下载"); } catch (e) { alert("导出失败: " + e.message); } }
@@ -2401,7 +2378,21 @@ document.addEventListener('click', () => {
 
 function changeByLink() { const u = prompt("链接:"); if(u && currentTargetImg) { handleImageUpdate(u); } menu.style.display='none'; }
 function triggerFileInput() { fileInput.click(); menu.style.display='none'; }
-fileInput.addEventListener('change', (e) => { const f = e.target.files[0]; if (f && uploadContext) { const r = new FileReader(); r.onload = (ev) => { handleBeautifyImageUpdate(ev.target.result); }; r.readAsDataURL(f); fileInput.value = ''; return; } if (f && currentTargetImg) { const target = currentTargetImg; const r = new FileReader(); r.onload = ev => handleImageUpdate(ev.target.result, target); r.readAsDataURL(f); } fileInput.value=''; });
+fileInput.addEventListener('cancel', () => { uploadContext = null; });
+fileInput.addEventListener('change', event => {
+    const file = event.target.files[0];
+    const context = uploadContext;
+    const target = currentTargetImg;
+    uploadContext = null;
+    fileInput.value = '';
+    if (!file || (!context && !target)) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        if (context) handleBeautifyImageUpdate(reader.result, context);
+        else handleImageUpdate(reader.result, target);
+    };
+    reader.readAsDataURL(file);
+});
 
 function handleImageUpdate(src, target = currentTargetImg) {
     if (target) {
@@ -3202,9 +3193,6 @@ overlay.addEventListener('touchstart', (e) => { const rect = overlay.getBounding
 overlay.addEventListener('touchend', (e) => { if (!appIsSwiping) return; if (e.changedTouches[0].clientX - appStartX > 60) { handleAppSwipeBack(); } appIsSwiping = false; });
 
 
-function changeDockIcon(index, type) { uploadContext = { type: 'dock', index: index }; if (type === 'link') { const u = prompt("请输入图片链接:"); if(u) handleBeautifyImageUpdate(u); } else { document.getElementById('fileInput').click(); } }
-function changeAppIcon(index, type) { uploadContext = { type: 'app', index: index }; if (type === 'link') { const u = prompt("请输入图片链接:"); if(u) handleBeautifyImageUpdate(u); } else { document.getElementById('fileInput').click(); } }
-function clearWallpaper() { document.body.style.backgroundImage = ''; document.body.classList.remove('has-wallpaper'); openBeautifyPage(); saveData(); }
 
 const msgInputArea = document.getElementById('msgInput');
 
@@ -5302,7 +5290,7 @@ function toggleVoiceText(el, e) {
                 const room = document.getElementById('chatRoom');
                 room.style.backgroundImage = ''; 
                 room.style.backgroundSize = '';
-                openBeautifyPage(); 
+                refreshBeautifyPage();
                 saveData();
             }
             /* ========================================= */

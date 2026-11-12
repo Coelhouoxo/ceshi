@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="gallery_app.css">
     <link rel="stylesheet" href="home.css?v=10">
     <link rel="stylesheet" href="api-settings.css?v=4">
+    <link rel="stylesheet" href="personal-settings.css?v=1">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -43,7 +44,7 @@
                                 <div id="homeHandle" data-home-text="homeHandle" data-home-legacy>@Yueyuemiao77</div>
                                 <div id="homeBio" data-home-text="homeBio" data-home-legacy>♫ ₊˚ 幸せのメロディー ✧ ⁺</div>
                             </div>
-                            <button type="button" class="miu-icon-button miu-profile-settings" onclick="openDesktopSettings('beautify')" aria-label="美化设置"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+                            <button type="button" class="miu-icon-button miu-profile-settings" onclick="openDesktopSettings('beautify')" aria-label="个性设置"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
                         </div>
                         <div class="miu-location" data-home-item="location">
                             <i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="locationText" data-home-text="locationText" data-home-legacy>和鸟</span>
@@ -115,8 +116,8 @@
                             <span class="miu-app-name" data-home-text="app-name-0">(˶ᵔ ᵕ ᵔ˶)</span>
                         </div>
                         <div class="miu-app" data-home-item="beautify" style="--column:4">
-                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('beautify')" aria-label="美化"><img id="miuIcon-beautify" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openDesktopSettings('beautify')"><span data-home-text="shortcut-美化">美化</span></button>
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('beautify')" aria-label="个性设置"><img id="miuIcon-beautify" alt="" draggable="false" data-home-image></button>
+                            <button type="button" class="miu-app-name" data-home-launch-label onclick="openDesktopSettings('beautify')"><span data-home-text="shortcut-美化">个性设置</span></button>
                         </div>
                         <div class="miu-app" data-home-item="feather" style="--column:1">
                             <button type="button" class="miu-tile" data-home-pick-image aria-label="更换(｡•́‿•̀｡)图标"><img id="miuIcon-feather" alt="" draggable="false" data-home-image></button>
@@ -1379,161 +1380,75 @@
             </div>
 
             <!-- Beautify Page (Fix: Layout Update) -->
-<div class="api-settings-page" id="beautifyPage">
-    <div class="api-header">
-        <i class="fas fa-chevron-left api-back-btn" onclick="closeBeautifyPage()"></i>
-        <span class="api-title">美化中心</span>
-        <div style="width:40px"></div>
+<div class="api-settings-page personal-settings" id="beautifyPage">
+    <header class="personal-header">
+        <button type="button" class="personal-back" aria-label="返回" onclick="closeBeautifyPage()"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+        <h1>个性设置</h1>
+    </header>
+    <div class="personal-scroll">
+        <h2 class="personal-caption">壁纸</h2>
+        <div class="personal-group personal-pair">
+            <div class="personal-pair-item">
+        <div class="personal-screen home">
+            <img id="wallpaperPreviewImg" alt="" hidden>
+            <div class="personal-screen-content" aria-hidden="true"><div class="personal-mini-clock"><span id="personalPreviewDate"></span><strong id="personalPreviewTime">--:--</strong></div>
+<div class="personal-mini-grid"><span><i class="fa-solid fa-comment" aria-hidden="true"></i></span><span><i class="fa-solid fa-heart" aria-hidden="true"></i></span><span><i class="fa-solid fa-terminal" aria-hidden="true"></i></span><span><i class="fa-solid fa-book" aria-hidden="true"></i></span><span><i class="fa-solid fa-users" aria-hidden="true"></i></span><span><i class="fa-solid fa-sliders" aria-hidden="true"></i></span><span><i class="fa-solid fa-cloud" aria-hidden="true"></i></span><span><i class="fa-solid fa-star" aria-hidden="true"></i></span></div><div class="personal-mini-dock"><span class="personal-mini-icon "><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="personalDock1" alt="" hidden></span><span class="personal-mini-icon "><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="personalDock2" alt="" hidden></span><span class="personal-mini-icon "><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="personalDock3" alt="" hidden></span></div></div>
+            <button type="button" class="personal-customize" data-personal-open="home" aria-label="自定义主屏幕壁纸">自定义</button>
+        </div>
+        <span>主屏幕</span>
     </div>
-    
-    <div class="api-content">
-        
-        <!-- 1. Dock 设置区 -->
-        <div class="settings-label" style="margin-bottom:10px; margin-left:5px;">Dock栏样式</div>
-        
-        <!-- Dock 预览 -->
-        <div class="dock-preview-wrapper">
-            <div class="dock-preview">
-                <div class="dock-btn"><img id="previewDock1" src=""></div>
-                <div class="dock-btn"><img id="previewDock2" src=""></div>
-                <div class="dock-btn"><img id="previewDock3" src=""></div>
-            </div>
+            <div class="personal-pair-item">
+        <div class="personal-screen chatroom">
+            <img id="chatRoomWallpaperPreviewImg" alt="" hidden>
+            <div class="personal-screen-content" aria-hidden="true"><div class="personal-mini-chat-header"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i><strong>小记</strong><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></div>
+<div class="personal-mini-messages"><span>今晚有空吗？</span><span>有的，怎么啦？</span><span>一起去线下剧场吧。</span></div>
+<div class="personal-mini-composer"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>输入消息</span><i class="fa-solid fa-microphone" aria-hidden="true"></i></div></div>
+            <button type="button" class="personal-customize" data-personal-open="chatroom" aria-label="自定义聊天页壁纸">自定义</button>
         </div>
-        
-        <!-- Dock 图标设置网格 -->
-        <div class="edit-grid">
-            <div class="edit-card">
-                <div class="edit-card-title">WeChat</div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeDockIcon(1, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeDockIcon(1, 'local')">相册</button>
-                </div>
-            </div>
-            <div class="edit-card">
-                <div class="edit-card-title">应用 2</div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeDockIcon(2, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeDockIcon(2, 'local')">相册</button>
-                </div>
-            </div>
-            <div class="edit-card">
-                <div class="edit-card-title">应用 3</div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeDockIcon(3, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeDockIcon(3, 'local')">相册</button>
-                </div>
-            </div>
+        <span>聊天页</span>
+    </div>
         </div>
-
-        <div class="api-divider" style="height:1px; background:#f0f0f0; margin: 10px 0 20px 0;"></div>
-
-        <!-- 2. 桌面APP图标区 -->
-        <div class="settings-label" style="margin-bottom:10px; margin-left:5px;">桌面APP图标</div>
-        
-        <div class="app-preview-wrapper">
-            <div class="app-preview-icon"><img id="previewApp5" src="" style="display:none;"><i class="fas fa-music" id="previewApp5Default"></i></div>
-            <div class="app-preview-icon"><img id="previewApp6" src="" style="display:none;"><i class="fas fa-cloud" id="previewApp6Default"></i></div>
+        <div class="personal-group"><button type="button" class="personal-row" data-personal-open="wechat">
+        <span class="personal-row-icon wechat"><img id="wcWallpaperPreviewImg" alt="" hidden></span><span class="personal-row-label">聊天列表</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="voice">
+        <span class="personal-row-icon voice"><img id="vcWallpaperPreviewImg" alt="" hidden></span><span class="personal-row-label">语音通话</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="offline">
+        <span class="personal-row-icon offline"><img id="offlineWallpaperPreviewImg" alt="" hidden></span><span class="personal-row-label">线下剧场</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button></div>
+        <h2 class="personal-caption">图标</h2>
+        <div class="personal-group"><button type="button" class="personal-row" data-personal-open="dock">
+        <span class="personal-row-icon dock"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></span><span class="personal-row-label">Dock 栏</span><span class="personal-row-preview" aria-hidden="true"><span class="personal-mini-icon tone-1"><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="previewDock1" alt="" hidden></span><span class="personal-mini-icon tone-2"><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="previewDock2" alt="" hidden></span><span class="personal-mini-icon tone-3"><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="previewDock3" alt="" hidden></span></span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="apps">
+        <span class="personal-row-icon apps"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></span><span class="personal-row-label">桌面 App 图标</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button></div>
+    </div>
+    <dialog id="personalEditor" class="personal-dialog" aria-labelledby="personalEditorTitle">
+        <div class="personal-dialog-header">
+            <button type="button" class="personal-back" id="personalEditorBack" aria-label="关闭"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            <h2 id="personalEditorTitle"></h2>
         </div>
-
-        <div class="edit-grid">
-            <div class="edit-card">
-                <div class="edit-card-title">论坛</div>
-                <div class="dock-btn"><img id="previewDock4" alt=""></div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeDockIcon(4, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeDockIcon(4, 'local')">相册</button>
-                </div>
-            </div>
-            <div class="edit-card">
-                <div class="edit-card-title">软件 5</div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeAppIcon(5, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeAppIcon(5, 'local')">相册</button>
-                </div>
-            </div>
-            <div class="edit-card">
-                <div class="edit-card-title">软件 6</div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeAppIcon(6, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeAppIcon(6, 'local')">相册</button>
-                </div>
-            </div>
+        <div class="personal-group" data-personal-panel="dock" hidden><button type="button" class="personal-row" data-personal-open="dock1">
+        <span class="personal-row-icon dock1"><span class="personal-mini-icon "><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="personalEditDock1" alt="" hidden></span></span><span class="personal-row-label">聊天</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="dock2">
+        <span class="personal-row-icon dock2"><span class="personal-mini-icon "><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="personalEditDock2" alt="" hidden></span></span><span class="personal-row-label">情侣空间</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="dock3">
+        <span class="personal-row-icon dock3"><span class="personal-mini-icon "><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="personalEditDock3" alt="" hidden></span></span><span class="personal-row-label">钱包</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button></div>
+        <div class="personal-group" data-personal-panel="apps" hidden><button type="button" class="personal-row" data-personal-open="dock4">
+        <span class="personal-row-icon dock4"><span class="personal-mini-icon "><i class="fa-solid fa-users" aria-hidden="true"></i><img id="previewDock4" alt="" hidden></span></span><span class="personal-row-label">论坛</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="app5">
+        <span class="personal-row-icon app5"><span class="personal-mini-icon "><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i><img id="previewApp5" alt="" hidden></span></span><span class="personal-row-label">查手机</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button><button type="button" class="personal-row" data-personal-open="app6">
+        <span class="personal-row-icon app6"><span class="personal-mini-icon "><i class="fa-solid fa-image" aria-hidden="true"></i><img id="previewApp6" alt="" hidden></span></span><span class="personal-row-label">真实相册</span><i class="fa-solid fa-chevron-right personal-chevron" aria-hidden="true"></i>
+    </button></div>
+        <div class="personal-group" data-personal-panel="image" hidden>
+            <button type="button" class="personal-row" data-personal-source="local"><span class="personal-row-label">从相册选择</span><i class="fa-solid fa-images" aria-hidden="true"></i></button>
+            <button type="button" class="personal-row" data-personal-source="link"><span class="personal-row-label">输入图片链接</span><i class="fa-solid fa-link" aria-hidden="true"></i></button>
+            <button type="button" class="personal-row personal-danger" data-personal-source="clear"><span class="personal-row-label">清除壁纸</span><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
         </div>
-
-        <div class="api-divider" style="height:1px; background:#f0f0f0; margin: 10px 0 20px 0;"></div>
-
-        <!-- 3. 壁纸设置区 (图7样式) -->
-        <div class="settings-label" style="margin-bottom:10px; margin-left:5px;">全局壁纸管理</div>
-
-        <!-- 主屏壁纸 -->
-        <div class="edit-card" style="margin-bottom: 20px; width: 100%;">
-            <div class="edit-card-title">主屏幕壁纸</div>
-            <div class="wallpaper-preview-box" id="wallpaperPreviewBox" style="width:100px; height:180px; margin: 0 auto 15px auto; border: 2px solid #eee; border-radius: 10px; overflow:hidden; background:#f9f9f9; display:flex; align-items:center; justify-content:center;">
-                <!-- [补全] 缺失的占位符 div -->
-                <div id="wallpaperPlaceholder" style="color:#ccc; font-size:12px;">默认</div>
-                <img id="wallpaperPreviewImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-            </div>
-            <div class="edit-btns-row">
-                <button class="edit-btn" onclick="changeWallpaper('link')">链接导入</button>
-                <button class="edit-btn" onclick="changeWallpaper('local')">本地相册</button>
-                <button class="edit-btn" style="color:#ff3b30; background:#fff0f0;" onclick="clearWallpaper()">清除</button>
-            </div>
-        </div>
-
-        <!-- WeChat壁纸 -->
-        <div class="edit-card" style="margin-bottom: 20px; width: 100%;">
-            <div class="edit-card-title">WeChat 壁纸</div>
-            <div class="wallpaper-preview-box" id="wcWallpaperPreviewBox" style="width:100px; height:180px; margin: 0 auto 15px auto; border: 2px solid #eee; border-radius: 10px; overflow:hidden; background:#f9f9f9; display:flex; align-items:center; justify-content:center;">
-                <!-- [补全] 缺失的占位符 div -->
-                <div id="wcWallpaperPlaceholder" style="color:#ccc; font-size:12px;">默认</div>
-                <img id="wcWallpaperPreviewImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-            </div>
-            <div class="edit-btns-row">
-                <button class="edit-btn" onclick="changeWallpaper('wechat_link')">链接导入</button>
-                <button class="edit-btn" onclick="changeWallpaper('wechat_local')">本地相册</button>
-                <button class="edit-btn" style="color:#ff3b30; background:#fff0f0;" onclick="clearWechatWallpaper()">清除</button>
-            </div>
-        </div>
-        <!-- 聊天页壁纸 -->
-        <div class="edit-card" style="margin-bottom: 20px; width: 100%;">
-            <div class="edit-card-title">聊天页壁纸</div>
-            <div class="wallpaper-preview-box" id="chatRoomWallpaperPreviewBox">
-                <div id="chatRoomWallpaperPlaceholder" style="color:#ccc; font-size:12px;">默认</div>
-                <img id="chatRoomWallpaperPreviewImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-            </div>
-            <div class="edit-btns-row">
-                <button class="edit-btn" onclick="changeWallpaper('chatroom_link')">链接导入</button>
-                <button class="edit-btn" onclick="changeWallpaper('chatroom_local')">本地相册</button>
-                <button class="edit-btn" style="color:#ff3b30; background:#fff0f0;" onclick="clearChatRoomWallpaper()">清除</button>
-            </div>
-        </div>
-           <!-- 语音通话壁纸 (新增) -->
-        <div class="edit-card" style="margin-bottom: 20px; width: 100%;">
-            <div class="edit-card-title">语音通话壁纸</div>
-            <div class="wallpaper-preview-box" id="vcWallpaperPreviewBox" style="width:100px; height:180px; margin: 0 auto 15px auto; border: 2px solid #eee; border-radius: 10px; overflow:hidden; background:#f9f9f9; display:flex; align-items:center; justify-content:center;">
-                <div id="vcWallpaperPlaceholder" style="color:#ccc; font-size:12px;">默认</div>
-                <img id="vcWallpaperPreviewImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-            </div>
-            <div class="edit-btns-row">
-                <button class="edit-btn" onclick="changeWallpaper('voice_link')">链接导入</button>
-                <button class="edit-btn" onclick="changeWallpaper('voice_local')">本地相册</button>
-                <button class="edit-btn" style="color:#ff3b30; background:#fff0f0;" onclick="clearVoiceCallWallpaper()">清除</button>
-            </div>
-        </div>
-        <!-- 线下壁纸 -->
-        <div class="edit-card" style="margin-bottom: 20px; width: 100%;">
-            <div class="edit-card-title">线下壁纸</div>
-            <div class="wallpaper-preview-box" id="offlineWallpaperPreviewBox" style="width:100px; height:180px; margin: 0 auto 15px auto; border: 2px solid #eee; border-radius: 10px; overflow:hidden; background:#f9f9f9; display:flex; align-items:center; justify-content:center;">
-                <div id="offlineWallpaperPlaceholder" style="color:#ccc; font-size:12px; text-align:center;">默认<br>(透出桌面)</div>
-                <img id="offlineWallpaperPreviewImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-            </div>
-            <div class="edit-btns-row">
-                <button class="edit-btn" onclick="changeWallpaper('offline_link')">链接导入</button>
-                <button class="edit-btn" onclick="changeWallpaper('offline_local')">本地相册</button>
-                <button class="edit-btn" style="color:#ff3b30; background:#fff0f0;" onclick="clearOfflineWallpaper()">清除</button>
-            </div>
-        </div>
-    </div> </div> <div class="modal-overlay" id="addCharModal">
+    </dialog>
+</div>
+<div class="modal-overlay" id="addCharModal">
     <div class="modal-box">
         <div class="modal-title">创建新角色</div>
         <img src="https://placehold.co/100/e0e0e0/888?text=+" class="modal-avatar" id="newCharAvatar" onclick="showMenu(event, 'newCharAvatar')">
@@ -1616,7 +1531,7 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="script.js?v=7"></script>
+    <script data-cfasync="false" src="script.js?v=8"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
