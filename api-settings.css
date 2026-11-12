@@ -95,3 +95,10 @@
 .ios-api #iwRoleCropCanvas { border-radius: 12px; width: 172px; }
 .ios-api #iwRoleCrop input[type="range"] { accent-color: #8e8e93; }
 .ios-api #iwQuickRoles:not([hidden]) { margin: 8px 0; }
+.ios-api .ios-api-expand-row { border-top: 1px solid #f0f0f2; }
+.ios-api .ios-api-expand-row[aria-expanded="true"] .ios-api-chevron,
+.ios-api-advanced[open] > summary .ios-api-chevron { transform: rotate(180deg); }
+.ios-api-advanced > summary { list-style: none; cursor: pointer; }
+.ios-api-advanced > summary::-webkit-details-marker { display: none; }
+.ios-api-inline-models, .ios-api-advanced[open] > summary { border-bottom: 1px solid #f0f0f2; }
+.ios-api-inline-models .ios-api-model-results { max-height: 210px; overflow-y: auto; }

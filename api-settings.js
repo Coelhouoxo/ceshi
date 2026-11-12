@@ -9,8 +9,8 @@ const MiuApi = (() => {
     const titles = {
         home: 'API 设置', main: '主 API', secondary: '副 API', presets: '配置方案',
         routing: '副 API 适用功能', voice: '语音消息', voiceBooks: '语音世界书', voiceRoles: '角色声线',
-        image: '绘图工坊', imageConnection: '服务与参数', imagePrompt: '提示词与画师串',
-        imageTags: 'GPT 标签', imageVibe: 'Vibe 素材库', imageRoles: '角色与参考图', imageHistory: '生图历史', time: '时间感知', models: '选择模型'
+        image: '生图配置', imageConnection: '服务与参数', imagePrompt: '提示词与画师串',
+        imageTags: 'GPT 标签', imageVibe: 'Vibe 素材库', imageRoles: '角色与参考图', imageHistory: '生图历史', time: '时间感知'
     };
     const voiceNames = { minimax: 'MiniMax', fish: 'Fish Audio', eleven: 'ElevenLabs' };
     const providerFields = ['MiniVoice', 'MiniEndpoint', 'MiniModel', 'FishEndpoint', 'FishKey', 'FishModel', 'FishVoice',
@@ -396,12 +396,13 @@ const MiuApi = (() => {
     }
 
     function showAuxProfile(id) {
+        if (modelPicker?.kind === 'aux') closeModelPicker();
         const p = profiles().find(item => item.id === id);
         byId('iosAuxName').value = p?.name || '';
         byId('iosAuxEndpoint').value = p?.endpoint || '';
         byId('iosAuxKey').value = p?.key || '';
         byId('iosAuxModel').value = p?.model || '';
-        setText('iosAuxFetch', value('iosAuxModel') || '选择模型');
+        setText('iosAuxFetchLabel', value('iosAuxModel') || '选择模型');
         byId('iosAuxTemp').value = p?.temperature ?? 1;
         byId('iosAuxTokens').value = p?.maxTokens ?? 2048;
         byId('iosAuxEnabled').checked = p?.enabled ?? true;
@@ -450,9 +451,9 @@ const MiuApi = (() => {
     function refreshSummaries() {
         const currentPreset = byId('apiPresetSelect').selectedOptions[0];
         setText('iosPrimarySummary', value('apiModel') || (value('apiEndpoint') ? '待选模型' : '未配置'));
-        setText('iosMainModelOpen', value('apiModel') || '选择模型');
-        setText('iosAuxFetch', value('iosAuxModel') || '选择模型');
-        setText('iwGptModels', value('iosGptModel') || '选择模型');
+        setText('iosMainModelOpenLabel', value('apiModel') || '选择模型');
+        setText('iosAuxFetchLabel', value('iosAuxModel') || '选择模型');
+        setText('iwGptModelsLabel', value('iosGptModel') || '选择模型');
         const enabled = profiles().filter(p => p.enabled).length;
         setText('iosSecondarySummary', enabled ? enabled + ' 套已启用' : '未配置');
         setText('iosPresetSummary', currentPreset?.value ? currentPreset.textContent : '未选择');
@@ -479,6 +480,7 @@ const MiuApi = (() => {
 
     function showView(view) {
         if (!Object.hasOwn(titles, view)) return;
+        closeModelPicker();
         currentView = view;
         if (view.startsWith('image')) MiuWorkshop.enter(view);
         if (view === 'voice') renderSoundPresets();
@@ -486,7 +488,7 @@ const MiuApi = (() => {
         if (view === 'voiceRoles') renderVoiceRoles();
         for (const section of sections) section.hidden = section.dataset.apiSection !== view;
         setText('iosApiTitle', titles[view]);
-        setText('iosApiBackLabel', view === 'home' ? '桌面' : view === 'models' ? titles[modelPicker.from] : view.startsWith('image') && view !== 'image' ? '绘图工坊' : view.startsWith('voice') && view !== 'voice' ? '语音消息' : 'API 设置');
+        setText('iosApiBackLabel', view === 'home' ? '桌面' : view.startsWith('image') && view !== 'image' ? titles.image : view.startsWith('voice') && view !== 'voice' ? '语音消息' : 'API 设置');
         byId('iosApiSearchBar').hidden = view !== 'home';
         scroll.scrollTop = 0;
         refreshSummaries();
@@ -528,16 +530,10 @@ const MiuApi = (() => {
 
     function back() {
         if (currentView === 'home') return false;
-        if (currentView === 'models') {
-            const from = modelPicker.from;
-            modelPicker = undefined;
-            showView(from);
-        } else {
-            const parent = currentView.startsWith('image') && currentView !== 'image' ? 'image' :
-                currentView.startsWith('voice') && currentView !== 'voice' ? 'voice' : 'home';
-            showView(parent);
-            saveData();
-        }
+        const parent = currentView.startsWith('image') && currentView !== 'image' ? 'image' :
+            currentView.startsWith('voice') && currentView !== 'voice' ? 'voice' : 'home';
+        showView(parent);
+        saveData();
         return true;
     }
 
@@ -547,17 +543,30 @@ const MiuApi = (() => {
         aux: ['iosAuxEndpoint', 'iosAuxKey', 'iosAuxModel']
     };
 
-    function pickModel(kind, fetchNow = true) {
-        modelPicker = { kind, from: currentView, models: [], revision: 0 };
+    function closeModelPicker() {
+        if (!modelPicker) return;
+        modelPicker.button.setAttribute('aria-expanded', 'false');
+        byId('iosInlineModels').hidden = true;
+        modelPicker = undefined;
+    }
+
+    function pickModel(kind, button) {
+        const wasOpen = modelPicker?.button === button;
+        closeModelPicker();
+        if (wasOpen) return;
+        modelPicker = { kind, button, models: [], revision: 0 };
+        const panel = byId('iosInlineModels');
+        button.after(panel);
+        panel.hidden = false;
+        button.setAttribute('aria-expanded', 'true');
         byId('iosModelQuery').value = '';
         byId('iosModelManual').value = value(modelFields[kind][2]);
         setText('iosModelStatus', '');
-        showView('models');
         drawModels();
-        if (fetchNow) fetchModelsForPicker();
     }
 
     function drawModels() {
+        if (!modelPicker) return;
         const results = byId('iosModelResults');
         results.replaceChildren();
         const query = value('iosModelQuery').toLowerCase();
@@ -570,11 +579,15 @@ const MiuApi = (() => {
             button.addEventListener('click', () => applyModel(model));
             results.append(button);
         }
-        if (modelPicker.models.length) setText('iosModelStatus', matched.length ? matched.length + ' 个模型' : '没有匹配的模型');
+        if (modelPicker.models.length) {
+            setText('iosModelStatus', matched.length > 100 ? '显示前 100 个，请缩小搜索范围' :
+                matched.length ? matched.length + ' 个模型' : '没有匹配的模型');
+        }
     }
 
     async function fetchModelsForPicker() {
         const picker = modelPicker;
+        if (!picker) return;
         const revision = ++picker.revision;
         const [urlId, keyId] = modelFields[picker.kind];
         setText('iosModelStatus', '正在拉取模型…');
@@ -597,7 +610,7 @@ const MiuApi = (() => {
     }
 
     function applyModel(model) {
-        if (!model) return;
+        if (!model || !modelPicker) return;
         const picker = modelPicker;
         const field = byId(modelFields[picker.kind][2]);
         if (field.tagName === 'SELECT') {
@@ -609,7 +622,9 @@ const MiuApi = (() => {
             field.value = model;
             field.dispatchEvent(new Event('change', { bubbles: true }));
         }
-        back();
+        refreshSummaries();
+        closeModelPicker();
+        picker.button.focus({ preventScroll: true });
     }
 
     byId('iosApiBack').addEventListener('click', () => { if (!back()) closeApiSettings(); });
@@ -898,12 +913,24 @@ const MiuApi = (() => {
             button.disabled = false;
         }
     });
-    byId('iwGptModels').onclick = () => pickModel('gpt', false);
-    byId('iosAuxFetch').onclick = () => pickModel('aux', false);
-    byId('iosMainModelOpen').addEventListener('click', () => pickModel('main', false));
+    for (const [kind, id] of Object.entries({ main: 'iosMainModelOpen', aux: 'iosAuxFetch', gpt: 'iwGptModels' })) {
+        byId(id).addEventListener('click', event => pickModel(kind, event.currentTarget));
+        for (const field of modelFields[kind].slice(0, 2)) {
+            const invalidate = () => { if (modelPicker?.kind === kind) closeModelPicker(); };
+            byId(field).addEventListener('input', invalidate);
+            byId(field).addEventListener('change', invalidate);
+        }
+    }
+    byId('iwConnectionPreset').addEventListener('change', closeModelPicker);
+    byId('iwConnectionProvider').addEventListener('change', closeModelPicker);
     byId('iosModelFetch').addEventListener('click', fetchModelsForPicker);
     byId('iosModelApply').addEventListener('click', () => applyModel(value('iosModelManual')));
     byId('iosModelQuery').addEventListener('input', drawModels);
+    byId('iosModelManual').addEventListener('keydown', event => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        event.preventDefault();
+        applyModel(value('iosModelManual'));
+    });
 
     return { open, back, hydrate, speechContext, speechBookMatches, createCallSpeech, endpoint, request, getAuxRoute, messageVoice, minimaxSpeech, generateImage, imageReady, timeMode, messageTime, timeDescription, escapeHtml };
 })();

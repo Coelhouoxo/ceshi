@@ -266,7 +266,7 @@ const MiuWorkshop = (() => {
     async function novelai(prompt) {
         const key = get('naiApiKey');
         const model = get('naiModel') || 'nai-diffusion-4-5-full';
-        const modern = /^nai-diffusion-[45]/.test(model);
+        const modern = modernNaiModel(model);
         const protocol = get('iwNaiProtocol');
         const [width, height] = (get('naiSize') || '1024x1024').split('x').map(Number);
         const positive = prompt.positive;
@@ -405,7 +405,17 @@ const MiuWorkshop = (() => {
         $(edit.remove).onclick = () => { if (removeItem(key, get(edit.select))) editItem(key, ''); };
     }
 
+    function modernNaiModel(model) {
+        return /^nai-diffusion-[45]/.test(model);
+    }
+
+    function refreshNaiParameters() {
+        $('iwNaiNativeParameters').hidden = get('iwNaiProtocol') === 'openai';
+        $('iwNaiSmeaRow').hidden = modernNaiModel(get('naiModel') || 'nai-diffusion-4-5-full');
+    }
+
     function refreshConnection() {
+        refreshNaiParameters();
         const provider = get('iwConnectionProvider');
         document.querySelectorAll('[data-iw-connection]').forEach(panel => { panel.hidden = panel.dataset.iwConnection !== provider; });
         choices('iwConnectionPreset', items('connections').filter(item => item.provider === provider), store().activeConnection?.[provider], '当前配置');
@@ -415,6 +425,8 @@ const MiuWorkshop = (() => {
     }
 
     $('iwConnectionProvider').onchange = refreshConnection;
+    $('iwNaiProtocol').addEventListener('change', refreshNaiParameters);
+    $('naiModel').addEventListener('change', refreshNaiParameters);
     $('iwConnectionPreset').onchange = async () => {
         const provider = get('iwConnectionProvider');
         const id = get('iwConnectionPreset');
@@ -783,7 +795,10 @@ const MiuWorkshop = (() => {
     function enter(view) {
         if (view !== 'imageRoles') closeCrop();
         if (view === 'image') { renderTags(); renderRoleTokens(); }
-        if (view === 'imageConnection') refreshConnection();
+        if (view === 'imageConnection') {
+            $('iwNaiAdvanced').open = false;
+            refreshConnection();
+        }
         if (view === 'imagePrompt') editItem('prompts');
         if (view === 'imageTags') editItem('tags');
         if (view === 'imageVibe') refreshVibe();

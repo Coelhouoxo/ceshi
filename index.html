@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
     <link rel="stylesheet" href="home.css?v=10">
-    <link rel="stylesheet" href="api-settings.css?v=3">
+    <link rel="stylesheet" href="api-settings.css?v=4">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -1019,14 +1019,14 @@
                     </div>
                     <div class="ios-api-group">
                     <button type="button" class="ios-api-row" data-api-view="voice" data-api-search="语音消息 MiniMax Fish Audio ElevenLabs 音色 角色声线 通话自动朗读 语音世界书"><span class="ios-api-glyph ios-api-purple" aria-hidden="true"><i class="fa-solid fa-microphone"></i></span><span class="ios-api-row-text">语音消息</span><span id="iosVoiceSummary" class="ios-api-summary">MiniMax</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
-                    <button type="button" class="ios-api-row" data-api-view="image" data-api-search="生图配置 绘图工坊 NovelAI NAI GPT Image Vibe 画师串 标签"><span class="ios-api-glyph ios-api-green" aria-hidden="true"><i class="fa-solid fa-image"></i></span><span class="ios-api-row-text">绘图工坊</span><span id="iosImageSummary" class="ios-api-summary">关闭</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+                    <button type="button" class="ios-api-row" data-api-view="image" data-api-search="生图配置 NovelAI NAI GPT Image Vibe 画师串 标签"><span class="ios-api-glyph ios-api-green" aria-hidden="true"><i class="fa-solid fa-image"></i></span><span class="ios-api-row-text">生图配置</span><span id="iosImageSummary" class="ios-api-summary">关闭</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
                     <button type="button" class="ios-api-row" data-api-view="time" data-api-search="时间感知 自定义 模糊 时间"><span class="ios-api-glyph ios-api-orange" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span><span class="ios-api-row-text">时间感知</span><span id="iosTimeSummary" class="ios-api-summary">真实时间</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div><p id="iosApiNoResults" class="ios-api-note" hidden>没有匹配的设置</p>
                     </section>
                     <section data-api-section="main" hidden>
 <div class="ios-api-group">
 <label class="ios-api-field"><span>接口地址</span><input id="apiEndpoint" inputmode="url" placeholder="https://…/v1"></label>
 <label class="ios-api-field"><span>API 密钥</span><input id="apiKey" type="password" autocomplete="off"></label>
-<select id="apiModel" hidden></select><button type="button" class="ios-api-action" id="iosMainModelOpen">选择模型</button>
+<select id="apiModel" hidden></select><button type="button" class="ios-api-row ios-api-expand-row" id="iosMainModelOpen" aria-expanded="false" aria-controls="iosInlineModels"><span class="ios-api-row-text">模型</span><span id="iosMainModelOpenLabel" class="ios-api-summary">选择模型</span><i class="fa-solid fa-chevron-down ios-api-chevron" aria-hidden="true"></i></button>
 </div><div class="ios-api-group">
 <label class="ios-api-field"><span>温度</span><input id="apiTemp" type="number" min="0" max="2" step="0.1" value="1.0"></label>
 <label class="ios-api-field"><span>最大 Tokens</span><input id="apiMaxTokens" type="number" min="1" value="2048"></label></div><span id="tempDisplay" class="" hidden></span>
@@ -1037,7 +1037,7 @@
                     <label class="ios-api-field"><span>方案名称</span><input id="iosAuxName" maxlength="60"></label>
                     <label class="ios-api-field"><span>接口地址</span><input id="iosAuxEndpoint" inputmode="url" placeholder="https://…/v1"></label>
                     <label class="ios-api-field"><span>API 密钥</span><input id="iosAuxKey" type="password" autocomplete="off"></label>
-                    <input id="iosAuxModel" hidden><button type="button" class="ios-api-action" id="iosAuxFetch">选择模型</button>
+                    <input id="iosAuxModel" hidden><button type="button" class="ios-api-row ios-api-expand-row" id="iosAuxFetch" aria-expanded="false" aria-controls="iosInlineModels"><span class="ios-api-row-text">模型</span><span id="iosAuxFetchLabel" class="ios-api-summary">选择模型</span><i class="fa-solid fa-chevron-down ios-api-chevron" aria-hidden="true"></i></button>
                     <label class="ios-api-field"><span>温度</span><input id="iosAuxTemp" type="number" min="0" max="2" step="0.1" value="1"></label>
                     <label class="ios-api-field"><span>最大 Tokens</span><input id="iosAuxTokens" type="number" min="1" step="1" value="2048"></label>
                     <label class="ios-api-field"><span>启用方案</span><input type="checkbox" id="iosAuxEnabled" checked></label><div class="ios-api-actions"><button type="button" class="ios-api-action" id="iosAuxSave">保存方案</button><button type="button" class="ios-api-action" id="iosAuxDelete">删除方案</button></div><p id="iosAuxStatus" class="ios-api-note" role="status"></p></div>
@@ -1148,7 +1148,7 @@
                             <option value="1024x1024">1024x1024 (正方)</option>
                             <option value="832x1216">832x1216 (竖屏)</option>
                             <option value="1216x832">1216x832 (横屏)</option>
-                        </select></label></div><h2 class="ios-api-caption">生成参数</h2><div class="ios-api-group">
+                        </select></label></div><details id="iwNaiAdvanced" class="ios-api-group ios-api-advanced"><summary class="ios-api-row ios-api-expand-row"><span class="ios-api-row-text">高级参数</span><i class="fa-solid fa-chevron-down ios-api-chevron" aria-hidden="true"></i></summary><div id="iwNaiNativeParameters">
 <label class="ios-api-field"><span>采样步数</span><input id="naiSteps" type="number" value="28" min="1" max="50"></label>
 <label class="ios-api-field"><span>提示词相关性</span><input id="naiCfg" type="number" value="6" step="0.1" min="0" max="20"></label>
 <label class="ios-api-field"><span>采样器</span><select id="naiSampler">
@@ -1160,12 +1160,12 @@
                             <option value="karras">Karras (推荐)</option>
                             <option value="native">Native</option>
                         </select></label>
-<label class="ios-api-field"><span>SMEA 与 DYN</span><button type="button" class="ios-api-inline-toggle ios-api-row checked" id="naiSmeaToggle" role="switch" aria-label="SMEA 与 DYN" onclick="toggleSwitch(this); saveData()"><span class="ios-api-switch"></span></button></label>
+<label class="ios-api-field" id="iwNaiSmeaRow"><span>SMEA 与 DYN</span><button type="button" class="ios-api-inline-toggle ios-api-row checked" id="naiSmeaToggle" role="switch" aria-label="SMEA 与 DYN" onclick="toggleSwitch(this); saveData()"><span class="ios-api-switch"></span></button></label>
 <label class="ios-api-field"><span>随机种子</span><input id="naiSeed" type="number" placeholder="-1 为随机" value="-1"></label>
-<label class="ios-api-field"><span>生成间隔（秒）</span><input id="iwNaiInterval" type="number" min="0" max="300" placeholder="0"></label></div></div><div data-iw-connection="gpt" hidden><div class="ios-api-group">
+</div><label class="ios-api-field"><span>生成间隔（秒）</span><input id="iwNaiInterval" type="number" min="0" max="300" placeholder="0"></label></details></div><div data-iw-connection="gpt" hidden><div class="ios-api-group">
 <label class="ios-api-field"><span>接口地址</span><input id="iosGptEndpoint" inputmode="url" placeholder="https://api.openai.com/v1"></label>
 <label class="ios-api-field"><span>API 密钥</span><input id="iosGptKey" type="password" autocomplete="off"></label>
-<input id="iosGptModel" hidden><button type="button" class="ios-api-action" id="iwGptModels">选择模型</button>
+<input id="iosGptModel" hidden><button type="button" class="ios-api-row ios-api-expand-row" id="iwGptModels" aria-expanded="false" aria-controls="iosInlineModels"><span class="ios-api-row-text">模型</span><span id="iwGptModelsLabel" class="ios-api-summary">选择模型</span><i class="fa-solid fa-chevron-down ios-api-chevron" aria-hidden="true"></i></button>
 <label class="ios-api-field"><span>尺寸</span><select id="iosGptSize"><option value="1024x1024">正方形</option><option value="1024x1536">竖屏</option><option value="1536x1024">横屏</option></select></label>
 <label class="ios-api-field"><span>画质</span><select id="iosGptQuality"><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label>
 <label class="ios-api-field"><span>画风（DALL·E 3）</span><select id="iwGptStyle"><option value="">默认</option><option value="vivid">鲜艳</option><option value="natural">自然</option></select></label>
@@ -1245,11 +1245,7 @@
                     <label class="ios-api-field"><span>关闭后使用</span><select id="iosTimeMode"><option value="custom">自定义时间</option><option value="fuzzy">模糊感知</option></select></label><div id="iosTimeCustom">
                     <label class="ios-api-field"><span>日期与时间</span><input id="iosTimeValue" type=datetime-local></label></div></div></div>
                     </section>
-                    <section data-api-section="models" hidden>
-                    <div class="ios-api-group">
-                    <label class="ios-api-field"><span>搜索模型</span><input id="iosModelQuery" type="search" autocomplete="off" placeholder="输入模型名称"></label><button type="button" class="ios-api-action" id="iosModelFetch">重新拉取</button>
-                    <label class="ios-api-field"><span>手动输入</span><input id="iosModelManual" autocomplete="off"></label><button type="button" class="ios-api-action" id="iosModelApply">使用此模型</button><p id="iosModelStatus" class="ios-api-note" role="status"></p><div id="iosModelResults" class="ios-api-model-results"></div></div>
-                    </section>
+
                 </div>
                 <div hidden>
 <input id="secApiEndpoint"><input id="secApiKey" type="password"><select id="secApiModel"></select><input id="secApiTemp" value="1"><span id="secTempDisplay"></span><input id="secApiMaxTokens" value="2048">
@@ -1257,6 +1253,9 @@
 <span id="naiToggle"></span><input id="naiProxy"><input id="minimaxModel"><input id="minimaxTemp" value="0.9"><span id="minimaxTempDisplay"></span>
 <span id="autoActivityToggle"></span><div id="autoFreqPanel"><span id="autoFreqDisplay"></span><input id="autoFreqSlider" value="1"><span id="autoCharArrow"></span><div id="autoCharListBody"></div></div>
 </div>
+<div id="iosInlineModels" class="ios-api-inline-models" hidden>
+                    <label class="ios-api-field"><span>搜索模型</span><input id="iosModelQuery" type="search" autocomplete="off" placeholder="输入模型名称"></label><button type="button" class="ios-api-action" id="iosModelFetch">拉取模型</button>
+                    <label class="ios-api-field"><span>手动输入</span><input id="iosModelManual" autocomplete="off"></label><button type="button" class="ios-api-action" id="iosModelApply">使用此模型</button><p id="iosModelStatus" class="ios-api-note" role="status"></p><div id="iosModelResults" class="ios-api-model-results"></div></div>
 <div id="iosApiSearchBar" class="ios-api-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="iosApiSearch" type="search" aria-label="搜索 API 设置" placeholder="搜索"></div>
             </div>
 
@@ -1618,8 +1617,8 @@
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
     <script data-cfasync="false" src="script.js?v=7"></script>
-    <script data-cfasync="false" src="api-settings.js?v=3" defer></script>
-    <script src="image-workshop.js?v=3" defer></script>
+    <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
+    <script src="image-workshop.js?v=4" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
