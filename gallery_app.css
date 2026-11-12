@@ -1,0 +1,298 @@
+/* --- gallery_app.css --- */
+
+/* 全屏容器 */
+#galleryAppPage {
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: #FFF2F4; 
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3000;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 顶部导航栏 */
+.gal-header {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    background: transparent;
+    z-index: 10;
+    flex-shrink: 0;
+    padding-top: env(safe-area-inset-top, 10px); 
+    height: calc(50px + env(safe-area-inset-top, 10px));
+}
+
+
+.gal-nav-icon, .gal-action-icon {
+    font-size: 19px; /* 原来是 24px，改小到 19px */
+    color: #333;
+    width: 44px;     /* 保持点击范围不变，方便手指点击 */
+    height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 20;
+}
+.gal-nav-icon { justify-content: flex-start; }
+.gal-action-icon { justify-content: flex-end; }
+
+.gal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 2px; /* 增加字间距，更显高级 */
+}
+
+/* 主滚动区域 */
+.gal-scroll-view {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0; 
+    -webkit-overflow-scrolling: touch;
+    position: relative; 
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- gallery_app.css 修改部分 --- */
+
+/* --- 上半部分: 圆形头像栏 --- */
+.gal-top-bar {
+    /* 这里的 padding 可以稍微减小，因为我们在 grid 里面加了 padding */
+    padding: 5px 10px 10px 10px; 
+    position: relative;
+    z-index: 2;
+}
+
+.gal-circle-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    
+    /* ★★★ 核心修复：增加 10px 的顶部内边距 ★★★ */
+    /* 这样头像放大时，上面就有空间显示边框，不会被切掉了 */
+    padding: 10px 5px 15px 5px; 
+    
+    scrollbar-width: none; 
+    justify-content: flex-start; 
+}
+.gal-circle-grid::-webkit-scrollbar { display: none; }
+
+.gal-circle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0; 
+    width: 82px;
+    /* 增加这一行，确保点击区域稳定 */
+    transform-origin: center center;
+}
+
+/* 头像外框 */
+.gal-circle-img-wrap {
+    width: 74px;  
+    height: 74px; 
+    border-radius: 50%;
+    padding: 3px; 
+    background: transparent; 
+    
+    /* 边框颜色加深一点点，或者保持 #ddd，确保清晰 */
+    border: 2px solid #d0d0d0; 
+    
+    margin-bottom: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease; /* 动画更丝滑 */
+}
+
+/* 选中态：只放大，不切边 */
+.gal-circle-item.active .gal-circle-img-wrap {
+    /* 1.08倍稍微明显一点，因为我们要展示它是选中的 */
+    transform: scale(1.08);
+    /* 边框颜色保持灰色，或者稍微深一点点增加质感，不给黑框 */
+    border-color: #bbb; 
+}
+
+.gal-circle-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.gal-circle-name {
+    margin-top: 12px; /* 稍微再拉大一点名字和头像的距离 */
+    font-size: 13px;
+    color: #555;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.gal-circle-item.active .gal-circle-name {
+    color: #000;
+    font-weight: bold;
+}
+
+/* --- 下半部分: 拍立得展示区 --- */
+.gal-photo-area {
+    flex: 1;
+    padding: 10px 15px 80px 15px;
+    min-height: 300px;
+    position: relative;
+    z-index: 2;
+}
+
+/* 提示文字 */
+.gal-hint-text {
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+    margin-top: 50px;
+    opacity: 0.7;
+}
+
+/* 照片网格 */
+.gal-polaroid-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* 拍立得照片本体 */
+.gal-polaroid-photo {
+    background: #fff;
+    padding: 6px 6px 25px 6px; 
+    box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
+    width: 47%; 
+    position: relative;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.gal-polaroid-photo img {
+    width: 100%;
+    aspect-ratio: 1/1; 
+    object-fit: cover;
+    background: #f5f5f5;
+    display: block;
+    pointer-events: none; 
+}
+
+/* 删除按钮 */
+.gal-photo-del {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    background: #ff3b30;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s;
+    pointer-events: none;
+}
+
+/* 抖动动画 */
+@keyframes shake-photo {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(1.5deg); }
+    75% { transform: rotate(-1.5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.gal-polaroid-photo.shake-mode {
+    animation: shake-photo 0.25s infinite;
+}
+
+.gal-polaroid-photo.shake-mode .gal-photo-del {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+/* 背景点击层 */
+#gal-bg-click-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    z-index: 0;
+}
+
+/* --- gallery_app.css 新增菜单样式 --- */
+
+/* 添加菜单容器 */
+.gal-add-menu {
+    display: none; /* 默认隐藏 */
+    position: absolute;
+    top: 55px; /* 在顶部导航栏下方 */
+    right: 15px;
+    width: 140px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 100;
+    flex-direction: column;
+    overflow: hidden;
+    animation: galMenuFadeIn 0.2s ease;
+}
+
+.gal-add-menu.active {
+    display: flex;
+}
+
+.gal-menu-item {
+    padding: 12px 15px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.gal-menu-item:active {
+    background: #f5f5f5;
+}
+
+.gal-menu-item:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.gal-menu-item i {
+    font-size: 16px;
+    color: #555;
+    width: 20px;
+    text-align: center;
+}
+
+@keyframes galMenuFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
