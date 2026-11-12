@@ -92,3 +92,6 @@
 .ios-api-tag-list { display: flex; flex-wrap: wrap; padding: 0 14px; gap: 6px; }
 .ios-api-tag-list button { border: 0; border-radius: 999px; padding: 5px 9px; background: #f2f2f7; font-size: 13px; }
 .ios-api-voice-detail > summary { padding: 13px 16px; cursor: pointer; }
+.ios-api #iwRoleCropCanvas { border-radius: 12px; width: 172px; }
+.ios-api #iwRoleCrop input[type="range"] { accent-color: #8e8e93; }
+.ios-api #iwQuickRoles:not([hidden]) { margin: 8px 0; }

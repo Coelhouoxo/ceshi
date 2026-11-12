@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
     <link rel="stylesheet" href="home.css?v=10">
-    <link rel="stylesheet" href="api-settings.css?v=2">
+    <link rel="stylesheet" href="api-settings.css?v=3">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -1114,7 +1114,7 @@
 <button type="button" data-api-view="imageHistory" class="ios-api-row"><span class="ios-api-row-text">生图历史</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div><h2 class="ios-api-caption">试画</h2><div class="ios-api-group">
 <label class="ios-api-field"><span>试画服务</span><select id="iwTestProvider"><option value="nai">NovelAI</option><option value="gpt">GPT Image</option></select></label>
 <label class="ios-api-field ios-api-stacked"><span>画面描述</span><textarea id="iwTestPrompt" rows="3" placeholder="输入提示词，可引用标签或角色"></textarea></label>
-<div id="iwQuickTags"></div><button type="button" class="ios-api-action" id="iwGenerate">生成图片</button>
+<div id="iwQuickTags"></div><div id="iwQuickRoles" class="ios-api-tag-list" hidden></div><button type="button" class="ios-api-action" id="iwGenerate">生成图片</button>
 <p id="iwStatus" class="ios-api-note" role="status"></p></div><div id="iwPreviewPanel" class="ios-api-group" hidden><img id="iwPreview" class="ios-api-preview" alt="生成的图片"><div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwSavePreview">保存到历史</button><button type="button" class="ios-api-action" id="iwDownload">下载图片</button></div></div>
 </section>
 <section data-api-section="imageConnection" hidden>
@@ -1212,6 +1212,13 @@
 <label class="ios-api-field"><span>参考强度</span><input id="iwRoleStrength" type="number" min="0" max="1" step="0.05" value="0.65"></label>
 <label class="ios-api-field"><span>脸部保真</span><input id="iwRoleFidelity" type="number" min="0" max="1" step="0.05" value="0.8"></label>
 <img id="iwRoleThumb" class="ios-api-preview" alt="角色参考图" hidden>
+<div id="iwRoleCrop" hidden>
+<canvas id="iwRoleCropCanvas" width="208" height="304" class="ios-api-preview" aria-label="裁剪预览"></canvas>
+<label class="ios-api-field"><span>缩放</span><input id="iwRoleZoom" type="range" min="1" max="4" step="0.05" value="1"></label>
+<label class="ios-api-field"><span>左右位置</span><input id="iwRoleCropX" type="range" min="0" max="100" value="50"></label>
+<label class="ios-api-field"><span>上下位置</span><input id="iwRoleCropY" type="range" min="0" max="100" value="50"></label>
+<div class="ios-api-actions"><button id="iwRoleCropApply" type="button" class="ios-api-action">确认裁剪</button><button id="iwRoleCropCancel" type="button" class="ios-api-action">取消</button></div>
+</div>
 <div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwRoleUploadButton">上传参考图</button><button type="button" class="ios-api-action" id="iwRoleClear">移除参考图</button></div><input type="file" id="iwRoleUpload" accept="image/*" hidden>
 <button type="button" class="ios-api-action" id="iwRoleSave">保存角色设定</button>
 <p id="iwRoleStatus" class="ios-api-note" role="status"></p></div>
@@ -1609,7 +1616,7 @@
     <script src="gallery_app.js"></script>
     <script data-cfasync="false" src="script.js?v=6"></script>
     <script data-cfasync="false" src="api-settings.js?v=2" defer></script>
-    <script src="image-workshop.js?v=1" defer></script>
+    <script src="image-workshop.js?v=2" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">

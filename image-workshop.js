@@ -31,6 +31,8 @@ const MiuWorkshop = (() => {
     let preview;
     let lastNaiRequest = 0;
     let roleImage = '';
+    let cropSource;
+    let cropRevision = 0;
 
     function items(key) {
         return store()[key] ??= [];
@@ -493,14 +495,14 @@ const MiuWorkshop = (() => {
             : make(entry, name)).filter(entry => entry && (!entry.images || entry.images.length));
     }
 
-    async function localImage(file, canvasSize) {
+    async function localImage(file) {
         if (file.size > 18 * 1024 * 1024) throw new Error('请选择小于 18 MB 的图片');
         const bitmap = await createImageBitmap(file);
         try {
             const canvas = document.createElement('canvas');
             const scale = Math.min(1, 1536 / Math.max(bitmap.width, bitmap.height));
-            canvas.width = canvasSize?.[0] || Math.max(1, Math.round(bitmap.width * scale));
-            canvas.height = canvasSize?.[1] || Math.max(1, Math.round(bitmap.height * scale));
+            canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+            canvas.height = Math.max(1, Math.round(bitmap.height * scale));
             const ctx = canvas.getContext('2d');
             const fit = Math.min(canvas.width / bitmap.width, canvas.height / bitmap.height);
             const w = bitmap.width * fit;
@@ -575,6 +577,7 @@ const MiuWorkshop = (() => {
     };
 
     function refreshRole() {
+        closeCrop();
         const id = get('iwRole');
         choices('iwRole', chatList.map(chat => ({ id: String(chat.id), name: chat.name || chat.realName || String(chat.id) })), id, '选择角色');
         const role = items('roles').find(row => row.id === id);
@@ -589,18 +592,61 @@ const MiuWorkshop = (() => {
         $('iwRoleSave').disabled = $('iwRoleUploadButton').disabled = !chat;
     }
     $('iwRole').onchange = refreshRole;
+    function closeCrop() {
+        cropRevision++;
+        cropSource?.close();
+        cropSource = undefined;
+        $('iwRoleCrop').hidden = true;
+        $('iwRoleSave').disabled = !get('iwRole');
+    }
+
+    function paintCrop(canvas) {
+        const source = cropSource;
+        if (!source) return;
+        const ratio = Math.max(canvas.width / source.width, canvas.height / source.height) * Number(get('iwRoleZoom'));
+        const width = source.width * ratio;
+        const height = source.height * ratio;
+        const left = (canvas.width - width) * Number(get('iwRoleCropX')) / 100;
+        const top = (canvas.height - height) * Number(get('iwRoleCropY')) / 100;
+        canvas.getContext('2d').drawImage(source, left, top, width, height);
+    }
+
     $('iwRoleUploadButton').onclick = () => $('iwRoleUpload').click();
     $('iwRoleUpload').onchange = async event => {
         const file = event.target.files[0];
         if (!file) return;
+        closeCrop();
+        const revision = cropRevision;
         try {
-            roleImage = await localImage(file, [832, 1216]);
-            setImage('iwRoleThumb', roleImage);
-            $('iwRoleEnabled').checked = true;
+            if (file.size > 18 * 1024 * 1024) throw new Error('请选择小于 18 MB 的图片');
+            const bitmap = await createImageBitmap(file);
+            if (revision !== cropRevision) { bitmap.close(); return; }
+            cropSource = bitmap;
+            put('iwRoleZoom', '1');
+            put('iwRoleCropX', '50');
+            put('iwRoleCropY', '50');
+            $('iwRoleCrop').hidden = false;
+            $('iwRoleSave').disabled = true;
+            paintCrop($('iwRoleCropCanvas'));
         } catch (error) { status('iwRoleStatus', error.message); }
-        event.target.value = '';
+        finally { event.target.value = ''; }
     };
-    $('iwRoleClear').onclick = () => { roleImage = ''; setImage('iwRoleThumb', ''); $('iwRoleEnabled').checked = false; };
+    for (const id of ['iwRoleZoom', 'iwRoleCropX', 'iwRoleCropY']) {
+        $(id).oninput = () => paintCrop($('iwRoleCropCanvas'));
+    }
+    $('iwRoleCropApply').onclick = () => {
+        if (!cropSource) return;
+        const canvas = document.createElement('canvas');
+        canvas.width = 832;
+        canvas.height = 1216;
+        paintCrop(canvas);
+        roleImage = canvas.toDataURL('image/png');
+        setImage('iwRoleThumb', roleImage);
+        $('iwRoleEnabled').checked = true;
+        closeCrop();
+    };
+    $('iwRoleCropCancel').onclick = closeCrop;
+    $('iwRoleClear').onclick = () => { closeCrop(); roleImage = ''; setImage('iwRoleThumb', ''); $('iwRoleEnabled').checked = false; };
     $('iwRoleSave').onclick = async () => {
         const id = get('iwRole');
         if (!id || !get('iwRoleAlias')) return status('iwRoleStatus', '请选择角色并填写角色变量');
@@ -642,6 +688,26 @@ const MiuWorkshop = (() => {
         status('iwHistoryStatus', list.children.length ? '' : '暂无历史记录');
     }
 
+    function addPromptToken(text) {
+        put('iwTestPrompt', join([get('iwTestPrompt'), text]));
+        store().iwTestPrompt = get('iwTestPrompt');
+        saveData();
+    }
+
+    function renderRoleTokens() {
+        const root = $('iwQuickRoles');
+        const roles = items('roles').filter(role => role.alias);
+        root.replaceChildren();
+        root.hidden = !roles.length;
+        for (const role of roles) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = role.alias;
+            button.onclick = () => addPromptToken('{{' + role.alias + '}}');
+            root.append(button);
+        }
+    }
+
     function renderTags() {
         const root = $('iwQuickTags');
         root.replaceChildren();
@@ -663,11 +729,7 @@ const MiuWorkshop = (() => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.textContent = tag.name;
-                button.onclick = () => {
-                    put('iwTestPrompt', join([get('iwTestPrompt'), tag.name]));
-                    store().iwTestPrompt = get('iwTestPrompt');
-                    saveData();
-                };
+                button.onclick = () => addPromptToken(tag.name);
                 section.append(button);
             }
             root.append(section);
@@ -712,7 +774,8 @@ const MiuWorkshop = (() => {
     }
 
     function enter(view) {
-        if (view === 'image') renderTags();
+        if (view !== 'imageRoles') closeCrop();
+        if (view === 'image') { renderTags(); renderRoleTokens(); }
         if (view === 'imageConnection') refreshConnection();
         if (view === 'imagePrompt') editItem('prompts');
         if (view === 'imageTags') editItem('tags');
