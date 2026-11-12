@@ -8,7 +8,7 @@
 <!-- 核心：沉浸式状态栏 -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<meta name="theme-color" content="#f5f5f5">
+<meta name="theme-color" content="#FDEFF2">
 
     
     <!-- 外部库 -->
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
-    <link rel="stylesheet" href="home.css?v=5">
+    <link rel="stylesheet" href="home.css?v=6">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -129,31 +129,37 @@
                 </section>
                 <section class="miu-page" aria-label="第 3 页">
                     <div class="miu-sheet">
-                        <div class="miu-week-card" data-home-item="week">
+                        <div class="miu-week-card" data-home-item="week" aria-label="日常侧记">
                             <div class="miu-week-head">
                                 <div class="miu-week-portrait">
-                                    <button type="button" class="miu-photo miu-week-avatar" id="bubbleWrapper" onclick="showMenu(event, 'home')" aria-label="更换周历头像"><img id="headerImg" alt="" draggable="false"></button>
+                                    <button type="button" class="miu-photo miu-week-avatar" id="bubbleWrapper" onclick="showMenu(event, 'home')" aria-label="更换侧记头像"><img id="headerImg" alt="" draggable="false"></button>
                                     <i class="fa-solid fa-camera" aria-hidden="true"></i>
                                 </div>
                                 <div class="miu-week-copy">
-                                    <strong>Miu Phone <i class="fa-solid fa-star" aria-hidden="true"></i></strong>
-                                    <div id="miuWeekDays" class="miu-week-days" aria-label="本周"></div>
+                                    <strong>日常侧记 <span aria-hidden="true">✦</span></strong>
+                                    <p>把喜欢的小事留在这里。</p>
+                                    <div class="miu-week-date"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="miuWeekDate"></span></div>
+                                    <div id="miuWeekDays" class="miu-week-days" aria-label="最近三天"></div>
                                 </div>
                             </div>
                             <div class="miu-week-timeline">
                                 <div class="miu-week-entry">
-                                    <i class="fa-solid fa-check miu-week-mark" aria-hidden="true"></i>
-                                    <span id="miuWeekDate"></span>
+                                    <i class="fa-solid fa-pen-nib miu-week-mark" aria-hidden="true"></i>
+                                    <p>慢一点，也会走到想去的地方。</p>
                                     <time id="miuWeekTime">--:--</time>
+                                    <i class="fa-solid fa-check miu-week-status" aria-hidden="true"></i>
                                 </div>
                                 <div class="miu-week-entry">
-                                    <i class="fa-regular fa-circle miu-week-mark" aria-hidden="true"></i>
-                                    <span class="miu-week-note">此刻</span>
-                                    <div class="miu-week-photos">
-                                        <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第一张照片"><img id="miuWeekPhoto1" alt="" draggable="false" data-home-image></button>
-                                        <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第二张照片"><img id="miuWeekPhoto2" alt="" draggable="false" data-home-image></button>
-                                        <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第三张照片"><img id="miuWeekPhoto3" alt="" draggable="false" data-home-image></button>
+                                    <i class="fa-regular fa-bookmark miu-week-mark" aria-hidden="true"></i>
+                                    <div class="miu-week-album">
+                                        <div><small>相片收集</small><strong>今天的片段</strong></div>
+                                        <div class="miu-week-photos">
+                                            <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第一张照片"><img id="miuWeekPhoto1" alt="" draggable="false" data-home-image></button>
+                                            <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第二张照片"><img id="miuWeekPhoto2" alt="" draggable="false" data-home-image></button>
+                                            <button type="button" class="miu-photo" onclick="showMenu(event, 'home')" aria-label="更换第三张照片"><img id="miuWeekPhoto3" alt="" draggable="false" data-home-image></button>
+                                        </div>
                                     </div>
+                                    <span class="miu-week-status miu-week-status-open" aria-hidden="true"></span>
                                 </div>
                             </div>
                         </div>
@@ -175,38 +181,28 @@
                             <button type="button" class="miu-tile" id="app6IconWrapper" data-home-edit-icon onclick="openGalleryApp()" aria-label="真实相册"><img id="app6Img" alt="" draggable="false"><span id="app6Default" hidden></span></button>
                             <button type="button" class="miu-app-name" onclick="openGalleryApp()"><span id="app6Label">真实相册</span></button>
                         </div>
-                        <div class="miu-player" data-home-item="player" aria-label="音乐播放器">
-                            <div class="miu-player-head">
-                                <button type="button" class="miu-player-tab" onclick="toggleMusicPanel(true)">音乐库 <i class="fa-solid fa-angle-down" aria-hidden="true"></i></button>
-                                <button type="button" class="miu-player-tab" onclick="openMusicSearchModal()">搜索歌曲 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></button>
+                        <div class="miu-memo" data-home-item="player" aria-label="纸上存档">
+                            <div class="miu-memo-head">
+                                <span>纸上存档 <i class="fa-solid fa-angle-down" aria-hidden="true"></i></span>
+                                <span>今日手记 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></span>
                             </div>
-                            <div class="miu-player-card">
-                                <div class="miu-track">
-                                    <button type="button" class="miu-photo miu-record" onclick="showMenu(event, 'home')" aria-label="更换播放器图片"><img id="miuPlayerPhoto" alt="" draggable="false" data-home-image></button>
-                                    <div>
-                                        <div id="miuTrackName">未选择歌曲</div>
-                                        <div id="miuTrackArtist">播放列表</div>
-                                    </div>
-                                    <button type="button" class="miu-icon-button" onclick="toggleMusicPanel(true)" aria-label="播放列表"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></button>
+                            <div class="miu-memo-card">
+                                <div class="miu-memo-profile">
+                                    <button type="button" class="miu-photo miu-memo-photo" onclick="showMenu(event, 'home')" aria-label="更换存档封面"><img id="miuPlayerPhoto" alt="" draggable="false" data-home-image></button>
+                                    <div><strong>白日收藏簿</strong><p>留一页给今天的好心情。</p></div>
+                                    <span class="miu-memo-mark" aria-hidden="true">··· <i class="fa-solid fa-pen"></i></span>
                                 </div>
-                                <div class="miu-player-meta">
-                                    <span id="miuTrackStatus">等待播放</span>
-                                    <button type="button" onclick="toggleMusicPanel(true)">查看队列</button>
+                                <div class="miu-memo-meta">
+                                    <time id="miuMemoDate"></time>
+                                    <span>日常记录</span>
                                 </div>
                             </div>
-                            <div class="miu-bracket miu-player-timing" aria-label="播放时间">
-                                <span><i class="fa-regular fa-clock" aria-hidden="true"></i> <span id="miuTrackElapsed">0:00</span></span>
-                                <span id="miuTrackRemaining">–:––</span>
-                            </div>
-                            <div class="miu-player-bottom">
-                                <div class="miu-bracket miu-player-controls">
-                                    <button type="button" class="miu-icon-button" onclick="prevTrack()" aria-label="上一首"><i class="fa-solid fa-backward-step" aria-hidden="true"></i></button>
-                                    <button type="button" class="miu-icon-button" id="miuPlay" aria-label="播放"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
-                                    <button type="button" class="miu-icon-button" onclick="nextTrack()" aria-label="下一首"><i class="fa-solid fa-forward-step" aria-hidden="true"></i></button>
-                                </div>
-                                <div class="miu-bracket miu-player-progress">
-                                    <span id="miuTrackPercent">0%</span>
-                                    <progress id="miuTrackProgress" max="1" value="0" aria-label="播放进度"></progress>
+                            <div class="miu-bracket miu-memo-note">把今天写进一小格。</div>
+                            <div class="miu-memo-bottom">
+                                <div class="miu-bracket miu-memo-contact"><i class="fa-regular fa-envelope" aria-hidden="true"></i> <span>留给明天</span></div>
+                                <div class="miu-bracket miu-memo-progress" aria-label="今日已过时间">
+                                    <span id="miuMemoPercent">0%</span>
+                                    <progress id="miuMemoProgress" max="1440" value="0" aria-label="今日进度"></progress>
                                 </div>
                             </div>
                         </div>
@@ -224,15 +220,12 @@
             <div class="miu-dock" aria-label="常用应用">
                 <div class="miu-app" data-home-item="dock-chat" style="--column:1">
                     <button type="button" class="miu-tile" data-home-edit-icon onclick="openApp('Page 1')" aria-label="聊天"><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="dockIcon1" alt="" draggable="false"></button>
-                    <button type="button" class="miu-app-name" onclick="openApp('Page 1')">聊天</button>
                 </div>
                 <div class="miu-app" data-home-item="dock-couple" style="--column:2">
                     <button type="button" class="miu-tile" data-home-edit-icon onclick="openCoupleSpace()" aria-label="情侣空间"><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="dockIcon2" alt="" draggable="false"></button>
-                    <button type="button" class="miu-app-name" onclick="openCoupleSpace()">情侣空间</button>
                 </div>
                 <div class="miu-app" data-home-item="dock-wallet" style="--column:3">
                     <button type="button" class="miu-tile" data-home-edit-icon onclick="openWallet()" aria-label="钱包"><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="dockIcon3" alt="" draggable="false"></button>
-                    <button type="button" class="miu-app-name" onclick="openWallet()">钱包</button>
                 </div>
             </div>
         </main>
@@ -1690,7 +1683,7 @@
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
     <script data-cfasync="false" src="script.js?v=4"></script>
-    <script data-cfasync="false" src="home.js?v=4" defer></script>
+    <script data-cfasync="false" src="home.js?v=6" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>

@@ -3,8 +3,8 @@
   "short_name": "Miu Phone",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f5f5f5",
-  "theme_color": "#f5f5f5",
+  "background_color": "#FDEFF2",
+  "theme_color": "#FDEFF2",
   "icons": [
     {
       "src": "https://i.postimg.cc/YqzB9KMk/mmexport1767959101859.png",

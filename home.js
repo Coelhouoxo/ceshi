@@ -311,7 +311,11 @@
     const weekTime = document.getElementById('miuWeekTime');
     const weekDate = document.getElementById('miuWeekDate');
     const weekDays = document.getElementById('miuWeekDays');
-    const weekdayFormat = new Intl.DateTimeFormat('en', { weekday: 'narrow' });
+    const memoDate = document.getElementById('miuMemoDate');
+    const memoPercent = document.getElementById('miuMemoPercent');
+    const memoProgress = document.getElementById('miuMemoProgress');
+    const chipDateFormat = new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric' });
+    const memoDateFormat = new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
     const calendarMonth = document.getElementById('miuCalendarMonth');
     const calendarDays = document.getElementById('miuCalendarDays');
     const weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -347,15 +351,13 @@
     function renderWeek() {
         weekDate.textContent = dateFormat.format(today);
         weekDays.replaceChildren();
-        for (let offset = 0; offset < 7; offset++) {
-            const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + offset);
-            const cell = document.createElement('span');
-            const number = document.createElement('b');
-            cell.append(weekdayFormat.format(day), number);
-            number.textContent = day.getDate();
-            if (offset === today.getDay()) cell.setAttribute('aria-current', 'date');
-            weekDays.append(cell);
-        }
+        ['昨天', '今天', '明天'].forEach((label, index) => {
+            const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() + index - 1);
+            const chip = document.createElement('span');
+            chip.textContent = label + ' ' + chipDateFormat.format(day);
+            if (index === 1) chip.setAttribute('aria-current', 'date');
+            weekDays.append(chip);
+        });
     }
 
     function updateTime() {
@@ -367,6 +369,11 @@
                 label.textContent = time;
             }
             dateLabel.textContent = formatClockDate(now);
+            memoDate.dateTime = clock.dateTime;
+            memoDate.textContent = memoDateFormat.format(now) + '　' + time;
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            memoProgress.value = minutes;
+            memoPercent.textContent = Math.floor(minutes * 100 / memoProgress.max) + '%';
         }
         if (today.toDateString() !== now.toDateString()) {
             if (displayedMonth.getMonth() === today.getMonth() && displayedMonth.getFullYear() === today.getFullYear()) {
@@ -412,44 +419,4 @@
             }
         });
     }
-
-    const play = document.getElementById('miuPlay');
-    const playIcon = play.firstElementChild;
-    const name = document.getElementById('miuTrackName');
-    const artist = document.getElementById('miuTrackArtist');
-    const elapsed = document.getElementById('miuTrackElapsed');
-    const remaining = document.getElementById('miuTrackRemaining');
-    const progress = document.getElementById('miuTrackProgress');
-    const percent = document.getElementById('miuTrackPercent');
-    const playbackStatus = document.getElementById('miuTrackStatus');
-
-    function formatDuration(seconds) {
-        return Math.floor(seconds / 60) + ':' + String(Math.floor(seconds % 60)).padStart(2, '0');
-    }
-
-    function updatePlayer() {
-        const track = musicPlaylist[currentMusicIndex];
-        const playing = Boolean(track && !audioPlayer.paused && !audioPlayer.ended);
-        const total = Number.isFinite(audioPlayer.duration) ? audioPlayer.duration : 0;
-        const position = Math.min(audioPlayer.currentTime, total);
-        name.textContent = track?.name || '未选择歌曲';
-        artist.textContent = track ? track.artist || '未知歌手' : '播放列表';
-        play.setAttribute('aria-label', playing ? '暂停' : '播放');
-        playIcon.classList.toggle('fa-play', !playing);
-        playIcon.classList.toggle('fa-pause', playing);
-        elapsed.textContent = formatDuration(position);
-        remaining.textContent = total ? '−' + formatDuration(total - position) : '–:––';
-        progress.value = total ? position / total : 0;
-        percent.textContent = Math.floor(progress.value * 100) + '%';
-        playbackStatus.textContent = playing ? '正在播放' : track ? '已暂停' : '等待播放';
-    }
-
-    play.addEventListener('click', () => {
-        if (musicPlaylist.length) togglePlayback();
-        else toggleMusicPanel(true);
-    });
-    for (const event of ['loadstart', 'loadedmetadata', 'durationchange', 'playing', 'pause', 'ended', 'timeupdate', 'emptied', 'error']) {
-        audioPlayer.addEventListener(event, updatePlayer);
-    }
-    updatePlayer();
 })();

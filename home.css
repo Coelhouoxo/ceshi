@@ -8,13 +8,13 @@
     height: 100%;
     height: 100dvh;
     color: var(--miu-ink);
-    background: linear-gradient(174deg, #dbdbde 0%, #ededef 40%, #fafafa 76%, #f3f3f4 100%);
+    background: #FDEFF2;
     font: 14px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
     isolation: isolate;
 }
 
 body.has-wallpaper .miu-home {
-    background: linear-gradient(180deg, rgba(243, 243, 245, .65), rgba(250, 250, 250, .53) 75%, rgba(250, 250, 250, .1));
+    background: transparent;
 }
 
 .miu-home button {
@@ -91,16 +91,16 @@ body.has-wallpaper .miu-home {
     padding-inline-end: .06em;
 }
 
-.miu-profile, .miu-banner-top, .miu-track, .miu-calendar-head {
+.miu-profile, .miu-calendar-head {
     display: flex;
     align-items: center;
     gap: 11px;
 }
 
-.miu-identity, .miu-track > div, .miu-calendar-head > span { flex: 1; min-width: 0; }
-.miu-identity > div, .miu-track > div > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.miu-identity > div:first-child, #miuTrackName { font-weight: 650; }
-.miu-identity > div + div, #miuTrackArtist { color: var(--miu-muted); font-size: 12px; margin-top: 2px; }
+.miu-identity, .miu-calendar-head > span { flex: 1; min-width: 0; }
+.miu-identity > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.miu-identity > div:first-child { font-weight: 650; }
+.miu-identity > div + div { color: var(--miu-muted); font-size: 12px; margin-top: 2px; }
 
 .miu-photo, .miu-home .miu-tile {
     position: relative;
@@ -253,8 +253,14 @@ body.has-wallpaper .miu-home {
 .miu-calendar-grid .miu-weekday { font-size: 9px; letter-spacing: .05em; }
 .miu-calendar-grid .miu-today { border-radius: 999px; background: #dcdce0; font-weight: 700; color: var(--miu-ink); }
 
-.miu-week-card { display: grid; gap: 13px; padding: 4px 0; }
-.miu-week-head { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 12px; }
+.miu-week-card {
+    --miu-paper-ink: #454147;
+    display: grid;
+    gap: 14px;
+    padding: 4px 0;
+    color: var(--miu-paper-ink);
+}
+.miu-week-head { display: grid; grid-template-columns: clamp(57px, 20vw, 78px) minmax(0, 1fr); align-items: start; gap: 13px; }
 .miu-week-portrait { position: relative; }
 .miu-week-portrait > i {
     position: absolute;
@@ -262,29 +268,44 @@ body.has-wallpaper .miu-home {
     bottom: 0;
     display: grid;
     place-items: center;
-    width: 19px;
-    height: 19px;
+    width: 21px;
+    height: 21px;
     border-radius: 50%;
-    background: #3f4047;
+    background: #454147;
     color: #fff;
     font-size: 9px;
     pointer-events: none;
 }
-.miu-week-avatar { width: 64px; height: 64px; border-radius: 50%; }
-.miu-week-copy > strong { font: 700 20px/1.2 Georgia, serif; }
-.miu-week-copy > strong i { font-size: 10px; vertical-align: .15em; }
-.miu-week-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-top: 6px; text-align: center; }
-.miu-week-days span { display: grid; justify-items: center; gap: 3px; font-size: 9px; color: var(--miu-muted); }
-.miu-week-days b { display: grid; place-items: center; min-width: 20px; min-height: 20px; color: var(--miu-ink); font-size: 11px; font-weight: 600; }
-.miu-week-days [aria-current] b { background: #4d4e591d; border-radius: 50%; }
+.miu-week-avatar { width: 100%; aspect-ratio: 1; border-radius: 50%; background: #fff9; box-shadow: inset 0 0 0 1px #665d661c; }
+.miu-week-copy > strong { display: block; color: #27242a; font: 700 20px/1.18 Georgia, "Songti SC", serif; }
+.miu-week-copy > strong span { font-size: 11px; vertical-align: .22em; }
+.miu-week-copy > p, .miu-week-date { margin-top: 4px; font-size: 11px; color: #716970; }
+.miu-week-date i { margin-right: 2px; color: #766c75; }
+.miu-week-days { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.miu-week-days span {
+    padding: 3px 6px;
+    border: 1px solid #84798428;
+    border-radius: 999px;
+    font-size: 9px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.miu-week-days [aria-current] { color: #514651; background: #fff9; }
 .miu-week-timeline { position: relative; display: grid; gap: 7px; }
-.miu-week-timeline::before { content: ""; position: absolute; top: 14px; bottom: 14px; left: 11px; width: 1px; background: var(--miu-line); }
-.miu-week-entry { display: flex; align-items: center; gap: 9px; min-height: 30px; font-size: 11px; }
-.miu-week-entry > time { margin-left: auto; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
-.miu-week-mark { z-index: 1; display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: #4d4e5917; color: #53545c; font-size: 10px; }
-.miu-week-note { color: var(--miu-muted); }
-.miu-week-photos { display: flex; gap: 4px; margin-left: auto; }
-.miu-week-photos .miu-photo { width: clamp(29px, 10vw, 45px); aspect-ratio: 1; border-radius: 7px; }
+.miu-week-timeline::before { content: ""; position: absolute; top: 12px; bottom: 7px; left: 12px; width: 1px; background: #6b5d6b32; }
+.miu-week-entry { display: flex; align-items: center; gap: 7px; min-height: 30px; font-size: 11px; }
+.miu-week-entry p { flex: 1; min-width: 0; font-weight: 620; }
+.miu-week-entry > time { margin-left: auto; color: #716970; font-size: 10px; font-variant-numeric: tabular-nums; }
+.miu-week-mark, .miu-week-status { flex: none; display: grid; place-items: center; border-radius: 50%; }
+.miu-week-mark { z-index: 1; width: 25px; height: 25px; background: #f3e7eb; color: #776873; font-size: 10px; }
+.miu-week-status { width: 17px; height: 17px; color: white; background: #655b64; font-size: 8px; }
+.miu-week-status-open { border: 4px solid #655b64; background: transparent; }
+.miu-week-album { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 5px; border-radius: 8px; padding: 5px 6px; background: #e7dde958; }
+.miu-week-album small, .miu-week-album strong { display: block; }
+.miu-week-album small { color: #716970; font-size: 9px; }
+.miu-week-album strong { font-size: 11px; font-weight: 650; }
+.miu-week-photos { flex: none; display: flex; gap: 3px; }
+.miu-week-photos .miu-photo { width: clamp(25px, 9vw, 42px); aspect-ratio: 1; border-radius: 6px; background: #fffc; }
 
 .miu-home .camera-widget { align-self: start; }
 .miu-home .camera-widget .captcha-top { width: auto; max-width: 100%; align-self: center; white-space: nowrap; }
@@ -292,27 +313,31 @@ body.has-wallpaper .miu-home {
 .miu-home .camera-widget .captcha-verify-btn { padding-inline: 5px; }
 .miu-home .camera-widget .captcha-img-container { flex: 1; min-width: 0; border: 1px solid #eee; background: transparent; }
 
-.miu-player { display: grid; gap: 8px; font-size: 11px; }
-.miu-player-head, .miu-player-meta, .miu-player-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.miu-home .miu-player-tab, .miu-player-meta button { padding: 4px 7px; border: 1px solid #dddddf65; border-radius: 3px; background: #ffffff5e; font-size: 10px; }
-.miu-player-tab i { margin-left: 6px; }
-.miu-player-card { padding: 12px; border: 1px solid #e0e0e490; border-radius: 5px; background: linear-gradient(120deg, #ffffff66, #e9e9ed65); }
-.miu-track { gap: 9px; }
-.miu-track .miu-record { width: 56px; aspect-ratio: 1; border-radius: 13px; background: #e2e2e78c; }
-#miuTrackName { font-size: 13px; }
-.miu-player-meta { margin-top: 7px; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
-.miu-player-timing { width: 72%; height: 26px; justify-content: space-between !important; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
-.miu-bracket { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-evenly; gap: 5px; padding-inline: 9px; }
-.miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 5px; width: 4px; border: 1px solid #55576185; pointer-events: none; }
+.miu-memo { display: grid; gap: 7px; font-size: 11px; color: #454147; }
+.miu-memo-head, .miu-memo-meta, .miu-memo-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.miu-memo-head > span, .miu-memo-meta > span { padding: 4px 7px; border: 1px solid #c7bfc52f; border-radius: 2px; background: #ffffff65; font-size: 10px; }
+.miu-memo-head > span:first-child { min-width: 38%; display: flex; justify-content: space-between; align-items: center; }
+.miu-memo-head i { margin-left: 5px; }
+.miu-memo-card { padding: 10px 11px 7px; border: 1px solid #d6ccd350; border-radius: 4px; background: linear-gradient(120deg, #fffc, #fbf8faac 64%, #eee7ec6e); }
+.miu-memo-profile { display: flex; align-items: center; gap: 10px; }
+.miu-memo-photo { width: 57px; aspect-ratio: 1; border-radius: 13px; background: #e6e2e5aa; box-shadow: inset 0 0 0 2px #fffa; }
+.miu-memo-profile strong { display: block; font-size: 14px; }
+.miu-memo-profile p { margin-top: 4px; color: #716970; font-size: 10px; }
+.miu-memo-mark { align-self: start; margin-left: auto; color: #817881; white-space: nowrap; }
+.miu-memo-meta { margin-top: 7px; color: #716970; font-size: 10px; font-variant-numeric: tabular-nums; }
+.miu-memo-meta > span { min-width: 64px; text-align: center; }
+.miu-bracket { position: relative; min-width: 0; display: flex; align-items: center; gap: 5px; min-height: 24px; padding-inline: 8px; }
+.miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 3px; width: 4px; border: 1px solid #55495399; pointer-events: none; }
 .miu-bracket::before { left: 0; border-right: 0; }
 .miu-bracket::after { right: 0; border-left: 0; }
-.miu-player-controls .miu-icon-button { width: 30px; height: 30px; font-size: 12px; }
-.miu-player-controls #miuPlay { font-size: 15px; }
-.miu-player-progress { height: 30px; justify-content: flex-end; font-variant-numeric: tabular-nums; }
-.miu-player-progress progress { width: 42%; min-width: 16px; height: 7px; border: 0; appearance: none; color: #53545e; accent-color: #53545e; background: #d3d3d8; }
-.miu-player-progress progress::-webkit-progress-bar { background: #d3d3d8; }
-.miu-player-progress progress::-webkit-progress-value { background: #53545e; }
-.miu-player-progress progress::-moz-progress-bar { background: #53545e; }
+.miu-memo-note { width: 72%; font-weight: 600; }
+.miu-memo-bottom { gap: 12px; }
+.miu-memo-bottom > div { flex: 1; }
+.miu-memo-progress { justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.miu-memo-progress progress { width: 36%; min-width: 16px; height: 8px; border: 0; appearance: none; color: #655c64; accent-color: #655c64; background: #dcd4da; }
+.miu-memo-progress progress::-webkit-progress-bar { background: #dcd4da; }
+.miu-memo-progress progress::-webkit-progress-value { background: #655c64; }
+.miu-memo-progress progress::-moz-progress-bar { background: #655c64; }
 
 .miu-pagination {
     position: relative;
@@ -338,39 +363,29 @@ body.has-wallpaper .miu-home {
 .miu-pagination button[aria-current]::after { background: #4b4c54; }
 
 .miu-dock {
+    flex: none;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 76px));
-    justify-content: center;
-    align-items: start;
-    gap: clamp(14px, 6vw, 26px);
-    padding: 7px 16px calc(11px + var(--safe-bottom));
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    width: min(calc(100% - 24px), 390px);
+    margin: 4px auto calc(9px + var(--safe-bottom));
+    padding: 10px 15px;
+    border: 1px solid #ffffffb8;
+    border-radius: 27px;
+    background: linear-gradient(155deg, #ffffff47, #ffffff1b 52%, #ffffff30);
+    -webkit-backdrop-filter: blur(10px) saturate(128%);
+    backdrop-filter: blur(10px) saturate(128%);
+    box-shadow: inset 0 1px 1px #ffffff85, inset 0 -1px 1px #ffffff60, 0 4px 14px #44303912;
 }
-.miu-dock .miu-app { gap: 4px; }
-.miu-dock .miu-app-name { font-size: 10px; }
 .miu-home .miu-dock .miu-tile {
-    width: clamp(49px, 15vw, 62px);
-    border-radius: 18px;
-    background:
-        radial-gradient(ellipse at 25% -12%, #ffffff9c, transparent 51%),
-        radial-gradient(ellipse at 105% 110%, #ffffff50, transparent 63%),
-        linear-gradient(148deg, #ffffff21, #53515e1d 73%, #ffffff26);
-    -webkit-backdrop-filter: blur(9px) saturate(142%);
-    backdrop-filter: blur(9px) saturate(142%);
-    box-shadow: inset 0 1px 1px #ffffffcf, inset 0 -1px 1px #ffffff57,
-        inset 1px 0 1px #ffffff6b, 0 4px 12px #22202b20;
-    color: #35343c;
-    font-size: 20px;
+    width: clamp(43px, 14vw, 55px);
+    border-radius: 13px;
+    background: #fff9;
+    color: #474049;
+    font-size: 18px;
 }
+.miu-home .miu-dock .miu-tile:has(img[src]:not(.miu-image-failed)) { background: transparent; }
 .miu-dock .miu-tile:has(img[src]:not(.miu-image-failed)) > i { visibility: hidden; }
-.miu-dock .miu-tile img { inset: 12%; width: 76%; height: 76%; border-radius: 12px; }
-.miu-dock .miu-tile::after {
-    content: "";
-    position: absolute;
-    inset: 1px;
-    border-radius: inherit;
-    pointer-events: none;
-    background: radial-gradient(ellipse at 9% 3%, #ffffff53, transparent 37%);
-}
 
 .app-overlay.miu-settings-route { overflow: clip; }
 .app-overlay.miu-settings-route > :is(#chatAppPage, #genericAppPage, #forumPage) { display: none !important; }
