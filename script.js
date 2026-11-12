@@ -400,6 +400,10 @@ if (streamToggle) {
             }
             if (globalData.naiModel) document.getElementById('naiModel').value = globalData.naiModel;
             if (globalData.naiSize) document.getElementById('naiSize').value = globalData.naiSize;
+            for (const id of ['naiSteps', 'naiCfg', 'naiSampler', 'naiSchedule']) {
+                if (globalData[id] != null) document.getElementById(id).value = globalData[id];
+            }
+            document.getElementById('naiSmeaToggle').classList.toggle('checked', globalData.naiSmea !== false);
             if (globalData.naiDefaultPositive) document.getElementById('naiDefaultPositive').value = globalData.naiDefaultPositive;
             if (globalData.naiDefaultNegative) document.getElementById('naiDefaultNegative').value = globalData.naiDefaultNegative;
             if (globalData.naiSeed !== undefined) document.getElementById('naiSeed').value = globalData.naiSeed;
@@ -454,6 +458,7 @@ if (streamToggle) {
         window.worldBooks = worldBooks;       // 导出世界书
         window.worldbooks = worldBooks;       // 导出小写别名(防呆)
         window.chatList = chatList;           // 导出聊天列表
+        MiuApi.hydrate();
         window.globalData = globalData;       // 导出全局设置
         console.log("✅ 全局数据已挂载到 window，论坛可读取");
         // ===========================================
@@ -1953,6 +1958,7 @@ function openChatSettings() {
         document.getElementById('charPersona').value = chat.charPersona || '';
         document.getElementById('userPersona').value = chat.userPersona || '';
 
+        document.getElementById('charTtsProvider').value = chat.ttsProvider || '';
         document.getElementById('charVoiceId').value = chat.minimaxVoiceId || '';
         document.getElementById('charFishVoiceId').value = chat.fishVoiceId || '';
         document.getElementById('charElevenVoiceId').value = chat.elevenVoiceId || '';
@@ -2073,6 +2079,7 @@ chat.showUserAvatar = document.getElementById('toggleUserAvatar').classList.cont
     chat.charPersona = document.getElementById('charPersona').value;
     chat.userPersona = document.getElementById('userPersona').value;
 
+    chat.ttsProvider = document.getElementById('charTtsProvider').value;
     chat.minimaxVoiceId = document.getElementById('charVoiceId').value.trim();
     chat.fishVoiceId = document.getElementById('charFishVoiceId').value.trim();
     chat.elevenVoiceId = document.getElementById('charElevenVoiceId').value.trim();
@@ -2600,75 +2607,6 @@ async function fetchModels() {
 }
 
 // ★★★ 新增：拉取副 API 模型列表 ★★★
-async function fetchSecModels() {
-    let endpoint = document.getElementById('secApiEndpoint').value.trim().replace(/\/+$/, '');
-    const key = document.getElementById('secApiKey').value.trim();
-    const modelSelect = document.getElementById('secApiModel');
-    const blacklist = ['api520.pro', 'api521.pro']; 
-    
-    if (blacklist.some(domain => endpoint.includes(domain))) {
-        alert("安全限制：无法访问此 API 域名。");
-        return;
-    }
-    if (!endpoint || !key) { 
-        alert('请先填写副 API Endpoint 和 Key'); 
-        return; 
-    }
-
-    const btn = document.getElementById('secModelFetchBtn');
-    const originalText = btn.innerText;
-    btn.innerText = '拉取中...';
-    btn.style.opacity = '0.7';
-
-    try {
-        const response = await fetch(`${endpoint}/models`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${key}`,
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`API 报错: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        modelSelect.innerHTML = '';
-
-        let models = [];
-        if (Array.isArray(data.data)) models = data.data;
-        else if (Array.isArray(data.models)) models = data.models;
-        else if (Array.isArray(data)) models = data;
-
-        if (models.length > 0) {
-            models.forEach(model => {
-                const modelId = model.id || model.name || model;
-                const option = document.createElement('option');
-                option.value = modelId;
-                option.innerText = modelId;
-                modelSelect.appendChild(option);
-            });
-            alert(`成功拉取副 API 共 ${models.length} 个模型！`);
-            saveData(); 
-        } else {
-            alert('拉取成功但模型列表为空');
-        }
-    } catch (error) {
-        console.error(error);
-        alert('副 API 模型拉取失败: ' + error.message);
-    } finally {
-        btn.innerText = originalText;
-        btn.style.opacity = '1';
-    }
-}
-
-/**
- * ★★★ 中央 API 分发器 (严格隔离版) ★★★
- * 传入功能名称，自动计算并返回相应的 API 配置。
- * 只要功能勾选了副 API，就绝对不向下回退到主 API。
- */
 window.getApiCredentials = function(featureName) {
     const assigned = MiuApi.getAuxRoute(featureName);
     if (assigned) return assigned;
@@ -2680,40 +2618,6 @@ window.getApiCredentials = function(featureName) {
     const primTemp = Number.isFinite(primaryTemperature) ? primaryTemperature : 1;
     const primMaxTokens = parseInt(document.getElementById('apiMaxTokens')?.value, 10) || 2048;
 
-    // 2. 获取副 API 参数
-    const secEndpoint = document.getElementById('secApiEndpoint')?.value.trim().replace(/\/+$/, '') || '';
-    const secKey = document.getElementById('secApiKey')?.value.trim() || '';
-    const secModel = document.getElementById('secApiModel')?.value || '';
-    const secondaryTemperature = parseFloat(document.getElementById('secApiTemp')?.value);
-    const secTemp = Number.isFinite(secondaryTemperature) ? secondaryTemperature : 1;
-    const secMaxTokens = parseInt(document.getElementById('secApiMaxTokens')?.value) || parseInt(globalData.secApiMaxTokens) || 2048;
-
-    // 3. 判断当前功能是否勾选了副 API
-    const featureSwitchMap = {
-        'chat': 'secUseChat',
-        'summary': 'secUseSummary',
-        'diary': 'secUseDiary',
-        'quiz': 'secUseQuiz',
-        'forum': 'secUseForum',
-        'check_phone': 'secUseCheckPhone'
-    };
-
-    const switchId = featureSwitchMap[featureName];
-    const isSecEnabled = assigned === undefined && switchId && document.getElementById(switchId)?.classList.contains('checked');
-
-    // 【严格隔离逻辑】：只要勾选了副 API，直接返回副 API 配置（即便未配置完整也会直接返回，以便请求时报错，实现绝对不向下回退）。
-    if (isSecEnabled) {
-        return {
-            endpoint: secEndpoint,
-            key: secKey,
-            model: secModel,
-            temperature: secTemp,
-            maxTokens: secMaxTokens,
-            isSecondary: true
-        };
-    }
-
-    // 未勾选时，继续使用主 API
     return {
         endpoint: primEndpoint,
         key: primKey,
@@ -12786,212 +12690,6 @@ function importPresetsJson(input) {
     // 清空 input 绑定的值，方便下次还能重复选同一个文件
     input.value = ''; 
 }
-
-// =========================================
-// ★★★ NovelAI 核心生图引擎 (已深度修复版) ★★★
-// =========================================
-async function fetchNovelAIImage(chat, aiImageDescription) {
-    if (!globalData.naiEnabled || !globalData.naiApiKey) {
-        return "https://placehold.co/800x800/eeeeee/999999?text=NovelAI+Not+Configured";
-    }
-
-    const model = globalData.naiModel || "nai-diffusion-4-5-full";
-    
-    // 1. 根据模型判断使用的新版官方接口地址
-    let targetApiUrl = model.includes("nai-diffusion-4") 
-        ? "https://image.novelai.net/ai/generate-image-stream" 
-        : "https://image.novelai.net/ai/generate-image";
-
-    // 2. 智能处理 CORS 代理 (清理旧版残留的错误链接并进行安全编码)
-    let endpoint = targetApiUrl;
-    if (globalData.naiProxy) {
-        let cleanProxy = globalData.naiProxy.replace('https://api.novelai.net', '').trim();
-        if (cleanProxy === "custom") cleanProxy = ""; 
-        if (cleanProxy) {
-            // 正确的代理方式：代理前缀 + URL编码后的目标地址
-            endpoint = cleanProxy + (cleanProxy.endsWith('?') || cleanProxy.endsWith('=') ? '' : '?') + encodeURIComponent(targetApiUrl);
-        }
-    }
-
-    const sizeParts = (globalData.naiSize || "1024x1024").split('x');
-    const width = parseInt(sizeParts[0]);
-    const height = parseInt(sizeParts[1]);
-
-    // 3. 组合提示词
-    const p1 = chat.visualPrompt ? chat.visualPrompt.trim() : "";
-    const p2 = aiImageDescription ? aiImageDescription.trim() : "";
-    const p3 = globalData.naiDefaultPositive ? globalData.naiDefaultPositive.trim() : "";
-    const finalPrompt = [p1, p2, p3].filter(item => item !== "").join(", ");
-    const finalNegative = globalData.naiDefaultNegative || "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality";
-
-    // 4. 处理随机种子
-    let targetSeed = parseInt(globalData.naiSeed);
-    if (isNaN(targetSeed) || targetSeed === -1) {
-        targetSeed = Math.floor(Math.random() * 4294967295) + 1;
-    }
-
-    // 5. ★★★ 核心修复：区分 V4 和 V3 模型的参数格式 ★★★
-    let requestBody;
-    const commonParams = {
-        width: width,
-        height: height,
-        scale: parseFloat(globalData.naiCfg) || 5.0,
-        sampler: globalData.naiSampler || "k_euler_ancestral",
-        steps: parseInt(globalData.naiSteps) || 28,
-        seed: targetSeed,
-        n_samples: 1,
-        ucPreset: 1,
-        qualityToggle: true
-    };
-
-    if (model.includes("nai-diffusion-4")) {
-        // V4/V4.5 专属格式
-        requestBody = {
-            input: finalPrompt,
-            model: model,
-            action: "generate",
-            parameters: {
-                ...commonParams,
-                params_version: 3, // 必填，否则报500
-                noise_schedule: "karras",
-                v4_prompt: {
-                    caption: { base_caption: finalPrompt, char_captions:[] },
-                    use_coords: false,
-                    use_order: true
-                },
-                v4_negative_prompt: {
-                    caption: { base_caption: finalNegative, char_captions:[] },
-                    legacy_uc: false
-                },
-                negative_prompt: finalNegative
-            }
-        };
-    } else {
-        // V3 专属格式
-        requestBody = {
-            input: finalPrompt,
-            model: model,
-            action: "generate",
-            parameters: {
-                ...commonParams,
-                sm: globalData.naiSmea !== false,
-                sm_dyn: globalData.naiSmea !== false,
-                noise_schedule: globalData.naiSchedule || "native",
-                negative_prompt: finalNegative
-            }
-        };
-    }
-
-    try {
-        // 6. 兼容 Chrome 浏览器的请求头处理
-        let fetchHeaders = {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${globalData.naiApiKey}`
-        };
-        if (/Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent)) {
-            const cleanHeaders = {};
-            for (const [k, v] of Object.entries(fetchHeaders)) {
-                cleanHeaders[k] = v.replace(/[^\x00-\xFF]/g, "");
-            }
-            fetchHeaders = cleanHeaders;
-        }
-
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: fetchHeaders,
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            console.error("生图失败 HTTP:", response.status, await response.text());
-            return "https://placehold.co/800x800/ffcccc/ff0000?text=API+Error+" + response.status;
-        }
-
-        // 7. ★★★ 智能流式解析 (解决 V4.5 返回 SSE 数据的问题) ★★★
-        const contentType = response.headers.get("content-type");
-        
-        if (contentType && contentType.includes("text/event-stream")) {
-            // V4.5 流式响应解析
-            const text = await response.text();
-            const lines = text.trim().split("\n");
-            let base64Data = null;
-
-            for (let i = lines.length - 1; i >= 0; i--) {
-                const line = lines[i].trim();
-                if (line.startsWith("data: ") && line !== "data: [DONE]") {
-                    const dataContent = line.substring(6);
-                    try {
-                        const jsonData = JSON.parse(dataContent);
-                        if ((jsonData.event_type === "final" && jsonData.image) || jsonData.data || jsonData.image) {
-                            base64Data = jsonData.image || jsonData.data;
-                            break;
-                        }
-                    } catch (e) {
-                        base64Data = dataContent; 
-                        break;
-                    }
-                }
-            }
-
-            if (base64Data) {
-                // 判断格式转换为 Blob
-                const isPNG = base64Data.startsWith("iVBORw0KGgo");
-                const binaryString = atob(base64Data);
-                const bytes = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                }
-                const blob = new Blob([bytes], { type: isPNG ? "image/png" : "image/jpeg" });
-                return blobToBase64(blob);
-            }
-        } 
-        
-        // 8. 降级回退：如果是 ZIP (V3 常见) 的暴力截取法
-        const arrayBuffer = await response.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let startIndex = -1;
-        for (let i = 0; i < bytes.length - 8; i++) {
-            if (bytes[i]===137 && bytes[i+1]===80 && bytes[i+2]===78 && bytes[i+3]===71 && bytes[i+4]===13) {
-                startIndex = i;
-                break;
-            }
-        }
-
-        if (startIndex !== -1) {
-            const pngData = bytes.slice(startIndex);
-            const blob = new Blob([pngData], { type: "image/png" });
-            return blobToBase64(blob);
-        } else {
-            return "https://placehold.co/800x800/eeeeee/999999?text=Image+Parse+Error";
-        }
-
-    } catch (e) {
-        console.error("生图请求网络错误:", e);
-        return "https://placehold.co/800x800/eeeeee/999999?text=Network+Error";
-    }
-}
-
-// 控制 NovelAI 代理下拉框的显示和提示
-window.handleNaiProxyChange = function() {
-    const sel = document.getElementById('naiProxySelect');
-    const inp = document.getElementById('naiProxy');
-    const hint = document.getElementById('proxyHint');
-    if (!sel) return;
-    
-    if (sel.value === 'custom') {
-        inp.style.display = 'block';
-        hint.innerHTML = '请输入你自己的反代或 Cloudflare Worker 地址。';
-    } else {
-        inp.style.display = 'none';
-        if (sel.value.includes('cors-anywhere')) {
-            hint.innerHTML = '必须先在浏览器新标签页打开 <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" style="color:#007aff; text-decoration:underline;">激活页面(点击)</a> 并点授权，此代理才会生效！';
-        } else if (sel.value === '') {
-            hint.innerHTML = '<span style="color:#ff3b30;">直连极大可能遇到 CORS 跨域拦截导致图片生成失败。</span>';
-        } else {
-            hint.innerHTML = '默认推荐代理，如果网络拥堵生图慢，可尝试切换备用。';
-        }
-    }
-};
 
 /* ========================================= */
 /* ★★★ 线下剧场 (Offline RP) 核心逻辑 ★★★ */

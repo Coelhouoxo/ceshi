@@ -8,13 +8,30 @@ const MiuApi = (() => {
     const features = ['chat', 'summary', 'diary', 'forum', 'check_phone', 'quiz'];
     const titles = {
         home: 'API 设置', main: '主 API', secondary: '副 API', presets: '配置方案',
-        routing: '副 API 适用功能', activity: '活动设置', voice: '语音消息',
-        image: '生图配置', time: '时间感知', models: '选择模型'
+        routing: '副 API 适用功能', voice: '语音消息',
+        image: '绘图工坊', imageConnection: '服务与参数', imagePrompt: '提示词与画师串',
+        imageTags: 'GPT 标签', imageVibe: 'Vibe 素材库', imageRoles: '角色与参考图', imageHistory: '生图历史', time: '时间感知', models: '选择模型'
     };
     const voiceNames = { minimax: 'MiniMax', fish: 'Fish Audio', eleven: 'ElevenLabs' };
     const providerFields = ['MiniVoice', 'MiniEndpoint', 'MiniModel', 'FishEndpoint', 'FishKey', 'FishModel', 'FishVoice',
         'ElevenEndpoint', 'ElevenKey', 'ElevenModel', 'ElevenVoice',
-        'GptEndpoint', 'GptKey', 'GptModel', 'GptSize', 'GptQuality'];
+        'GptEndpoint', 'GptKey', 'GptModel', 'GptSize', 'GptQuality',
+        'MiniSpeed', 'MiniVolume', 'MiniPitch', 'MiniEmotion', 'MiniLanguage',
+        'FishSpeed', 'FishVolume', 'FishTemperature', 'FishTopP', 'FishLatency', 'FishProtocol',
+        'ElevenSpeed', 'ElevenStability', 'ElevenSimilarity', 'ElevenStyle', 'ElevenLanguage', 'ElevenBoost', 'ElevenFormat'];
+    const fieldDefaults = {
+        GptSize: '1024x1024', GptQuality: 'auto', FishLatency: 'normal', FishProtocol: 'auto',
+        ElevenFormat: 'mp3_44100_128'
+    };
+    const voiceFields = {
+        minimax: ['Mini', 'https://api.minimax.cn', 'minimaxApiKey'],
+        fish: ['Fish', 'https://api.fish.audio', 'iosFishKey'],
+        eleven: ['Eleven', 'https://api.elevenlabs.io', 'iosElevenKey']
+    };
+    let voiceCursor = '';
+    let voiceRows = [];
+    let voiceRevision = 0;
+    let voiceListKind = 'voices';
     let currentView = 'home';
     let modelPicker;
 
@@ -26,17 +43,46 @@ const MiuApi = (() => {
         return suite().auxProfiles ??= [];
     }
 
+    function migrateAux() {
+        const config = suite();
+        if (config.auxMigrated || !Object.hasOwn(globalData, 'secApiEndpoint')) return;
+        const id = 'imported-secondary';
+        const wasUsed = Object.values(legacySwitches).some(key => globalData[key] === true);
+        const { secApiEndpoint: endpoint, secApiKey: key, secApiModel: model } = globalData;
+        if (endpoint || key || model || wasUsed) {
+            if (!profiles().some(profile => profile.id === id)) {
+                profiles().push({
+                    id, name: '副 API', endpoint: endpoint || '', key: key || '', model: model || '', enabled: true,
+                    temperature: Number(globalData.secApiTemp ?? 1), maxTokens: Number(globalData.secApiMaxTokens) || 2048
+                });
+            }
+        }
+        const routes = config.routes ??= {};
+        for (const feature of features) {
+            if (!routes[feature] || routes[feature] === 'legacy') {
+                routes[feature] = globalData[legacySwitches[feature]] === true ? id : 'main';
+            }
+        }
+        config.auxMigrated = true;
+    }
+
+    const legacySwitches = {
+        chat: 'secUseChat', summary: 'secUseSummary', diary: 'secUseDiary',
+        forum: 'secUseForum', check_phone: 'secUseCheckPhone', quiz: 'secUseQuiz'
+    };
+
     function getAuxRoute(feature) {
+        migrateAux();
         const routes = suite().routes;
         const id = routes && Object.hasOwn(routes, feature) ? routes[feature] : undefined;
-        if (!id || id === 'legacy') return undefined;
+        if (!id || id === 'legacy') return null;
         if (id === 'main') return null;
         const profile = profiles().find(item => item.id === id && item.enabled);
         return profile ? { ...profile, isSecondary: true } : null;
     }
 
-    function voiceProvider() {
-        const provider = suite().voiceProvider;
+    function voiceProvider(chat) {
+        const provider = chat?.ttsProvider || suite().voiceProvider;
         return Object.hasOwn(voiceNames, provider) ? provider : 'minimax';
     }
 
@@ -118,11 +164,21 @@ const MiuApi = (() => {
         return response;
     }
 
+    function voiceNumber(field, min, max, fallback) {
+        const raw = suite()[field];
+        return raw != null && raw !== '' && Number.isFinite(Number(raw)) ? Math.min(max, Math.max(min, Number(raw))) : fallback;
+    }
+
+    function voiceAddress(provider) {
+        const [prefix, fallback] = voiceFields[provider];
+        return (suite()[prefix + 'Endpoint'] || fallback).replace(/\/+$/, '').replace(/\/v[12]$/, '');
+    }
+
     async function minimaxSpeech(text, id) {
         const config = suite();
         const key = value('minimaxApiKey');
         if (!key || !id || !text.trim()) return null;
-        const base = (config.MiniEndpoint || 'https://api.minimax.cn').replace(/\/+$/, '').replace(/\/v1$/, '');
+        const base = voiceAddress('minimax');
         const url = new URL(endpoint(base, '/v1/t2a_v2'));
         const group = value('minimaxGroupId');
         if (group) url.searchParams.set('GroupId', group);
@@ -131,7 +187,11 @@ const MiuApi = (() => {
             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
             body: JSON.stringify({
                 model: config.MiniModel || 'speech-2.8-turbo', text, stream: false, output_format: 'hex',
-                voice_setting: { voice_id: id, speed: 1, vol: 1, pitch: 0 },
+                voice_setting: {
+                    voice_id: id, speed: voiceNumber('MiniSpeed', 0.5, 2, 1), vol: voiceNumber('MiniVolume', 0.1, 10, 1),
+                    pitch: voiceNumber('MiniPitch', -12, 12, 0), ...(config.MiniEmotion ? { emotion: config.MiniEmotion } : {})
+                },
+                ...(config.MiniLanguage ? { language_boost: config.MiniLanguage } : {}),
                 audio_setting: { format: 'mp3', sample_rate: 32000, bitrate: 128000, channel: 1 }
             })
         }, 60000);
@@ -147,7 +207,7 @@ const MiuApi = (() => {
 
     async function speech(text, chat = {}) {
         const config = suite();
-        const provider = voiceProvider();
+        const provider = voiceProvider(chat);
         if (provider === 'minimax') {
             const id = chat.minimaxVoiceId || config.MiniVoice;
             return id ? minimaxSpeech(text, id) : null;
@@ -161,23 +221,61 @@ const MiuApi = (() => {
         let body;
         let url;
         if (isFish) {
-            const base = (config.FishEndpoint || 'https://api.fish.audio').replace(/\/+$/, '').replace(/\/v1$/, '');
-            url = endpoint(base, '/v1/tts');
+            const base = voiceAddress('fish');
+            const model = (config.FishModel || 's1').replace(/^fish-audio\//, '');
+            const compatible = config.FishProtocol === 'compatible' ||
+                (config.FishProtocol !== 'native' && new URL(base).hostname === 'api.fish.audio');
+            const options = {
+                prosody: { speed: voiceNumber('FishSpeed', 0.5, 2, 1), volume: voiceNumber('FishVolume', -20, 20, 0) },
+                temperature: voiceNumber('FishTemperature', 0, 1, 0.7),
+                top_p: voiceNumber('FishTopP', 0, 1, 0.7), latency: config.FishLatency || 'normal'
+            };
             headers.Authorization = 'Bearer ' + key;
-            headers.model = config.FishModel || 's1';
-            body = { text, reference_id: id, format: 'mp3' };
+            url = endpoint(base, compatible ? (new URL(base).hostname === 'api.fish.audio' ? '/compat/v1/audio/speech' : '/v1/audio/speech') : '/v1/tts');
+            if (compatible) {
+                body = { model: 'fish-audio/' + model, input: text, voice: id, response_format: 'mp3', provider: { options: { 'fish-audio': options } } };
+            } else {
+                headers.model = model;
+                body = { text, reference_id: id, format: 'mp3', ...options };
+            }
         } else {
-            const base = (config.ElevenEndpoint || 'https://api.elevenlabs.io').replace(/\/+$/, '').replace(/\/v1$/, '');
-            url = endpoint(base, '/v1/text-to-speech/' + encodeURIComponent(id) + '?output_format=mp3_44100_128');
+            const base = voiceAddress('eleven');
+            url = endpoint(base, '/v1/text-to-speech/' + encodeURIComponent(id) + '?output_format=' + encodeURIComponent(config.ElevenFormat || fieldDefaults.ElevenFormat));
             headers['xi-api-key'] = key;
-            body = { text, model_id: config.ElevenModel || 'eleven_multilingual_v2' };
+            const model = config.ElevenModel || 'eleven_multilingual_v2';
+            const voiceSettings = {};
+            for (const [field, parameter, min, max] of [
+                ['ElevenSpeed', 'speed', 0.7, 1.2], ['ElevenStability', 'stability', 0, 1],
+                ['ElevenSimilarity', 'similarity_boost', 0, 1], ['ElevenStyle', 'style', 0, 1]
+            ]) {
+                if (config[field] != null && config[field] !== '') voiceSettings[parameter] = voiceNumber(field, min, max, min);
+            }
+            if (config.ElevenBoost) voiceSettings.use_speaker_boost = config.ElevenBoost === 'on';
+            body = { text, model_id: model };
+            if (Object.keys(voiceSettings).length) body.voice_settings = voiceSettings;
+            if (config.ElevenLanguage && model !== 'eleven_multilingual_v2') body.language_code = config.ElevenLanguage.toLowerCase().split('-')[0];
         }
-        const response = await request(url, { method: 'POST', headers, body: JSON.stringify(body) }, 60000);
-        const audio = await response.blob();
-        if (!audio.size || !/^(audio\/|application\/octet-stream)/i.test(audio.type)) {
-            throw new Error('服务没有返回音频');
+        const points = Array.from(text);
+        const limit = isFish ? 1000 : config.ElevenModel === 'eleven_v3' ? 4500 : 9500;
+        const parts = [];
+        while (points.length) {
+            const candidate = points.slice(0, limit);
+            let length = candidate.length;
+            if (points.length > limit) {
+                const boundary = candidate.findLastIndex(char => /[。！？.!?\n]/.test(char));
+                if (boundary > limit / 2) length = boundary + 1;
+            }
+            parts.push(points.splice(0, length).join(''));
         }
-        return blobToBase64(audio.type.startsWith('audio/') ? audio : new Blob([audio], { type: 'audio/mpeg' }));
+        const clips = [];
+        for (const part of parts) {
+            body[isFish && Object.hasOwn(body, 'input') ? 'input' : 'text'] = part;
+            const response = await request(url, { method: 'POST', headers, body: JSON.stringify(body) }, 60000);
+            const audio = await response.blob();
+            if (!audio.size || !/^(audio\/|application\/octet-stream)/i.test(audio.type)) throw new Error('服务没有返回音频');
+            clips.push(audio);
+        }
+        return blobToBase64(new Blob(clips, { type: 'audio/mpeg' }));
     }
 
     async function messageVoice(text, chat) {
@@ -191,38 +289,15 @@ const MiuApi = (() => {
 
     function imageReady() {
         const provider = imageProvider();
-        if (provider === 'nai') return Boolean(globalData.naiApiKey);
-        if (provider === 'gpt') return Boolean(suite().GptKey);
-        return false;
+        return provider !== 'off' && MiuWorkshop.ready(provider);
     }
 
     async function generateImage(chat, description) {
-        if (imageProvider() === 'nai') return fetchNovelAIImage(chat, description);
-        const config = suite();
-        if (imageProvider() !== 'gpt' || !config.GptKey) return '';
-        const body = {
-            model: config.GptModel || 'gpt-image-2',
-            prompt: [chat.visualPrompt, description].filter(Boolean).join('\n'),
-            size: config.GptSize || '1024x1024',
-            quality: config.GptQuality || 'auto',
-            n: 1
-        };
+        if (!imageReady()) return '';
         try {
-            const url = endpoint(config.GptEndpoint || 'https://api.openai.com/v1', '/images/generations');
-            const response = await request(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + config.GptKey },
-                body: JSON.stringify(body)
-            }, 180000);
-            const image = (await response.json()).data?.[0];
-            if (image?.b64_json && /^[A-Za-z0-9+/=]+$/.test(image.b64_json)) return 'data:image/png;base64,' + image.b64_json;
-            if (image?.url) {
-                const imageUrl = new URL(image.url);
-                if (imageUrl.protocol === 'https:') return imageUrl.href;
-            }
-            throw new Error('服务没有返回图片');
+            return await MiuWorkshop.generate(imageProvider(), description, chat);
         } catch (error) {
-            console.warn('GPT 生图失败', error.message);
+            console.warn('聊天生图失败', error.message);
             return '';
         }
     }
@@ -243,8 +318,8 @@ const MiuApi = (() => {
         setOptions(chooser, [['', '新建方案'], ...list.map(p => [p.id, p.name + (p.enabled ? '' : '（已停用）')])], current);
         for (const feature of features) {
             const select = byId('iosRoute-' + feature);
-            const currentRoute = suite().routes?.[feature] || 'legacy';
-            setOptions(select, [['legacy', '沿用原设置'], ['main', '主 API'],
+            const currentRoute = suite().routes?.[feature] || 'main';
+            setOptions(select, [['main', '主 API'],
                 ...list.map(p => [p.id, p.name + (p.enabled ? '' : '（已停用）')])], currentRoute);
             if (select.selectedIndex < 0) select.value = 'main';
         }
@@ -305,15 +380,12 @@ const MiuApi = (() => {
         const currentPreset = byId('apiPresetSelect').selectedOptions[0];
         setText('iosPrimarySummary', value('apiModel') || (value('apiEndpoint') ? '待选模型' : '未配置'));
         setText('iosMainModelOpen', value('apiModel') || '选择模型');
-        setText('iosLegacyModelOpen', value('secApiModel') || '选择模型');
         const enabled = profiles().filter(p => p.enabled).length;
-        setText('iosSecondarySummary', enabled ? enabled + ' 套已启用' : value('secApiModel') || '未配置');
+        setText('iosSecondarySummary', enabled ? enabled + ' 套已启用' : '未配置');
         setText('iosPresetSummary', currentPreset?.value ? currentPreset.textContent : '未选择');
         setText('iosVoiceSummary', voiceNames[voiceProvider()]);
         setText('iosImageSummary', { off: '关闭', nai: 'NovelAI', gpt: 'GPT Image' }[imageProvider()]);
         setText('iosTimeSummary', { real: '真实时间', custom: '自定义', fuzzy: '模糊感知' }[timeMode()]);
-        const activity = byId('autoActivityToggle').classList.contains('checked');
-        apiPage.querySelector('[data-api-view="activity"]').hidden = !activity;
         apiPage.querySelectorAll('[role="switch"]').forEach(button => {
             button.setAttribute('aria-checked', String(button.classList.contains('checked')));
         });
@@ -323,8 +395,7 @@ const MiuApi = (() => {
         const terms = value('iosApiSearch').toLowerCase().split(/\s+/).filter(Boolean);
         let count = 0;
         for (const row of searchRows) {
-            const available = row.dataset.apiView !== 'activity' || byId('autoActivityToggle').classList.contains('checked');
-            row.hidden = !available || !terms.every(term => row.dataset.apiSearch.toLowerCase().includes(term));
+            row.hidden = !terms.every(term => row.dataset.apiSearch.toLowerCase().includes(term));
             if (!row.hidden) count++;
         }
         byId('iosApiNoResults').hidden = count > 0;
@@ -336,9 +407,11 @@ const MiuApi = (() => {
     function showView(view) {
         if (!Object.hasOwn(titles, view)) return;
         currentView = view;
+        if (view.startsWith('image')) MiuWorkshop.enter(view);
+        if (view === 'voice') renderSoundPresets();
         for (const section of sections) section.hidden = section.dataset.apiSection !== view;
         setText('iosApiTitle', titles[view]);
-        setText('iosApiBackLabel', view === 'home' ? '桌面' : view === 'models' ? titles[modelPicker.from] : 'API 设置');
+        setText('iosApiBackLabel', view === 'home' ? '桌面' : view === 'models' ? titles[modelPicker.from] : view.startsWith('image') && view !== 'image' ? '绘图工坊' : 'API 设置');
         byId('iosApiSearchBar').hidden = view !== 'home';
         scroll.scrollTop = 0;
         refreshSummaries();
@@ -349,6 +422,7 @@ const MiuApi = (() => {
         const voice = voiceProvider();
         const image = imageProvider();
         byId('iosVoiceProvider').value = voice;
+        byId('iosVoiceScopeRow').hidden = voice !== 'fish';
         byId('iosImageProvider').value = image;
         apiPage.querySelectorAll('[data-voice-panel]').forEach(panel => { panel.hidden = panel.dataset.voicePanel !== voice; });
         apiPage.querySelectorAll('[data-image-panel]').forEach(panel => { panel.hidden = panel.dataset.imagePanel !== image; });
@@ -359,15 +433,20 @@ const MiuApi = (() => {
         byId('iosTimeValue').value = suite().timeValue || '';
     }
 
+    function hydrate() {
+        for (const field of providerFields) {
+            byId('ios' + field).value = suite()[field] ?? fieldDefaults[field] ?? '';
+        }
+        MiuWorkshop.hydrate();
+        migrateAux();
+        refreshMedia();
+    }
+
     function open() {
         byId('iosApiSearch').value = '';
-        for (const field of providerFields) {
-            const input = byId('ios' + field);
-            input.value = suite()[field] ?? (field === 'GptSize' ? '1024x1024' : field === 'GptQuality' ? 'auto' : '');
-        }
+        hydrate();
         renderAuxChoices();
         showAuxProfile(value('iosAuxSelect'));
-        refreshMedia();
         showView('home');
     }
 
@@ -378,7 +457,7 @@ const MiuApi = (() => {
             modelPicker = undefined;
             showView(from);
         } else {
-            showView('home');
+            showView(currentView.startsWith('image') && currentView !== 'image' ? 'image' : 'home');
             saveData();
         }
         return true;
@@ -386,7 +465,7 @@ const MiuApi = (() => {
 
     const modelFields = {
         main: ['apiEndpoint', 'apiKey', 'apiModel'],
-        legacy: ['secApiEndpoint', 'secApiKey', 'secApiModel'],
+        gpt: ['iosGptEndpoint', 'iosGptKey', 'iosGptModel'],
         aux: ['iosAuxEndpoint', 'iosAuxKey', 'iosAuxModel']
     };
 
@@ -422,7 +501,7 @@ const MiuApi = (() => {
         const [urlId, keyId] = modelFields[picker.kind];
         setText('iosModelStatus', '正在拉取模型…');
         try {
-            const base = value(urlId);
+            const base = (value(urlId) || (picker.kind === 'gpt' ? 'https://api.openai.com/v1' : '')).replace(/\/images\/(?:generations|edits)\/?$/, '');
             if (!base) throw new Error('请先填写接口地址，或手动填写模型');
             const headers = value(keyId) ? { Authorization: 'Bearer ' + value(keyId) } : {};
             const response = await request(endpoint(base, '/models'), { headers }, 25000);
@@ -450,6 +529,7 @@ const MiuApi = (() => {
             saveData();
         } else {
             field.value = model;
+            field.dispatchEvent(new Event('change', { bubbles: true }));
         }
         back();
     }
@@ -478,6 +558,8 @@ const MiuApi = (() => {
     }
     byId('iosVoiceProvider').addEventListener('change', event => {
         suite().voiceProvider = event.target.value;
+        resetVoiceList();
+        renderSoundPresets();
         refreshMedia();
         saveData();
     });
@@ -506,6 +588,132 @@ const MiuApi = (() => {
         suite().timeValue = event.target.value;
         saveData();
     });
+    function soundPresets() {
+        return suite().soundPresets ??= [];
+    }
+
+    function renderSoundPresets(selected = '') {
+        const choices = soundPresets().filter(item => item.provider === voiceProvider());
+        setOptions(byId('iosSoundPreset'), [['', '新建预设'], ...choices.map(item => [item.id, item.name])], selected);
+        byId('iosSoundName').value = choices.find(item => item.id === selected)?.name || '';
+        byId('iosSoundDelete').disabled = !selected;
+    }
+
+    byId('iosSoundPreset').onchange = event => {
+        const item = soundPresets().find(row => row.id === event.target.value);
+        if (item) {
+            Object.assign(suite(), item.fields);
+            hydrate();
+            saveData();
+        }
+        renderSoundPresets(item?.id);
+    };
+    byId('iosSoundSave').onclick = async () => {
+        const name = value('iosSoundName');
+        if (!name) return setText('iosVoiceStatus', '请填写声线预设名称');
+        const provider = voiceProvider();
+        const prefix = voiceFields[provider][0];
+        const fields = Object.fromEntries(providerFields.filter(field => field.startsWith(prefix) &&
+            !/(?:Endpoint|Key|Protocol)$/.test(field)).map(field => [field, value('ios' + field)]));
+        const id = value('iosSoundPreset') || crypto.randomUUID();
+        suite().soundPresets = [...soundPresets().filter(item => item.id !== id), { id, name, provider, fields }];
+        await saveData();
+        renderSoundPresets(id);
+        setText('iosVoiceStatus', '已保存');
+    };
+    byId('iosSoundDelete').onclick = () => {
+        const id = value('iosSoundPreset');
+        if (!id || !confirm('删除这套声线预设？')) return;
+        suite().soundPresets = soundPresets().filter(item => item.id !== id);
+        renderSoundPresets();
+        saveData();
+    };
+
+    function resetVoiceList() {
+        voiceRevision++;
+        voiceRows = [];
+        voiceCursor = '';
+        byId('iosVoiceResultsRow').hidden = true;
+        byId('iosVoiceMore').hidden = true;
+        setText('iosVoiceListStatus', '');
+    }
+
+    async function listVoiceOptions(kind, more = false) {
+        const provider = voiceProvider();
+        const [, , keyId] = voiceFields[provider];
+        const key = value(keyId);
+        const query = value('iosVoiceQuery');
+        const base = voiceAddress(provider);
+        if (!more) resetVoiceList();
+        const revision = ++voiceRevision;
+        voiceListKind = kind;
+        setText('iosVoiceListStatus', '正在获取…');
+        try {
+            let rows;
+            let next = '';
+            if (kind === 'models' && provider === 'minimax') {
+                rows = ['speech-2.8-turbo', 'speech-2.8-hd', 'speech-2.6-turbo', 'speech-2.6-hd', 'speech-02-turbo', 'speech-02-hd'];
+            } else {
+                if (!key) throw new Error('请先填写当前服务的密钥');
+                const path = kind === 'models' ? (provider === 'fish' && new URL(base).hostname === 'api.fish.audio' ? '/compat/v1/models' : '/v1/models')
+                    : { fish: '/model', eleven: '/v2/voices', minimax: '/v1/get_voice' }[provider];
+                const url = new URL(endpoint(base, path));
+                const headers = provider === 'eleven' ? { 'xi-api-key': key } : { Authorization: 'Bearer ' + key };
+                const options = { headers };
+                if (kind === 'voices' && provider === 'minimax') {
+                    const group = value('minimaxGroupId');
+                    if (group) url.searchParams.set('GroupId', group);
+                    options.method = 'POST';
+                    options.headers['Content-Type'] = 'application/json';
+                    options.body = JSON.stringify({ voice_type: 'all' });
+                } else if (kind === 'voices') {
+                    url.searchParams.set('page_size', '50');
+                    if (provider === 'fish') {
+                        url.searchParams.set('self', String(value('iosVoiceScope') !== 'public'));
+                        url.searchParams.set('page_number', more ? voiceCursor : '1');
+                        if (query) url.searchParams.set('title', query);
+                    } else {
+                        if (query) url.searchParams.set('search', query);
+                        if (more) url.searchParams.set('next_page_token', voiceCursor);
+                    }
+                }
+                const data = await (await request(url, options, 25000)).json();
+                if (kind === 'models') {
+                    rows = (Array.isArray(data) ? data : data.data || data.models || []).filter(row => row?.can_do_text_to_speech !== false);
+                } else if (provider === 'minimax') {
+                    rows = [...(data.system_voice || []), ...(data.voice_cloning || []), ...(data.voice_generation || [])];
+                } else {
+                    rows = data.voices || data.items || data.models || data.data?.items || [];
+                    if (data.has_more && data.next_page_token) next = data.next_page_token;
+                    if (provider === 'fish' && (data.has_more || rows.length === 50 && (Number(voiceCursor || 1) * 50 < (data.total ?? Infinity)))) {
+                        next = String(Number(voiceCursor || 1) + 1);
+                    }
+                }
+            }
+            if (revision !== voiceRevision) return;
+            const mapped = rows.map(row => typeof row === 'string' ? [row, row] : [
+                row.voice_id || row.model_id || row._id || row.id, row.voice_name || row.title || row.name
+            ]).filter(([id, name]) => id && (kind === 'models' || !query || [id, name].some(v => String(v || '').toLowerCase().includes(query.toLowerCase()))));
+            voiceRows = [...new Map([...voiceRows, ...mapped]).entries()];
+            voiceCursor = next;
+            setOptions(byId('iosVoiceResults'), [['', '请选择'], ...voiceRows.map(([id, name]) => [id, name || id])], '');
+            byId('iosVoiceResultsRow').hidden = !voiceRows.length;
+            byId('iosVoiceMore').hidden = !voiceCursor;
+            setText('iosVoiceListStatus', voiceRows.length ? '找到 ' + voiceRows.length + (kind === 'models' ? ' 个模型' : ' 个音色') : '没有找到匹配的结果');
+        } catch (error) {
+            if (revision === voiceRevision) setText('iosVoiceListStatus', error.message);
+        }
+    }
+
+    byId('iosVoiceList').onclick = () => listVoiceOptions('voices');
+    byId('iosVoiceMore').onclick = () => listVoiceOptions('voices', true);
+    byId('iosVoiceModels').onclick = () => listVoiceOptions('models');
+    byId('iosVoiceResults').onchange = event => {
+        if (!event.target.value) return;
+        const field = byId('ios' + voiceFields[voiceProvider()][0] + (voiceListKind === 'models' ? 'Model' : 'Voice'));
+        field.value = event.target.value;
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+    };
     byId('iosVoiceTest').addEventListener('click', async event => {
         const button = event.currentTarget;
         const audio = byId('iosVoicePreview');
@@ -528,13 +736,12 @@ const MiuApi = (() => {
         }
     });
     apiPage.querySelector('[onclick="fetchModels()"]').onclick = () => pickModel('main');
-    byId('secModelFetchBtn').onclick = () => pickModel('legacy');
+    byId('iwGptModels').onclick = () => pickModel('gpt');
     byId('iosAuxFetch').onclick = () => pickModel('aux');
     byId('iosMainModelOpen').addEventListener('click', () => pickModel('main', false));
-    byId('iosLegacyModelOpen').addEventListener('click', () => pickModel('legacy', false));
     byId('iosModelFetch').addEventListener('click', fetchModelsForPicker);
     byId('iosModelApply').addEventListener('click', () => applyModel(value('iosModelManual')));
     byId('iosModelQuery').addEventListener('input', drawModels);
 
-    return { open, back, getAuxRoute, messageVoice, minimaxSpeech, generateImage, imageReady, timeMode, messageTime, timeDescription, escapeHtml };
+    return { open, back, hydrate, endpoint, request, getAuxRoute, messageVoice, minimaxSpeech, generateImage, imageReady, timeMode, messageTime, timeDescription, escapeHtml };
 })();

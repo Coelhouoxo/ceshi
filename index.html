@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
     <link rel="stylesheet" href="home.css?v=10">
-    <link rel="stylesheet" href="api-settings.css?v=1">
+    <link rel="stylesheet" href="api-settings.css?v=2">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -697,7 +697,9 @@
 
     <!-- 3. MiniMax Voice ID-->
     <div class="settings-label">语音消息音色</div>
-    <label for="charVoiceId">MiniMax</label>
+    <label for="charTtsProvider">语音服务</label>
+<select class="settings-textarea" id="charTtsProvider"><option value="">跟随默认服务</option><option value="minimax">MiniMax</option><option value="fish">Fish Audio</option><option value="eleven">ElevenLabs</option></select>
+<label for="charVoiceId">MiniMax</label>
     <input type="text" class="settings-textarea" id="charVoiceId" placeholder="Voice ID" style="height: 40px; min-height: 40px; padding-top: 10px;">
     <label for="charFishVoiceId">Fish Audio</label>
     <input type="text" class="settings-textarea" id="charFishVoiceId" placeholder="Reference ID">
@@ -1026,36 +1028,22 @@
                     <button type="button" class="ios-api-row" data-api-search="流式传输 " id="apiStreamToggle" onclick="toggleApiStream()" role="switch" aria-checked="false"><span class="ios-api-glyph ios-api-blue" aria-hidden="true"><i class="fa-solid fa-wave-square"></i></span><span class="ios-api-row-text">流式传输</span><span class="ios-api-switch" aria-hidden="true"></span></button>
                     <button type="button" class="ios-api-row" data-api-search="自动翻译 " id="autoTranslateToggle" onclick="toggleAutoTranslate()" role="switch" aria-checked="false"><span class="ios-api-glyph ios-api-purple" aria-hidden="true"><i class="fa-solid fa-language"></i></span><span class="ios-api-row-text">自动翻译</span><span class="ios-api-switch" aria-hidden="true"></span></button>
                     <button type="button" class="ios-api-row" data-api-view="routing" data-api-search="副 API 适用功能 路由 总结 论坛 查手机 日记 拉黑 聊天"><span class="ios-api-glyph ios-api-blue" aria-hidden="true"><i class="fa-solid fa-sliders"></i></span><span class="ios-api-row-text">副 API 适用功能</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
-                    <button type="button" class="ios-api-row" data-api-search="后台独立活动 " id="autoActivityToggle" onclick="toggleAutoActivityGlobal()" role="switch" aria-checked="false"><span class="ios-api-glyph ios-api-gray" aria-hidden="true"><i class="fa-solid fa-clock"></i></span><span class="ios-api-row-text">后台独立活动</span><span class="ios-api-switch" aria-hidden="true"></span></button>
-                    <button type="button" class="ios-api-row" data-api-view="activity" hidden data-api-search="活动设置 频率 角色"><span class="ios-api-glyph ios-api-gray" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></span><span class="ios-api-row-text">活动设置</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div>
+                    </div>
                     <div class="ios-api-group">
                     <button type="button" class="ios-api-row" data-api-view="voice" data-api-search="语音消息 MiniMax Fish Audio ElevenLabs 音色"><span class="ios-api-glyph ios-api-purple" aria-hidden="true"><i class="fa-solid fa-microphone"></i></span><span class="ios-api-row-text">语音消息</span><span id="iosVoiceSummary" class="ios-api-summary">MiniMax</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
-                    <button type="button" class="ios-api-row" data-api-view="image" data-api-search="生图配置 NovelAI NAI GPT Image"><span class="ios-api-glyph ios-api-green" aria-hidden="true"><i class="fa-solid fa-image"></i></span><span class="ios-api-row-text">生图配置</span><span id="iosImageSummary" class="ios-api-summary">关闭</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+                    <button type="button" class="ios-api-row" data-api-view="image" data-api-search="生图配置 绘图工坊 NovelAI NAI GPT Image Vibe 画师串 标签"><span class="ios-api-glyph ios-api-green" aria-hidden="true"><i class="fa-solid fa-image"></i></span><span class="ios-api-row-text">绘图工坊</span><span id="iosImageSummary" class="ios-api-summary">关闭</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
                     <button type="button" class="ios-api-row" data-api-view="time" data-api-search="时间感知 自定义 模糊 时间"><span class="ios-api-glyph ios-api-orange" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span><span class="ios-api-row-text">时间感知</span><span id="iosTimeSummary" class="ios-api-summary">真实时间</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div><p id="iosApiNoResults" class="ios-api-note" hidden>没有匹配的设置</p>
                     </section>
-                    <section data-api-section="main" hidden><div class="ios-api-legacy ios-api-group"><div class="api-input-group"><label>API Endpoint</label><input type="text" class="api-input" id="apiEndpoint" placeholder="API 地址需要加/v1哦"></div>
-                    <div class="api-input-group"><div style="display:flex; justify-content:space-between; align-items:center;"><label>API Key</label><a href="https://api2.qiandao.mom" target="_blank" style="font-size:11px; color:#999; text-decoration: underline; text-decoration-color: #999;">注册站点/充值额度</a></div><input type="password" class="api-input" id="apiKey" placeholder="sk-..."></div>
-<div class="api-input-group">
-    <label>Model</label>
-    <div class="api-row-flex">
-        <select id="apiModel" hidden></select><button type="button" id="iosMainModelOpen" class="api-input ios-model-open">选择模型</button>
-        <button class="api-btn-small" onclick="fetchModels()">拉取</button>
-    </div>
-</div><div class="api-input-group"><div class="flex-between"><label>Temperature</label><span id="tempDisplay">1.0</span></div><input type="range" id="apiTemp" min="0" max="2" step="0.1" value="1.0" oninput="document.getElementById('tempDisplay').innerText = this.value"></div>
-<!-- ★★★ 新增：Max Tokens 设置 ★★★ -->
-<div class="api-input-group">
-    <div class="flex-between">
-        <label>Max Tokens</label>
-    </div>
-    <input type="number" class="api-input" id="apiMaxTokens" placeholder="默认 2048 (请根据使用模型来填写)" value="2048">
-    <div style="font-size:10px; color:#999; margin-top:5px;">
-        设置太大会导致 500 报错，建议gemini设置为3w
-    </div>
-</div>
-
-</div>
-                    </section>
-                    <section data-api-section="secondary" hidden>
+                    <section data-api-section="main" hidden>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>接口地址</span><input id="apiEndpoint" inputmode="url" placeholder="https://…/v1"></label>
+<label class="ios-api-field"><span>API 密钥</span><input id="apiKey" type="password" autocomplete="off"></label>
+<select id="apiModel" hidden></select><button type="button" class="ios-api-action" id="iosMainModelOpen">选择模型</button>
+<button type="button" class="ios-api-action" onclick="fetchModels()">拉取模型</button></div><div class="ios-api-group">
+<label class="ios-api-field"><span>温度</span><input id="apiTemp" type="number" min="0" max="2" step="0.1" value="1.0"></label>
+<label class="ios-api-field"><span>最大 Tokens</span><input id="apiMaxTokens" type="number" min="1" value="2048"></label></div><span id="tempDisplay" class="" hidden></span>
+</section>
+<section data-api-section="secondary" hidden>
                     <div class="ios-api-group">
                     <label class="ios-api-field"><span>副 API 方案</span><select id="iosAuxSelect"><option value="">新建方案</option></select></label>
                     <label class="ios-api-field"><span>方案名称</span><input id="iosAuxName" maxlength="60"></label>
@@ -1065,281 +1053,175 @@
                     <label class="ios-api-field"><span>温度</span><input id="iosAuxTemp" type="number" min="0" max="2" step="0.1" value="1"></label>
                     <label class="ios-api-field"><span>最大 Tokens</span><input id="iosAuxTokens" type="number" min="1" step="1" value="2048"></label>
                     <label class="ios-api-field"><span>启用方案</span><input type="checkbox" id="iosAuxEnabled" checked></label><div class="ios-api-actions"><button type="button" class="ios-api-action" id="iosAuxSave">保存方案</button><button type="button" class="ios-api-action" id="iosAuxDelete">删除方案</button></div><p id="iosAuxStatus" class="ios-api-note" role="status"></p></div>
-                    <details class="ios-api-disclosure"><summary>原副 API 配置</summary><div class="ios-api-legacy ios-api-group"><div class="api-input-group">
-    <label>副 API Endpoint</label>
-    <input type="text" class="api-input" id="secApiEndpoint" placeholder="例如: https://api.openai.com/v1">
-</div>
-
-<!-- 副 API 密钥 (无卡片，透明背景) -->
-<div class="api-input-group">
-    <label>副 API Key</label>
-    <input type="password" class="api-input" id="secApiKey" placeholder="sk-...">
-</div>
-
-<!-- 副 API 模型与拉取 (无卡片，透明背景) -->
-<div class="api-input-group">
-    <label>副 API Model</label>
-    <div class="api-row-flex">
-        <select id="secApiModel" hidden></select><button type="button" id="iosLegacyModelOpen" class="api-input ios-model-open">选择模型</button>
-        <button class="api-btn-small" onclick="fetchSecModels()" id="secModelFetchBtn">拉取</button>
-    </div>
-</div>
-
-<!-- 副 API 温度 (无卡片，透明背景) -->
-<div class="api-input-group">
-    <div class="flex-between">
-        <label>副 API Temperature</label>
-        <span id="secTempDisplay">1.0</span>
-    </div>
-    <input type="range" id="secApiTemp" min="0" max="2" step="0.1" value="1.0" 
-           style="width: 100%; accent-color: #333; cursor: pointer; margin: 15px 0; appearance: none; height: 6px; background: #f0f0f0; border-radius: 10px;"
-           oninput="document.getElementById('secTempDisplay').innerText = this.value">
-</div>
-
-<!-- 副 API 最大 Token (无卡片，透明背景) -->
-<div class="api-input-group">
-    <label>副 API Max Tokens</label>
-    <input type="number" class="api-input" id="secApiMaxTokens" placeholder="默认 2048" value="2048">
-</div>
-
-</div></details>
                     </section>
-                    <section data-api-section="presets" hidden><div class="ios-api-legacy ios-api-group"><div class="api-input-group"><label>保存配置方案</label><div class="api-row-flex"><input type="text" class="api-input" id="configName" placeholder="方案名称"><button class="api-btn-small" onclick="saveCurrentConfig()">保存</button></div></div><div class="api-preset-group">
-    <label class="api-preset-label">选择配置</label>
-    <div class="api-preset-row">
-        <!-- 下拉框：点击会唤起 iOS 原生滚动选择器 -->
-        <select id="apiPresetSelect" class="api-preset-select" onchange="loadProfileFromSelect(this)">
-            <option value="">-- 请选择已保存的配置 --</option>
-        </select>
-        <!-- 删除按钮 -->
-        <div class="api-preset-del-btn" onclick="deleteProfileFromSelect()"></div>
-        </div>
-    </div>
-    </div>
-                    </section>
-                    <section data-api-section="routing" hidden>
+                    <section data-api-section="presets" hidden>
+<h2 class="ios-api-caption">当前配置</h2><div class="ios-api-group">
+<label class="ios-api-field"><span>方案名称</span><input id="configName" placeholder="输入名称"></label>
+<button type="button" class="ios-api-action" onclick="saveCurrentConfig()">保存主 API 方案</button></div><h2 class="ios-api-caption">已保存的方案</h2><div class="ios-api-group">
+<label class="ios-api-field"><span>切换方案</span><select id="apiPresetSelect" onchange="loadProfileFromSelect(this)"><option value="">请选择</option></select></label>
+<button type="button" class="ios-api-action ios-api-danger" onclick="deleteProfileFromSelect()">删除选中的方案</button></div>
+</section>
+<section data-api-section="routing" hidden>
                     <div class="ios-api-group">
-                    <label class="ios-api-field"><span>日常聊天</span><select id="iosRoute-chat"><option value="legacy">沿用原设置</option><option value="main">主 API</option></select></label>
-                    <label class="ios-api-field"><span>总结</span><select id="iosRoute-summary"><option value="legacy">沿用原设置</option><option value="main">主 API</option></select></label>
-                    <label class="ios-api-field"><span>日记</span><select id="iosRoute-diary"><option value="legacy">沿用原设置</option><option value="main">主 API</option></select></label>
-                    <label class="ios-api-field"><span>论坛</span><select id="iosRoute-forum"><option value="legacy">沿用原设置</option><option value="main">主 API</option></select></label>
-                    <label class="ios-api-field"><span>查手机</span><select id="iosRoute-check_phone"><option value="legacy">沿用原设置</option><option value="main">主 API</option></select></label>
-                    <label class="ios-api-field"><span>拉黑</span><select id="iosRoute-quiz"><option value="legacy">沿用原设置</option><option value="main">主 API</option></select></label></div>
-                    <details class="ios-api-disclosure"><summary>原副 API 开关</summary>
-                    <div class="ios-api-group">
-                    <button type="button" class="ios-api-row" data-api-search="日常聊天 " id="secUseChat" onclick="toggleSwitch(this); saveData()" role="switch" aria-checked="false"><span class="ios-api-row-text">日常聊天</span><span class="ios-api-switch" aria-hidden="true"></span></button>
-                    <button type="button" class="ios-api-row" data-api-search="总结 " id="secUseSummary" onclick="toggleSwitch(this); saveData()" role="switch" aria-checked="false"><span class="ios-api-row-text">总结</span><span class="ios-api-switch" aria-hidden="true"></span></button>
-                    <button type="button" class="ios-api-row" data-api-search="日记 " id="secUseDiary" onclick="toggleSwitch(this); saveData()" role="switch" aria-checked="false"><span class="ios-api-row-text">日记</span><span class="ios-api-switch" aria-hidden="true"></span></button>
-                    <button type="button" class="ios-api-row" data-api-search="论坛 " id="secUseForum" onclick="toggleSwitch(this); saveData()" role="switch" aria-checked="false"><span class="ios-api-row-text">论坛</span><span class="ios-api-switch" aria-hidden="true"></span></button>
-                    <button type="button" class="ios-api-row" data-api-search="查手机 " id="secUseCheckPhone" onclick="toggleSwitch(this); saveData()" role="switch" aria-checked="false"><span class="ios-api-row-text">查手机</span><span class="ios-api-switch" aria-hidden="true"></span></button>
-                    <button type="button" class="ios-api-row" data-api-search="拉黑 " id="secUseQuiz" onclick="toggleSwitch(this); saveData()" role="switch" aria-checked="false"><span class="ios-api-row-text">拉黑</span><span class="ios-api-switch" aria-hidden="true"></span></button></div></details>
+                    <label class="ios-api-field"><span>日常聊天</span><select id="iosRoute-chat"><option value="main">主 API</option></select></label>
+                    <label class="ios-api-field"><span>总结</span><select id="iosRoute-summary"><option value="main">主 API</option></select></label>
+                    <label class="ios-api-field"><span>日记</span><select id="iosRoute-diary"><option value="main">主 API</option></select></label>
+                    <label class="ios-api-field"><span>论坛</span><select id="iosRoute-forum"><option value="main">主 API</option></select></label>
+                    <label class="ios-api-field"><span>查手机</span><select id="iosRoute-check_phone"><option value="main">主 API</option></select></label>
+                    <label class="ios-api-field"><span>拉黑</span><select id="iosRoute-quiz"><option value="main">主 API</option></select></label></div>
                     </section>
-                    <section data-api-section="activity" hidden><div class="ios-api-legacy ios-api-group"><div id="autoFreqPanel" style="display:none; flex-direction:column; gap:15px; margin-top:15px; padding-top:15px; border-top:1px dashed #eee;">
-                    
-                    <!-- 1. 频率滑块区域 -->
-                    <div>
-                        <div class="font-slider-header" style="padding:0; margin-bottom:10px;">
-                            <span class="font-slider-label">活动频率</span>
-                            <!-- 颜色改为深灰/黑 -->
-                            <span id="autoFreqDisplay" class="font-slider-value" style="color:#333;">中频 (3h)</span>
-                        </div>
-                        <!-- ★★★ 核心修改：width:100% 变长，accent-color:#333 去掉蓝色 ★★★ -->
-                        <input type="range" id="autoFreqSlider" min="0" max="2" step="1" value="1" 
-                               oninput="updateAutoFreqDisplay(this.value)"
-                               style="width: 100%; accent-color: #333; cursor: pointer; margin: 5px 0;">
-                    </div>
-                    
-                    <!-- 2. 角色选择 (清爽版：无图标，极淡背景) -->
-                    <div class="preset-manager-toggle" onclick="toggleAutoCharList()" 
-                         style="margin-top:5px; background:#FAFAFA; border:1px solid #f0f0f0; justify-content: space-between; padding: 12px;">
-                        <span style="color:#666; font-weight:500;">选择参与角色</span>
-                        <i class="fas fa-chevron-down" id="autoCharArrow" style="color:#ccc; font-size:12px;"></i>
-                    </div>
-                    
-                    <!-- 角色列表容器 -->
-                    <div class="preset-manager-body" id="autoCharListBody" style="background:#fff; border:1px solid #f0f0f0; border-top:none; margin-top: -5px; border-radius: 0 0 12px 12px;">
-                        <!-- JS 自动填充角色 -->
-                    </div>
-                    
-                    <!-- 保存按钮 -->
-                    <div class="plump-btn" onclick="saveAutoSettings()" style="margin-top:10px; background:#000; color:#fff; border:none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        保存活动配置
-                    </div>
-                </div></div>
-                    </section>
-                    <section data-api-section="voice" hidden>
+<section data-api-section="voice" hidden>
                     <div class="ios-api-group">
                     <label class="ios-api-field"><span>语音服务</span><select id="iosVoiceProvider"><option value="minimax">MiniMax</option><option value="fish">Fish Audio</option><option value="eleven">ElevenLabs</option></select></label></div>
-                    <div data-voice-panel="minimax"><div class="ios-api-legacy ios-api-group">
-                
-                <div class="api-input-group">
-                    <label>Group ID (账户ID)</label>
-                    <input type="text" class="api-input" id="minimaxGroupId" placeholder="例如：181000000000000">
-                </div>
-
-                <div class="api-input-group">
-                    <label>API Key</label>
-                    <input type="password" class="api-input" id="minimaxApiKey" placeholder="eyJh...">
-                </div>
-
-                <div class="api-input-group">
-                    <label>Model (模型名称)</label>
-                    <input type="text" class="api-input" id="minimaxModel" placeholder="例如：abab6.5s-chat">
-                </div>
-
-                <div class="api-input-group">
-                    <div class="flex-between" style="display:flex; justify-content:space-between; width:100%;">
-                        <label>Temperature (温度)</label>
-                        <span id="minimaxTempDisplay" style="font-size:14px; color:#333; font-weight:bold;">0.9</span>
-                    </div>
-                    <!-- 复用你的 apiTemp 样式 -->
-                    <input type="range" id="minimaxTemp" min="0.1" max="1.0" step="0.1" value="0.9" 
-                           style="width: 100%; accent-color: #333; cursor: pointer; margin: 15px 0; appearance: none; height: 6px; background: #f0f0f0; border-radius: 10px;"
-                           oninput="document.getElementById('minimaxTempDisplay').innerText = this.value">
-                </div>
-
-                <div class="plump-btn" onclick="saveData(); alert('MiniMax 配置已保存！')" style="margin-top:10px; background:#fff; color:#333; border:1px solid #ddd; box-shadow:none;">
-                    保存设置
-                </div></div>
-                    <div class="ios-api-group">
-                    <label class="ios-api-field"><span>默认音色 ID</span><input id="iosMiniVoice" autocomplete="off"></label>
-                    <label class="ios-api-field"><span>语音接口</span><input id="iosMiniEndpoint" inputmode="url" placeholder="https://api.minimax.cn"></label>
-                    <label class="ios-api-field"><span>语音模型</span><input id="iosMiniModel" placeholder="speech-2.8-turbo"></label></div></div>
-                    <div data-voice-panel="fish" hidden>
+                    <div data-voice-panel="minimax"><div class="ios-api-group">
+<label class="ios-api-field"><span>接口地址</span><input id="iosMiniEndpoint" inputmode="url" placeholder="https://api.minimax.cn"></label>
+<label class="ios-api-field"><span>API 密钥</span><input id="minimaxApiKey" type="password" autocomplete="off"></label>
+<label class="ios-api-field"><span>Group ID</span><input id="minimaxGroupId" placeholder="选填"></label>
+<label class="ios-api-field"><span>语音模型</span><input id="iosMiniModel" placeholder="speech-2.8-turbo"></label>
+<label class="ios-api-field"><span>默认音色 ID</span><input id="iosMiniVoice" autocomplete="off"></label></div><details class="ios-api-group ios-api-voice-detail"><summary>声线调节</summary><label class="ios-api-field"><span>语速</span><input id="iosMiniSpeed" type="number" min="0.5" max="2" step="0.05" placeholder="1"></label><label class="ios-api-field"><span>音量</span><input id="iosMiniVolume" type="number" min="0.1" max="10" step="0.1" placeholder="1"></label><label class="ios-api-field"><span>音调</span><input id="iosMiniPitch" type="number" min="-12" max="12" step="1" placeholder="0"></label><label class="ios-api-field"><span>情绪</span><select id="iosMiniEmotion"><option value="">自动</option><option value="happy">happy</option><option value="sad">sad</option><option value="angry">angry</option><option value="fearful">fearful</option><option value="disgusted">disgusted</option><option value="surprised">surprised</option><option value="calm">calm</option><option value="fluent">fluent</option></select></label><label class="ios-api-field"><span>语言增强</span><input id="iosMiniLanguage" placeholder="自动"></label></details></div>
+<div data-voice-panel="fish" hidden>
                     <div class="ios-api-group">
                     <label class="ios-api-field"><span>接口地址</span><input id="iosFishEndpoint" inputmode="url" placeholder="https://api.fish.audio"></label>
                     <label class="ios-api-field"><span>API 密钥</span><input id="iosFishKey" type="password" autocomplete="off"></label>
                     <label class="ios-api-field"><span>模型</span><input id="iosFishModel" placeholder="s1"></label>
-                    <label class="ios-api-field"><span>默认音色 ID</span><input id="iosFishVoice" autocomplete="off"></label></div></div>
+                    <label class="ios-api-field"><span>默认音色 ID</span><input id="iosFishVoice" autocomplete="off"></label></div><details class="ios-api-group ios-api-voice-detail"><summary>声线调节</summary><label class="ios-api-field"><span>语速</span><input id="iosFishSpeed" type="number" min="0.5" max="2" step="0.05" placeholder="1"></label><label class="ios-api-field"><span>音量增益</span><input id="iosFishVolume" type="number" min="-20" max="20" step="1" placeholder="0"></label><label class="ios-api-field"><span>表现力</span><input id="iosFishTemperature" type="number" min="0" max="1" step="0.05" placeholder="0.7"></label><label class="ios-api-field"><span>变化度</span><input id="iosFishTopP" type="number" min="0" max="1" step="0.05" placeholder="0.7"></label><label class="ios-api-field"><span>延迟偏好</span><select id="iosFishLatency"><option value="normal">音质优先</option><option value="balanced">均衡</option><option value="low">低延迟</option></select></label><label class="ios-api-field"><span>连接方式</span><select id="iosFishProtocol"><option value="auto">自动</option><option value="native">原生接口</option><option value="compatible">OpenAI 兼容</option></select></label></details></div>
                     <div data-voice-panel="eleven" hidden>
                     <div class="ios-api-group">
                     <label class="ios-api-field"><span>接口地址</span><input id="iosElevenEndpoint" inputmode="url" placeholder="https://api.elevenlabs.io"></label>
                     <label class="ios-api-field"><span>API 密钥</span><input id="iosElevenKey" type="password" autocomplete="off"></label>
                     <label class="ios-api-field"><span>模型</span><input id="iosElevenModel" placeholder="eleven_multilingual_v2"></label>
-                    <label class="ios-api-field"><span>默认音色 ID</span><input id="iosElevenVoice" autocomplete="off"></label></div></div>
+                    <label class="ios-api-field"><span>默认音色 ID</span><input id="iosElevenVoice" autocomplete="off"></label></div><details class="ios-api-group ios-api-voice-detail"><summary>声线调节</summary><label class="ios-api-field"><span>语速</span><input id="iosElevenSpeed" type="number" min="0.7" max="1.2" step="0.05" placeholder="1"></label><label class="ios-api-field"><span>稳定度</span><input id="iosElevenStability" type="number" min="0" max="1" step="0.05" placeholder="0.5"></label><label class="ios-api-field"><span>相似度</span><input id="iosElevenSimilarity" type="number" min="0" max="1" step="0.05" placeholder="0.75"></label><label class="ios-api-field"><span>风格强度</span><input id="iosElevenStyle" type="number" min="0" max="1" step="0.05" placeholder="0"></label><label class="ios-api-field"><span>朗读语言</span><input id="iosElevenLanguage" placeholder="自动或语言代码"></label><label class="ios-api-field"><span>声音增强</span><select id="iosElevenBoost"><option value="">跟随模型</option><option value="on">开启</option><option value="off">关闭</option></select></label><label class="ios-api-field"><span>音频码率</span><select id="iosElevenFormat"><option value="mp3_44100_128">44100 Hz / 128 kbps</option><option value="mp3_44100_64">44100 Hz / 64 kbps</option><option value="mp3_22050_32">22050 Hz / 32 kbps</option></select></label></details></div>
                     <div class="ios-api-group">
-                    <label class="ios-api-field"><span>试听文字</span><input id="iosVoiceSample" value="你好，这是一条语音消息。"></label><button type="button" class="ios-api-action" id="iosVoiceTest">试听语音</button><audio id="iosVoicePreview" controls hidden></audio><p id="iosVoiceStatus" class="ios-api-note" role="status"></p></div>
+                    <label class="ios-api-field"><span>音色库</span><input id="iosVoiceQuery" type="search" placeholder="按名称或 ID 搜索"></label>
+<label class="ios-api-field" id="iosVoiceScopeRow" hidden><span>Fish 音色来源</span><select id="iosVoiceScope"><option value="self">我的声音</option><option value="public">公开声音</option></select></label>
+<div class="ios-api-actions"><button class="ios-api-action" type="button" id="iosVoiceList">查找音色</button><button class="ios-api-action" type="button" id="iosVoiceModels">获取模型</button></div>
+<label class="ios-api-field" id="iosVoiceResultsRow" hidden><span>使用</span><select id="iosVoiceResults"></select></label>
+<button class="ios-api-action" type="button" id="iosVoiceMore" hidden>加载更多音色</button><p id="iosVoiceListStatus" class="ios-api-note" role="status"></p></div>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>声线预设</span><select id="iosSoundPreset"><option value="">新建预设</option></select></label>
+<label class="ios-api-field"><span>预设名称</span><input id="iosSoundName"></label>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iosSoundSave">保存声线</button><button type="button" class="ios-api-action ios-api-danger" id="iosSoundDelete">删除预设</button></div></div><div class="ios-api-group">
+<label class="ios-api-field"><span>试听文字</span><input id="iosVoiceSample" value="你好，这是一条语音消息。"></label><button type="button" class="ios-api-action" id="iosVoiceTest">试听语音</button><audio id="iosVoicePreview" controls hidden></audio><p id="iosVoiceStatus" class="ios-api-note" role="status"></p></div>
                     </section>
                     <section data-api-section="image" hidden>
-                    <div class="ios-api-group">
-                    <label class="ios-api-field"><span>生图服务</span><select id="iosImageProvider"><option value="off">关闭</option><option value="nai">NovelAI</option><option value="gpt">GPT Image</option></select></label></div>
-                    <div data-image-panel="nai" hidden><div class="ios-api-legacy ios-api-group"><div class="settings-card-box" style="margin-top: 20px;">
-                <div class="mem-row" hidden>
-                    <span class="settings-label">NovelAI 配置</span>
-                    <div class="wb-toggle" id="naiToggle" onclick="toggleSwitch(this)">
-                        <div class="wb-toggle-knob"></div>
-                    </div>
-                </div>
-
-                <div class="api-input-group">
-                    <label>API 密钥 (API Key)</label>
-                    <input type="password" class="api-input" id="naiApiKey" placeholder="pst-xxxxxxxxxxxxxxxx">
-                </div>
-
-                <div class="api-input-group">
-    <div class="flex-between" style="display:flex; justify-content:space-between; width:100%;">
-        <label>CORS 代理设置 <span style="font-size:10px; color:#ff3b30;">(网页端推荐使用代理)</span></label>
-    </div>
-    <!-- 代理下拉框 -->
-    <select class="api-input" id="naiProxySelect" onchange="handleNaiProxyChange()" style="margin-bottom: 8px;">
-        <option value="https://corsproxy.io/?https://api.novelai.net">corsproxy.io (推荐)</option>
-        <option value="https://api.allorigins.win/raw?url=https://api.novelai.net">allorigins.win (备用)</option>
-        <option value="https://cors-anywhere.herokuapp.com/https://api.novelai.net">cors-anywhere (需手动激活)</option>
-        <option value="">直连 (无代理，极易报错)</option>
-        <option value="custom">自定义代理</option>
-    </select>
-    <!-- 自定义输入框 (默认隐藏) -->
-    <input type="text" class="api-input" id="naiProxy" placeholder="请输入自定义代理URL..." style="display: none;">
-    <!-- 提示文本 -->
-    <div id="proxyHint" style="font-size:11px; color:#666; margin-top:5px; line-height:1.4;">
-        默认推荐使用 corsproxy.io，无需配置直接生效。
-    </div>
-</div>
-
-                <div class="api-row-flex" style="margin-top: 5px;">
-                    <div class="api-input-group" style="flex:1;">
-                        <label>选择模型 (Model)</label>
-                        <select class="api-input" id="naiModel" style="height: 44px; padding: 0 10px;">
-                            <option value="nai-diffusion-4-5-full">nai-diffusion-4-5-full</option>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>聊天生图</span><select id="iosImageProvider"><option value="off">关闭</option><option value="nai">NovelAI</option><option value="gpt">GPT Image</option></select></label></div><div class="ios-api-group">
+<button type="button" data-api-view="imageConnection" class="ios-api-row"><span class="ios-api-row-text">服务与参数</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+<button type="button" data-api-view="imagePrompt" class="ios-api-row"><span class="ios-api-row-text">提示词与画师串</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+<button type="button" data-api-view="imageTags" class="ios-api-row"><span class="ios-api-row-text">GPT 标签</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+<button type="button" data-api-view="imageVibe" class="ios-api-row"><span class="ios-api-row-text">Vibe 素材库</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+<button type="button" data-api-view="imageRoles" class="ios-api-row"><span class="ios-api-row-text">角色与参考图</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+<button type="button" data-api-view="imageHistory" class="ios-api-row"><span class="ios-api-row-text">生图历史</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div><h2 class="ios-api-caption">试画</h2><div class="ios-api-group">
+<label class="ios-api-field"><span>试画服务</span><select id="iwTestProvider"><option value="nai">NovelAI</option><option value="gpt">GPT Image</option></select></label>
+<label class="ios-api-field ios-api-stacked"><span>画面描述</span><textarea id="iwTestPrompt" rows="3" placeholder="输入提示词，可引用标签或角色"></textarea></label>
+<div id="iwQuickTags"></div><button type="button" class="ios-api-action" id="iwGenerate">生成图片</button>
+<p id="iwStatus" class="ios-api-note" role="status"></p></div><div id="iwPreviewPanel" class="ios-api-group" hidden><img id="iwPreview" class="ios-api-preview" alt="生成的图片"><div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwSavePreview">保存到历史</button><button type="button" class="ios-api-action" id="iwDownload">下载图片</button></div></div>
+</section>
+<section data-api-section="imageConnection" hidden>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>配置服务</span><select id="iwConnectionProvider"><option value="nai">NovelAI</option><option value="gpt">GPT Image</option></select></label>
+<label class="ios-api-field"><span>生图方案</span><select id="iwConnectionPreset"><option value="">当前配置</option></select></label>
+<label class="ios-api-field"><span>方案名称</span><input id="iwConnectionName" placeholder="输入名称"></label>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwConnectionSave">保存方案</button><button type="button" class="ios-api-action" id="iwConnectionDelete">删除方案</button></div></div><div data-iw-connection="nai"><div class="ios-api-group">
+<label class="ios-api-field"><span>接口地址</span><input id="iwNaiEndpoint" inputmode="url" placeholder="https://image.novelai.net"></label>
+<label class="ios-api-field"><span>API 密钥</span><input id="naiApiKey" type="password" autocomplete="off"></label>
+<label class="ios-api-field"><span>接口协议</span><select id="iwNaiProtocol"><option value="native">NovelAI 原生</option><option value="openai">OpenAI 兼容</option></select></label>
+<label class="ios-api-field"><span>模型</span><select id="naiModel"><option value="nai-diffusion-4-5-full">nai-diffusion-4-5-full</option><option value="nai-diffusion-5-full">nai-diffusion-5-full</option><option value="nai-diffusion-5-curated">nai-diffusion-5-curated</option><option value="nai-diffusion-2">nai-diffusion-2</option><option value="nai-diffusion-furry">nai-diffusion-furry</option><option value="safe-diffusion">safe-diffusion</option>
                             <option value="nai-diffusion-4-5-curated">nai-diffusion-4-5-curated</option>
                             <option value="nai-diffusion-4-full">nai-diffusion-4-full</option>
                             <option value="nai-diffusion-4-curated-preview">nai-diffusion-4-curated-preview</option>
                             <option value="nai-diffusion-3">nai-diffusion-3</option>
                             <option value="nai-diffusion-furry-3">nai-diffusion-furry-3</option>
-                        </select>
-                    </div>
-                    <div class="api-input-group" style="flex:1;">
-                        <label>图像尺寸 (Size)</label>
-                        <select class="api-input" id="naiSize" style="height: 44px; padding: 0 10px;">
+                        </select></label>
+<label class="ios-api-field"><span>尺寸</span><select id="naiSize">
                             <option value="1024x1024">1024x1024 (正方)</option>
                             <option value="832x1216">832x1216 (竖屏)</option>
                             <option value="1216x832">1216x832 (横屏)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- 进阶参数区 -->
-                <div class="api-row-flex" style="margin-top: 5px;">
-                    <div class="api-input-group" style="flex:1;">
-                        <label>采样步数 (Steps)</label>
-                        <input type="number" class="api-input" id="naiSteps" value="28" style="height: 44px;">
-                    </div>
-                    <div class="api-input-group" style="flex:1;">
-                        <label>相关性 (CFG Scale)</label>
-                        <input type="number" class="api-input" id="naiCfg" value="6" step="0.1" style="height: 44px;">
-                    </div>
-                </div>
-
-                <div class="api-row-flex" style="margin-top: 5px;">
-                    <div class="api-input-group" style="flex:1;">
-                        <label>采样器 (Sampler)</label>
-                        <select class="api-input" id="naiSampler" style="height: 44px; padding: 0 10px;">
+                        </select></label></div><h2 class="ios-api-caption">生成参数</h2><div class="ios-api-group">
+<label class="ios-api-field"><span>采样步数</span><input id="naiSteps" type="number" value="28" min="1" max="50"></label>
+<label class="ios-api-field"><span>提示词相关性</span><input id="naiCfg" type="number" value="6" step="0.1" min="0" max="20"></label>
+<label class="ios-api-field"><span>采样器</span><select id="naiSampler">
                             <option value="k_euler_ancestral">Euler Ancestral</option>
                             <option value="k_euler">Euler</option>
                             <option value="k_dpmpp_2m">DPM++ 2M</option>
-                        </select>
-                    </div>
-                    <div class="api-input-group" style="flex:1;">
-                        <label>噪声调度 (Schedule)</label>
-                        <select class="api-input" id="naiSchedule" style="height: 44px; padding: 0 10px;">
+                        </select></label>
+<label class="ios-api-field"><span>噪声调度</span><select id="naiSchedule">
                             <option value="karras">Karras (推荐)</option>
                             <option value="native">Native</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mem-row" style="margin-top: 15px; margin-bottom: 0;">
-                    <span style="font-size:13px;color:#666;">启用 SMEA & DYN (优化构图)</span>
-                    <div class="wb-toggle checked" id="naiSmeaToggle" onclick="toggleSwitch(this)"><div class="wb-toggle-knob"></div></div>
-                </div>
-
-                <div class="api-input-group" style="margin-top: 15px;">
-                    <label>随机种子 (Seed) <span style="font-size:10px; color:#999; font-weight:normal;">(填-1或留空为随机)</span></label>
-                    <input type="number" class="api-input" id="naiSeed" placeholder="-1" value="-1">
-                </div>
-
-                <div class="api-input-group" style="margin-top: 15px;">
-                    <label>正面预设词 (Quality Tags)</label>
-                    <textarea class="settings-textarea" id="naiDefaultPositive" style="min-height: 50px;" placeholder="在此输入默认附加的正面提示词..."></textarea>
-                </div>
-                <div class="api-input-group">
-                    <label>负面预设词 (UC Preset)</label>
-                    <textarea class="settings-textarea" id="naiDefaultNegative" style="min-height: 50px;" placeholder="在此输入默认的负面提示词..."></textarea>
-                </div>
-
-                <div class="plump-btn" onclick="saveData(); alert('NovelAI配置已保存！')" style="margin-top:10px; background:#fff; color:#333; border:1px solid #ddd;">
-                    保存 NovelAI 设置
-                </div>
-            </div></div></div>
-                    <div data-image-panel="gpt" hidden>
-                    <div class="ios-api-group">
-                    <label class="ios-api-field"><span>接口地址</span><input id="iosGptEndpoint" inputmode="url" placeholder="https://api.openai.com/v1"></label>
-                    <label class="ios-api-field"><span>API 密钥</span><input id="iosGptKey" type="password" autocomplete="off"></label>
-                    <label class="ios-api-field"><span>模型</span><input id="iosGptModel" placeholder="gpt-image-2"></label>
-                    <label class="ios-api-field"><span>画面尺寸</span><select id="iosGptSize"><option value="1024x1024">正方形</option><option value="1024x1536">竖屏</option><option value="1536x1024">横屏</option></select></label>
-                    <label class="ios-api-field"><span>质量</span><select id="iosGptQuality"><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label></div></div>
-                    </section>
-                    <section data-api-section="time" hidden>
+                        </select></label>
+<label class="ios-api-field"><span>SMEA 与 DYN</span><button type="button" class="ios-api-inline-toggle ios-api-row checked" id="naiSmeaToggle" role="switch" aria-label="SMEA 与 DYN" onclick="toggleSwitch(this); saveData()"><span class="ios-api-switch"></span></button></label>
+<label class="ios-api-field"><span>随机种子</span><input id="naiSeed" type="number" placeholder="-1 为随机" value="-1"></label>
+<label class="ios-api-field"><span>生成间隔（秒）</span><input id="iwNaiInterval" type="number" min="0" max="300" placeholder="0"></label></div></div><div data-iw-connection="gpt" hidden><div class="ios-api-group">
+<label class="ios-api-field"><span>接口地址</span><input id="iosGptEndpoint" inputmode="url" placeholder="https://api.openai.com/v1"></label>
+<label class="ios-api-field"><span>API 密钥</span><input id="iosGptKey" type="password" autocomplete="off"></label>
+<label class="ios-api-field"><span>模型</span><input id="iosGptModel" placeholder="gpt-image-2"></label>
+<button type="button" class="ios-api-action" id="iwGptModels">拉取并搜索模型</button>
+<label class="ios-api-field"><span>尺寸</span><select id="iosGptSize"><option value="1024x1024">正方形</option><option value="1024x1536">竖屏</option><option value="1536x1024">横屏</option></select></label>
+<label class="ios-api-field"><span>画质</span><select id="iosGptQuality"><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label>
+<label class="ios-api-field"><span>画风（DALL·E 3）</span><select id="iwGptStyle"><option value="">默认</option><option value="vivid">鲜艳</option><option value="natural">自然</option></select></label>
+<label class="ios-api-field"><span>响应格式</span><select id="iwGptFormat"><option value="">自动</option><option value="b64_json">Base64</option><option value="url">图片链接</option></select></label></div></div><p id="iwConnectionStatus" class="ios-api-note" role="status"></p>
+</section>
+<section data-api-section="imagePrompt" hidden>
+<h2 class="ios-api-caption">默认提示词</h2><div class="ios-api-group">
+<label class="ios-api-field ios-api-stacked"><span>NovelAI 正面词</span><textarea id="naiDefaultPositive" rows="3" ></textarea></label>
+<label class="ios-api-field ios-api-stacked"><span>NovelAI 角色词</span><textarea id="iwNaiCharacter" rows="3" ></textarea></label>
+<label class="ios-api-field ios-api-stacked"><span>NovelAI 负面词</span><textarea id="naiDefaultNegative" rows="3" ></textarea></label></div><div class="ios-api-group">
+<label class="ios-api-field ios-api-stacked"><span>GPT 正面词</span><textarea id="iwGptPositive" rows="3" ></textarea></label>
+<label class="ios-api-field ios-api-stacked"><span>GPT 负面词</span><textarea id="iwGptNegative" rows="3" ></textarea></label></div><h2 class="ios-api-caption">画师串与提示词方案</h2><div class="ios-api-group">
+<label class="ios-api-field"><span>选择预设</span><select id="iwPromptPreset"><option value="">新建预设</option></select></label>
+<label class="ios-api-field"><span>用于</span><select id="iwPromptScope"><option value="both">两种服务</option><option value="nai">NovelAI</option><option value="gpt">GPT</option></select></label>
+<label class="ios-api-field"><span>预设名称</span><input id="iwPromptName" ></label>
+<label class="ios-api-field ios-api-stacked"><span>画师串</span><textarea id="iwArtists" rows="3" ></textarea></label>
+<label class="ios-api-field ios-api-stacked"><span>正面词</span><textarea id="iwPresetPositive" rows="3" ></textarea></label>
+<label class="ios-api-field ios-api-stacked"><span>负面词</span><textarea id="iwPresetNegative" rows="3" ></textarea></label>
+<label class="ios-api-field"><span>使用这套预设</span><input type="checkbox" id="iwPromptEnabled" checked></label>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwPromptSave">保存预设</button><button type="button" class="ios-api-action" id="iwPromptDelete">删除</button></div>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwPromptImportButton">导入预设</button><button type="button" class="ios-api-action" id="iwPromptExport">导出预设</button></div><input id="iwPromptImport" type="file" accept=".json,application/json" hidden>
+<p id="iwPromptStatus" class="ios-api-note" role="status"></p></div>
+</section>
+<section data-api-section="imageTags" hidden>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>选择标签</span><select id="iwTagPreset"><option value="">新建标签</option></select></label>
+<label class="ios-api-field"><span>分类</span><input id="iwTagCategory" placeholder="如 光线、构图"></label>
+<label class="ios-api-field"><span>触发词</span><input id="iwTagName" placeholder="如 #柔光"></label>
+<label class="ios-api-field ios-api-stacked"><span>正面词</span><textarea id="iwTagPositive" rows="3" ></textarea></label>
+<label class="ios-api-field ios-api-stacked"><span>负面词</span><textarea id="iwTagNegative" rows="3" ></textarea></label>
+<label class="ios-api-field"><span>启用</span><input id="iwTagEnabled" type="checkbox" checked></label>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwTagSave">保存标签</button><button type="button" class="ios-api-action" id="iwTagDelete">删除</button></div>
+<p id="iwTagStatus" class="ios-api-note" role="status"></p></div>
+</section>
+<section data-api-section="imageVibe" hidden>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>启用 Vibe</span><input type="checkbox" id="iwVibeEnabled"></label>
+<label class="ios-api-field"><span>归一化参考强度</span><input type="checkbox" id="iwVibeNormalize" checked></label>
+<label class="ios-api-field"><span>素材或分组</span><select id="iwVibeSelected"><option value="">请选择</option></select></label>
+<label class="ios-api-field" id="iwVibeMemberRow" hidden><span>组内图片</span><select id="iwVibeMember"></select></label><label class="ios-api-field"><span>素材名称</span><input id="iwVibeName" ></label>
+<label class="ios-api-field"><span>参考强度</span><input id="iwVibeStrength" type="number" min="0" max="1" step="0.05" value="0.6"></label>
+<label class="ios-api-field"><span>信息提取</span><input id="iwVibeInfo" type="number" min="0" max="1" step="0.05" value="1"></label>
+<img id="iwVibeThumb" class="ios-api-preview" alt="Vibe 素材预览" hidden>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwVibeSave">保存素材设置</button><button type="button" class="ios-api-action" id="iwVibeDelete">移除</button></div>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwVibeUploadButton">上传图片或导入 Vibe</button><button type="button" class="ios-api-action" id="iwVibeExport">导出素材库</button></div><input type="file" id="iwVibeUpload" accept="image/*,.json,.naivibe,.naivibebundle" multiple hidden>
+<p id="iwVibeStatus" class="ios-api-note" role="status"></p></div>
+</section>
+<section data-api-section="imageRoles" hidden>
+<div class="ios-api-group">
+<label class="ios-api-field"><span>绑定角色</span><select id="iwRole"><option value="">选择角色</option></select></label>
+<label class="ios-api-field"><span>角色变量</span><input id="iwRoleAlias" placeholder="留空使用角色名"></label>
+<label class="ios-api-field ios-api-stacked"><span>角色外貌词</span><textarea id="iwRolePrompt" rows="3" ></textarea></label>
+<label class="ios-api-field"><span>使用角色参考图</span><input id="iwRoleEnabled" type="checkbox"></label>
+<label class="ios-api-field"><span>参考强度</span><input id="iwRoleStrength" type="number" min="0" max="1" step="0.05" value="0.65"></label>
+<label class="ios-api-field"><span>脸部保真</span><input id="iwRoleFidelity" type="number" min="0" max="1" step="0.05" value="0.8"></label>
+<img id="iwRoleThumb" class="ios-api-preview" alt="角色参考图" hidden>
+<div class="ios-api-actions"><button type="button" class="ios-api-action" id="iwRoleUploadButton">上传参考图</button><button type="button" class="ios-api-action" id="iwRoleClear">移除参考图</button></div><input type="file" id="iwRoleUpload" accept="image/*" hidden>
+<button type="button" class="ios-api-action" id="iwRoleSave">保存角色设定</button>
+<p id="iwRoleStatus" class="ios-api-note" role="status"></p></div>
+</section>
+<section data-api-section="imageHistory" hidden>
+<div class="ios-api-group">
+<div id="iwHistoryList" class="ios-api-gallery"></div>
+<p id="iwHistoryStatus" class="ios-api-note" role="status"></p></div>
+</section>
+<section data-api-section="time" hidden>
                     <div class="ios-api-group">
                     <label class="ios-api-field"><span>真实时间</span><input id="iosTimeReal" type="checkbox" checked></label></div><div id="iosTimeAlternatives" hidden>
                     <div class="ios-api-group">
@@ -1352,7 +1234,13 @@
                     <label class="ios-api-field"><span>手动输入</span><input id="iosModelManual" autocomplete="off"></label><button type="button" class="ios-api-action" id="iosModelApply">使用此模型</button><p id="iosModelStatus" class="ios-api-note" role="status"></p><div id="iosModelResults" class="ios-api-model-results"></div></div>
                     </section>
                 </div>
-                <div id="iosApiSearchBar" class="ios-api-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="iosApiSearch" type="search" aria-label="搜索 API 设置" placeholder="搜索"></div>
+                <div hidden>
+<input id="secApiEndpoint"><input id="secApiKey" type="password"><select id="secApiModel"></select><input id="secApiTemp" value="1"><span id="secTempDisplay"></span><input id="secApiMaxTokens" value="2048">
+<span id="secUseChat"></span><span id="secUseSummary"></span><span id="secUseDiary"></span><span id="secUseForum"></span><span id="secUseCheckPhone"></span><span id="secUseQuiz"></span>
+<span id="naiToggle"></span><input id="naiProxy"><input id="minimaxModel"><input id="minimaxTemp" value="0.9"><span id="minimaxTempDisplay"></span>
+<span id="autoActivityToggle"></span><div id="autoFreqPanel"><span id="autoFreqDisplay"></span><input id="autoFreqSlider" value="1"><span id="autoCharArrow"></span><div id="autoCharListBody"></div></div>
+</div>
+<div id="iosApiSearchBar" class="ios-api-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="iosApiSearch" type="search" aria-label="搜索 API 设置" placeholder="搜索"></div>
             </div>
 
             <div class="wb-settings-page" id="worldBookSettingsPage">
@@ -1719,8 +1607,9 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="script.js?v=5"></script>
-    <script data-cfasync="false" src="api-settings.js?v=1" defer></script>
+    <script data-cfasync="false" src="script.js?v=6"></script>
+    <script data-cfasync="false" src="api-settings.js?v=2" defer></script>
+    <script src="image-workshop.js?v=1" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
