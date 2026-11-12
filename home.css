@@ -372,7 +372,9 @@ body.has-wallpaper .miu-home {
     background: radial-gradient(ellipse at 9% 3%, #ffffff53, transparent 37%);
 }
 
+.app-overlay.miu-settings-route { overflow: clip; }
 .app-overlay.miu-settings-route > :is(#chatAppPage, #genericAppPage, #forumPage) { display: none !important; }
+.app-overlay.miu-settings-route > :is(.api-settings-page, .wb-settings-page):not(.active) { visibility: hidden; }
 
 .miu-home [data-home-item] { -webkit-touch-callout: none; }
 .miu-home .miu-drag-source { opacity: .3; }
