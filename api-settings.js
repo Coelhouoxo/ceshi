@@ -8,7 +8,7 @@ const MiuApi = (() => {
     const features = ['chat', 'summary', 'diary', 'forum', 'check_phone', 'quiz'];
     const titles = {
         home: 'API 设置', main: '主 API', secondary: '副 API', presets: '配置方案',
-        routing: '副 API 适用功能', voice: '语音消息',
+        routing: '副 API 适用功能', voice: '语音消息', voiceBooks: '语音世界书', voiceRoles: '角色声线',
         image: '绘图工坊', imageConnection: '服务与参数', imagePrompt: '提示词与画师串',
         imageTags: 'GPT 标签', imageVibe: 'Vibe 素材库', imageRoles: '角色与参考图', imageHistory: '生图历史', time: '时间感知', models: '选择模型'
     };
@@ -34,6 +34,10 @@ const MiuApi = (() => {
     let voiceListKind = 'voices';
     let currentView = 'home';
     let modelPicker;
+    const activeCallReaders = new Set();
+    let roleVoiceDraft;
+    let roleVoiceProvider;
+    const roleVoiceKeys = { minimax: 'minimaxVoiceId', fish: 'fishVoiceId', eleven: 'elevenVoiceId' };
 
     function suite() {
         return globalData.apiSuite ??= {};
@@ -287,6 +291,72 @@ const MiuApi = (() => {
         }
     }
 
+    function speechBookMatches(book, chat) {
+        return suite().speechBookEnabled === true && (suite().speechBookIds || []).includes(String(book.id))
+            && (!book.boundCharId || String(book.boundCharId) === String(chat?.id));
+    }
+
+    function speechContext(chat, text = '', call = false) {
+        if (!suite().speechBookEnabled) return '';
+        const content = [suite().speechRules];
+        for (const book of worldBooks) {
+            if (!speechBookMatches(book, chat)) continue;
+            if (book.triggerType === 'keyword') {
+                const keywords = String(book.keywords || '').split(/[,，]/).map(word => word.trim()).filter(Boolean);
+                if (!keywords.some(word => text.includes(word))) continue;
+            }
+            for (const entry of book.entries || []) {
+                if (entry.enabled !== false && entry.content?.trim()) {
+                    content.push((entry.title ? entry.title + '：' : '') + entry.content.trim());
+                }
+            }
+        }
+        const rules = [...new Set(content.filter(Boolean))].join('\n');
+        return rules ? '\n【语音世界书】（仅用于' + (call ? '通话中的口语台词' : '语音消息正文') + '）\n' + rules + '\n' : '';
+    }
+
+    function createCallSpeech() {
+        let closed = false;
+        let pending = Promise.resolve(false);
+        let stopAudio;
+        let revision = 0;
+
+        function say(text, chat) {
+            if (closed || suite().callRead !== true || !text.trim()) return Promise.resolve(false);
+            const turn = revision;
+            pending = pending.then(async () => {
+                if (closed || revision !== turn || suite().callRead !== true) return false;
+                const src = await messageVoice(text, chat);
+                if (!src || closed || revision !== turn || suite().callRead !== true) return false;
+                return new Promise(resolve => {
+                    const audio = new Audio(src);
+                    let done = false;
+                    const finish = played => {
+                        if (done) return;
+                        done = true;
+                        audio.onended = audio.onerror = null;
+                        stopAudio = undefined;
+                        resolve(played);
+                    };
+                    stopAudio = () => { audio.pause(); finish(false); };
+                    audio.onended = () => finish(true);
+                    audio.onerror = () => finish(false);
+                    Promise.resolve(audio.play()).catch(() => finish(false));
+                });
+            }).catch(() => false);
+            return pending;
+        }
+
+        const reader = {
+            say,
+            get active() { return !closed; },
+            mute() { revision++; stopAudio?.(); },
+            stop() { closed = true; reader.mute(); activeCallReaders.delete(reader); }
+        };
+        activeCallReaders.add(reader);
+        return reader;
+    }
+
     function imageReady() {
         const provider = imageProvider();
         return provider !== 'off' && MiuWorkshop.ready(provider);
@@ -331,6 +401,7 @@ const MiuApi = (() => {
         byId('iosAuxEndpoint').value = p?.endpoint || '';
         byId('iosAuxKey').value = p?.key || '';
         byId('iosAuxModel').value = p?.model || '';
+        setText('iosAuxFetch', value('iosAuxModel') || '选择模型');
         byId('iosAuxTemp').value = p?.temperature ?? 1;
         byId('iosAuxTokens').value = p?.maxTokens ?? 2048;
         byId('iosAuxEnabled').checked = p?.enabled ?? true;
@@ -380,6 +451,8 @@ const MiuApi = (() => {
         const currentPreset = byId('apiPresetSelect').selectedOptions[0];
         setText('iosPrimarySummary', value('apiModel') || (value('apiEndpoint') ? '待选模型' : '未配置'));
         setText('iosMainModelOpen', value('apiModel') || '选择模型');
+        setText('iosAuxFetch', value('iosAuxModel') || '选择模型');
+        setText('iwGptModels', value('iosGptModel') || '选择模型');
         const enabled = profiles().filter(p => p.enabled).length;
         setText('iosSecondarySummary', enabled ? enabled + ' 套已启用' : '未配置');
         setText('iosPresetSummary', currentPreset?.value ? currentPreset.textContent : '未选择');
@@ -409,9 +482,11 @@ const MiuApi = (() => {
         currentView = view;
         if (view.startsWith('image')) MiuWorkshop.enter(view);
         if (view === 'voice') renderSoundPresets();
+        if (view === 'voiceBooks') renderSpeechBooks();
+        if (view === 'voiceRoles') renderVoiceRoles();
         for (const section of sections) section.hidden = section.dataset.apiSection !== view;
         setText('iosApiTitle', titles[view]);
-        setText('iosApiBackLabel', view === 'home' ? '桌面' : view === 'models' ? titles[modelPicker.from] : view.startsWith('image') && view !== 'image' ? '绘图工坊' : 'API 设置');
+        setText('iosApiBackLabel', view === 'home' ? '桌面' : view === 'models' ? titles[modelPicker.from] : view.startsWith('image') && view !== 'image' ? '绘图工坊' : view.startsWith('voice') && view !== 'voice' ? '语音消息' : 'API 设置');
         byId('iosApiSearchBar').hidden = view !== 'home';
         scroll.scrollTop = 0;
         refreshSummaries();
@@ -422,6 +497,7 @@ const MiuApi = (() => {
         const voice = voiceProvider();
         const image = imageProvider();
         byId('iosVoiceProvider').value = voice;
+        byId('iosCallRead').checked = suite().callRead === true;
         byId('iosVoiceScopeRow').hidden = voice !== 'fish';
         byId('iosImageProvider').value = image;
         apiPage.querySelectorAll('[data-voice-panel]').forEach(panel => { panel.hidden = panel.dataset.voicePanel !== voice; });
@@ -457,7 +533,9 @@ const MiuApi = (() => {
             modelPicker = undefined;
             showView(from);
         } else {
-            showView(currentView.startsWith('image') && currentView !== 'image' ? 'image' : 'home');
+            const parent = currentView.startsWith('image') && currentView !== 'image' ? 'image' :
+                currentView.startsWith('voice') && currentView !== 'voice' ? 'voice' : 'home';
+            showView(parent);
             saveData();
         }
         return true;
@@ -588,6 +666,91 @@ const MiuApi = (() => {
         suite().timeValue = event.target.value;
         saveData();
     });
+    function renderSpeechBooks() {
+        byId('iosSpeechBookOn').checked = suite().speechBookEnabled === true;
+        byId('iosSpeechBookOptions').hidden = !byId('iosSpeechBookOn').checked;
+        byId('iosSpeechRules').value = suite().speechRules || '';
+        const list = byId('iosSpeechBooks');
+        list.replaceChildren();
+        if (!worldBooks.length) {
+            const hint = document.createElement('p');
+            hint.className = 'ios-api-note';
+            hint.textContent = '暂无可引用的世界书';
+            list.append(hint);
+        }
+        const selected = new Set(suite().speechBookIds || []);
+        for (const book of worldBooks) {
+            const id = String(book.id);
+            const label = document.createElement('label');
+            label.className = 'ios-api-field';
+            const name = document.createElement('span');
+            name.textContent = book.name;
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.checked = selected.has(id);
+            check.onchange = () => {
+                if (check.checked) selected.add(id);
+                else selected.delete(id);
+                suite().speechBookIds = [...selected];
+                saveData();
+            };
+            label.append(name, check);
+            list.append(label);
+        }
+    }
+
+    byId('iosSpeechBookOn').onchange = event => {
+        suite().speechBookEnabled = event.target.checked;
+        renderSpeechBooks();
+        saveData();
+    };
+    byId('iosSpeechRules').onchange = event => {
+        suite().speechRules = event.target.value.trim();
+        saveData();
+    };
+    byId('iosCallRead').onchange = event => {
+        suite().callRead = event.target.checked;
+        if (!event.target.checked) activeCallReaders.forEach(reader => reader.mute());
+        saveData();
+    };
+
+    function renderVoiceRoles() {
+        const current = value('iosVoiceRole');
+        setOptions(byId('iosVoiceRole'), [['', '选择角色'], ...chatList.map(chat =>
+            [String(chat.id), chat.name || chat.realName || String(chat.id)])], current);
+        loadVoiceRole();
+    }
+
+    function loadVoiceRole() {
+        const chat = chatList.find(item => String(item.id) === value('iosVoiceRole'));
+        byId('iosVoiceRoleFields').hidden = !chat;
+        if (!chat) return;
+        roleVoiceDraft = Object.fromEntries(Object.values(roleVoiceKeys).map(key => [key, chat[key] || '']));
+        byId('iosVoiceRoleProvider').value = chat.ttsProvider || '';
+        setText('iosVoiceRoleStatus', '');
+        showRoleVoice();
+    }
+
+    function showRoleVoice() {
+        roleVoiceProvider = voiceProvider({ ttsProvider: value('iosVoiceRoleProvider') });
+        byId('iosVoiceRoleId').value = roleVoiceDraft[roleVoiceKeys[roleVoiceProvider]];
+        setText('iosVoiceRoleLabel', voiceNames[roleVoiceProvider] + ' 音色 ID');
+    }
+
+    byId('iosVoiceRole').onchange = loadVoiceRole;
+    byId('iosVoiceRoleProvider').onchange = () => {
+        roleVoiceDraft[roleVoiceKeys[roleVoiceProvider]] = value('iosVoiceRoleId');
+        showRoleVoice();
+    };
+    byId('iosVoiceRoleSave').onclick = async () => {
+        const chat = chatList.find(item => String(item.id) === value('iosVoiceRole'));
+        if (!chat) return;
+        roleVoiceDraft[roleVoiceKeys[roleVoiceProvider]] = value('iosVoiceRoleId');
+        Object.assign(chat, roleVoiceDraft, { ttsProvider: value('iosVoiceRoleProvider') });
+        await saveData();
+        setText('iosVoiceRoleStatus', '已保存');
+    };
+
     function soundPresets() {
         return suite().soundPresets ??= [];
     }
@@ -735,13 +898,12 @@ const MiuApi = (() => {
             button.disabled = false;
         }
     });
-    apiPage.querySelector('[onclick="fetchModels()"]').onclick = () => pickModel('main');
-    byId('iwGptModels').onclick = () => pickModel('gpt');
-    byId('iosAuxFetch').onclick = () => pickModel('aux');
+    byId('iwGptModels').onclick = () => pickModel('gpt', false);
+    byId('iosAuxFetch').onclick = () => pickModel('aux', false);
     byId('iosMainModelOpen').addEventListener('click', () => pickModel('main', false));
     byId('iosModelFetch').addEventListener('click', fetchModelsForPicker);
     byId('iosModelApply').addEventListener('click', () => applyModel(value('iosModelManual')));
     byId('iosModelQuery').addEventListener('input', drawModels);
 
-    return { open, back, hydrate, endpoint, request, getAuxRoute, messageVoice, minimaxSpeech, generateImage, imageReady, timeMode, messageTime, timeDescription, escapeHtml };
+    return { open, back, hydrate, speechContext, speechBookMatches, createCallSpeech, endpoint, request, getAuxRoute, messageVoice, minimaxSpeech, generateImage, imageReady, timeMode, messageTime, timeDescription, escapeHtml };
 })();

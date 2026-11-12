@@ -1958,10 +1958,6 @@ function openChatSettings() {
         document.getElementById('charPersona').value = chat.charPersona || '';
         document.getElementById('userPersona').value = chat.userPersona || '';
 
-        document.getElementById('charTtsProvider').value = chat.ttsProvider || '';
-        document.getElementById('charVoiceId').value = chat.minimaxVoiceId || '';
-        document.getElementById('charFishVoiceId').value = chat.fishVoiceId || '';
-        document.getElementById('charElevenVoiceId').value = chat.elevenVoiceId || '';
 
         // 回填自定义回复条数限制，若未设置则默认为 1 - 3 条
         document.getElementById('charReplyMin').value = chat.replyMin !== undefined ? chat.replyMin : 1;
@@ -2079,10 +2075,6 @@ chat.showUserAvatar = document.getElementById('toggleUserAvatar').classList.cont
     chat.charPersona = document.getElementById('charPersona').value;
     chat.userPersona = document.getElementById('userPersona').value;
 
-    chat.ttsProvider = document.getElementById('charTtsProvider').value;
-    chat.minimaxVoiceId = document.getElementById('charVoiceId').value.trim();
-    chat.fishVoiceId = document.getElementById('charFishVoiceId').value.trim();
-    chat.elevenVoiceId = document.getElementById('charElevenVoiceId').value.trim();
 
     // 保存自定义回复条数限制
     let rMin = parseInt(document.getElementById('charReplyMin').value);
@@ -2498,115 +2490,6 @@ function handleImageUpdate(src, target = currentTargetImg) {
     }  
 }
 
-async function fetchModels() {
-    let endpoint = document.getElementById('apiEndpoint').value.trim().replace(/\/+$/, '');
-    const key = document.getElementById('apiKey').value.trim();
-    const modelSelect = document.getElementById('apiModel');
-    const blacklist = ['api520.pro', 'api521.pro']; 
-    
-    if (blacklist.some(domain => endpoint.includes(domain))) {
-        alert("禁止访问\n\n系统已拉黑该 API 服务商 (熊猫)。\n请勿使用此类不稳定或存在风险的接口。\n\n请求已被拦截，未发送任何数据。");
-        
-        // 恢复按钮状态
-        const btn = document.querySelector('.api-btn-small');
-        if(btn) { btn.innerText = '拉取模型列表'; btn.style.opacity = '1'; }
-        return; // 强制结束
-    }
-    if (!endpoint) { alert('请先填写 API Endpoint 地址'); return; }
-
-    // 2. 基础校验
-    if (!endpoint) { alert('请先填写 API Endpoint 地址'); return; }
-    if (!key) { alert('请先填写 API Key'); return; }
-
-    const btn = document.querySelector('.api-btn-small');
-    const originalText = btn.innerText;
-    btn.innerText = '拉取中...';
-    btn.style.opacity = '0.7';
-
-    try {
-        console.log(`正在尝试拉取模型列表: ${endpoint}/models`);
-
-        // 3. 发起请求
-        const response = await fetch(`${endpoint}/models`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${key}`,
-                'Content-Type': 'application/json',
-                // 下面这行通常能解决部分代理的缓存问题
-                'Cache-Control': 'no-cache'
-            }
-        });
-
-        // 4. 处理非 200 状态码
-        if (!response.ok) {
-            let errDetail = `Status: ${response.status}`;
-            try {
-                const errJson = await response.json();
-                if (errJson.error && errJson.error.message) {
-                    errDetail = errJson.error.message;
-                } else if (errJson.message) {
-                    errDetail = errJson.message;
-                }
-            } catch (e) {
-                // 解析 JSON 失败，使用默认状态码描述
-                errDetail = response.statusText;
-            }
-            throw new Error(`API 报错: ${errDetail}`);
-        }
-
-        // 5. 解析数据
-        const data = await response.json();
-        modelSelect.innerHTML = '';
-
-        // 兼容不同厂商的返回格式 (Ollama, OpenAI, DeepSeek 等)
-        let models = [];
-        if (Array.isArray(data.data)) {
-            models = data.data; // 标准 OpenAI 格式
-        } else if (Array.isArray(data.models)) {
-            models = data.models; // 某些本地部署格式
-        } else if (Array.isArray(data)) {
-            models = data; // 纯数组格式
-        }
-
-        if (models.length > 0) {
-            models.forEach(model => {
-                // 兼容对象里的 id 或直接是字符串的情况
-                const modelId = model.id || model.name || model;
-                const option = document.createElement('option');
-                option.value = modelId;
-                option.innerText = modelId;
-                modelSelect.appendChild(option);
-            });
-            alert(`成功拉取 ${models.length} 个模型！\n请在下拉框中选择。`);
-            saveData(); // 保存配置
-        } else {
-            console.warn("API 返回数据:", data);
-            alert('❌ 拉取成功但列表为空，请检查控制台(F12)日志');
-        }
-
-    } catch (error) {
-        console.error("拉取模型失败:", error);
-
-        // 6. 针对性错误提示
-        if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-            alert(
-                '网络请求失败 (Network Error)\n\n' +
-                '可能原因：\n' +
-                '1. 跨域限制 (CORS)：该 API 不支持浏览器直接访问。\n' +
-                '2. 地址错误：检查是否多了/少了 /v1\n' +
-                '3. 混合内容：你的网页是HTTPS，但API是HTTP。\n' +
-                '4. 科学上网问题。'
-            );
-        } else {
-            alert('拉取失败: ' + error.message);
-        }
-    } finally {
-        btn.innerText = originalText;
-        btn.style.opacity = '1';
-    }
-}
-
-// ★★★ 新增：拉取副 API 模型列表 ★★★
 window.getApiCredentials = function(featureName) {
     const assigned = MiuApi.getAuxRoute(featureName);
     if (assigned) return assigned;
@@ -3019,7 +2902,6 @@ function openAddCharModal() {
     document.getElementById('newCharRealName').value = '';
     document.getElementById('newCharName').value = '';
     document.getElementById('newCharSetting').value = '';
-    document.getElementById('newCharVisualPrompt').value = ''; 
     
     tempSelectedMaskId = null;
     document.getElementById('charMaskSelectedText').innerText = "默认 (不使用面具)";
@@ -3082,7 +2964,6 @@ function editChat(id) {
     document.getElementById('newCharRealName').value = chat.realName || "";
     document.getElementById('newCharName').value = chat.name || "";
     document.getElementById('newCharSetting').value = chat.charPersona || "";
-    document.getElementById('newCharVisualPrompt').value = chat.visualPrompt || ""; 
 
     // 4. 回填世界书数据 (关键)
     // chat.worldBooks 里面存的是 ID 数组
@@ -3150,7 +3031,6 @@ async function confirmAddChar() {
     const realName = document.getElementById('newCharRealName').value.trim();
     const avatar = document.getElementById('newCharAvatar').src;
     const charPersona = document.getElementById('newCharSetting').value;
-    const visualPrompt = document.getElementById('newCharVisualPrompt').value.trim(); // 新增：获取外观词
     
     let maskData = null;
     if (tempSelectedMaskId) {
@@ -3165,7 +3045,6 @@ async function confirmAddChar() {
             chat.realName = realName;
             chat.avatar = avatar;
             chat.charPersona = charPersona;
-            chat.visualPrompt = visualPrompt; 
             chat.worldBooks = tempSelectedWb;
             
             if (maskData) {
@@ -3191,7 +3070,7 @@ async function confirmAddChar() {
             realName: realName, 
             avatar: avatar, 
             charPersona: charPersona, 
-            visualPrompt: visualPrompt, 
+            visualPrompt: "",
             worldBooks: tempSelectedWb,
             messages: [],       
             time: timeStr,
@@ -4048,15 +3927,15 @@ function toggleAvatarSwitch(el, type) {
 }
 
 // 兼容旧版调用的包装函数 (供日记等模块使用)
-function getWorldBookContext(chat, checkText = "") {
-    const data = extractWorldBookContext(chat, checkText);
+function getWorldBookContext(chat, checkText = "", includeSpeechBooks = false) {
+    const data = extractWorldBookContext(chat, checkText, includeSpeechBooks);
     let combined = data.topContext;
     data.depthEntries.forEach(e => combined += e.text);
     return combined;
 }
 
 // ★ 全新的核心提取器：将全局条目和深度条目分离
-function extractWorldBookContext(chat, checkText = "") {
+function extractWorldBookContext(chat, checkText = "", includeSpeechBooks = false) {
     let topContext = "";
     let depthEntries = [];
 
@@ -4065,6 +3944,7 @@ function extractWorldBookContext(chat, checkText = "") {
     const boundList = chat.worldBooks || [];
 
     worldBooks.forEach(wb => {
+        if (includeSpeechBooks && MiuApi.speechBookMatches(wb, chat)) return;
         const isBound = boundList.some(ref => ref == wb.id || ref === wb.name) || wb.boundCharId === chat.id;
 
         if (isBound) {
@@ -4203,7 +4083,7 @@ async function generateAiReply(chat, isRegenerate = false) {
 
         // 1. 世界书 (升级版：提取深度数据)
     const recentContextText = chat.messages.slice(-5).map(m => m.text).join(' ');
-    const wbData = extractWorldBookContext(chat, recentContextText);
+    const wbData = extractWorldBookContext(chat, recentContextText, true);
     if (wbData.topContext) {
         systemPrompt += `\n【必须遵守的世界观/背景设定】：\n${wbData.topContext}\n`;
     }
@@ -4326,6 +4206,7 @@ if (myStickers && myStickers.length > 0) {
     - 格式："[VOICE:语音转文字的内容]"
     - 场景：当你想用声音传达情绪（如撒娇、叹气、吼叫、低语）时使用。
     - 严禁连续多轮都发语音`;
+    systemPrompt += MiuApi.speechContext(chat, recentContextText);
 
     // 【图片/生图能力】(根据开关动态分离逻辑)
     const useRealAI = MiuApi.imageReady();
@@ -8502,7 +8383,7 @@ async function triggerAiSocialAction(chat, source = 'chat') {
     }).join('\n');
     
     // --- 3. 注入世界书 ---
-    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, recentChat) : "";
+    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, recentChat, true) : "";
 
     // --- 4. 场景判断 ---
     let contextPrompt = "";
@@ -8541,6 +8422,7 @@ ${PROMPT_LIB.lifeActionProtocol}
 ${fullPersona}
 
 ${wbContext ? `【世界观设定】：\n${wbContext}\n` : ''}
+${MiuApi.speechContext(chat, recentChat)}
 ${offlineMemForAuto ? `【线下见面记忆】：\n${offlineMemForAuto}\n` : ''}
 
 === 最近聊天记录 ===
@@ -9493,6 +9375,8 @@ let vcTimerInterval = null;
 let vcSeconds = 0;
 let isVcConnecting = false;
 let activeVoiceCallChatId = null;
+let voiceCallSpeech;
+let videoCallSpeech;
 
 // 1. 开启语音通话界面
 function startVoiceCallUI() {
@@ -9502,6 +9386,8 @@ function startVoiceCallUI() {
      const chat = chatList.find(c => c.id === currentChatId);
     if (!chat) return;
     
+    voiceCallSpeech?.stop();
+    const speech = voiceCallSpeech = MiuApi.createCallSpeech();
     activeVoiceCallChatId = chat.id;
     // 填充数据
     document.getElementById('vcCharName').innerText = chat.name;
@@ -9531,13 +9417,15 @@ function startVoiceCallUI() {
 
     // 模拟接通逻辑：1.5秒后接通，开始计时，AI说话
     setTimeout(() => {
+        if (!speech.active) return;
         startVcTimer();
-        triggerVcFirstMessage(chat);
+        triggerVcFirstMessage(chat, speech);
     }, 1500);
 }
 
 // 找到 hangUpVoiceCall 函数，修改其内部的时间戳逻辑：
 function hangUpVoiceCall() {
+    voiceCallSpeech?.stop();
     if (vcTimerInterval) clearInterval(vcTimerInterval);
     
     const targetId = activeVoiceCallChatId || currentChatId;
@@ -9584,6 +9472,7 @@ function hangUpVoiceCall() {
 
 // 2. 最小化/关闭界面
 function minimizeVoiceCall() {
+    voiceCallSpeech?.stop();
     document.getElementById('voice-call-overlay').classList.remove('active');
     // 如果需要后台继续计时，这里就不 clearInterval
     // 但为了演示简单，我们假设关闭就是挂断
@@ -9624,9 +9513,10 @@ function updateVcTimerDisplay() {
     document.getElementById('vcTimer').innerText = timeStr;
 }
 
-async function triggerVcFirstMessage(chat) {
+async function triggerVcFirstMessage(chat, speech = voiceCallSpeech) {
+    if (!speech?.active) return;
     const recentChat = getCleanChatContext(chat, 20);
-    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, recentChat) : "";
+    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, recentChat, true) : "";
     
     const lastMsg = chat.messages[chat.messages.length - 1];
     const now = Date.now();
@@ -9644,6 +9534,7 @@ ${PROMPT_LIB.antiStereotype}
 ${isInstantCall ? '用户是在刚才文字聊天的过程中突然打来的，请无缝衔接刚才的话题。' : '用户是在很久没说话后突然打来的。'}
 
 ${getFullPersona(chat)}
+${MiuApi.speechContext(chat, recentChat, true)}
 ${wbContext ? `【世界观】：\n${wbContext}\n` : ''}
 
 【参考 - 文字聊天记录】：
@@ -9683,6 +9574,7 @@ ${globalData.autoTranslateEnabled ? `4. 【⚠️翻译强制协议】：每一�
         });
         
         const data = await response.json();
+        if (!speech.active) return;
         let rawContent = data.choices[0].message.content;
 
         // ★★★ 核心修复：使用 safeParseAiResponse 解析 JSON ★★★
@@ -9703,8 +9595,6 @@ ${globalData.autoTranslateEnabled ? `4. 【⚠️翻译强制协议】：每一�
                 segTrans = parts[1] ? parts[1].trim() : null;
             }
             
-            let audioUrl = null;
-            if (chat.minimaxVoiceId) audioUrl = await fetchMiniMaxTTS(segText, chat.minimaxVoiceId);
             
             // 模拟说话间隔
             await new Promise(r => setTimeout(r, 500 + segText.length * 50));
@@ -9718,11 +9608,12 @@ ${globalData.autoTranslateEnabled ? `4. 【⚠️翻译强制协议】：每一�
                 displayHtml = segText;
             }
 
+            if (!speech.active) return;
             addVcMessage("ai", displayHtml);
-            if (audioUrl) { const audio = new Audio(audioUrl); audio.play(); }
             saveToHistory(chat, segText, false);
+            await speech.say(segText, chat);
         }
-    } catch (e) { console.error(e); addVcMessage("ai", "..."); }
+    } catch (e) { console.error(e); if (speech.active) addVcMessage("ai", "..."); }
 }
 
 function addVcMessage(type, text) {
@@ -9848,13 +9739,14 @@ return `${m.isSelf ? userName : '我'}: ${cleanText}`;
     }).join('\n');
 }
 
-async function generateVcReply(chat, userText) {
+async function generateVcReply(chat, userText, speech = voiceCallSpeech) {
+    if (!speech?.active) return;
     const apiKey = document.getElementById('apiKey').value;
     const endpoint = document.getElementById('apiEndpoint').value;
     const model = document.getElementById('apiModel').value;
 
     const recentChat = getCleanChatContext(chat, 15);
-    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, userText) : "";
+    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, userText, true) : "";
 
     let systemPrompt = `
 ${PROMPT_LIB.core.replace(/{{char}}/g, chat.name)}
@@ -9866,6 +9758,7 @@ ${PROMPT_LIB.antiStereotype}
 用户刚说："${userText}"
 
 ${getFullPersona(chat)}
+${MiuApi.speechContext(chat, userText, true)}
 ${wbContext ? `【世界观】：\n${wbContext}\n` : ''}
 
 【参考 - 最近记录】：
@@ -9893,6 +9786,7 @@ if (typeof getVirtualTimePrompt === 'function') {
             })
         });
         const data = await response.json();
+        if (!speech.active) return;
         let rawContent = data.choices[0].message.content;
 
         // ★★★ 核心修复：解析 JSON ★★★
@@ -9912,8 +9806,6 @@ if (typeof getVirtualTimePrompt === 'function') {
                 segTrans = parts[1] ? parts[1].trim() : null;
             }
             
-            let audioUrl = null;
-            if (chat.minimaxVoiceId) audioUrl = await fetchMiniMaxTTS(segText, chat.minimaxVoiceId);
             
             await new Promise(resolve => setTimeout(resolve, 600 + (segText.length * 50))); 
             
@@ -9926,11 +9818,12 @@ if (typeof getVirtualTimePrompt === 'function') {
                 displayHtml = segText;
             }
 
+            if (!speech.active) return;
             addVcMessage("ai", displayHtml);
-            if (audioUrl) { const audio = new Audio(audioUrl); audio.play(); }
             saveToHistory(chat, segText, false);
+            await speech.say(segText, chat);
         }
-    } catch (e) { console.error(e); addVcMessage("ai", "..."); }
+    } catch (e) { console.error(e); if (speech.active) addVcMessage("ai", "..."); }
 }
 // --- ★★★ 新增：悬浮窗逻辑开始 ★★★ ---
 
@@ -10314,16 +10207,6 @@ function toggleApiStream() {
         globalData.apiStreamEnabled = isEnabled;
     }
     saveData();
-}
-
-// 【修改版】MiniMax TTS 核心功能
-async function fetchMiniMaxTTS(text, voiceId) {
-    try {
-        return await MiuApi.minimaxSpeech(text, voiceId);
-    } catch (error) {
-        console.warn('MiniMax 语音生成失败', error.message);
-        return null;
-    }
 }
 
 // 【新增】辅助函数：将 Blob 转为 Base64
@@ -11525,6 +11408,8 @@ async function startVideoCallUI() {
     const chat = chatList.find(c => c.id === currentChatId);
     if (!chat) return;
     
+    videoCallSpeech?.stop();
+    const speech = videoCallSpeech = MiuApi.createCallSpeech();
     activeVideoChatId = chat.id;
 
     // A. 填充基础信息
@@ -11574,7 +11459,7 @@ async function startVideoCallUI() {
 
     // F. 触发开场白 (延迟1秒，模拟接通)
     setTimeout(() => {
-        triggerVideoFirstMessage(chat);
+        if (speech.active) triggerVideoFirstMessage(chat, speech);
     }, 1000);
 }
 
@@ -11619,6 +11504,7 @@ async function toggleVideoCamera() {
 
 // 找到 hangUpVideoCall 内部时间戳逻辑替换为：
 function hangUpVideoCall() {
+    videoCallSpeech?.stop();
     if (vcvTimerInterval) clearInterval(vcvTimerInterval);
 
     if (videoStream) {
@@ -11744,9 +11630,10 @@ function updateVideoAction(text) {
     // ★ 这里没有 setTimeout，所以文字会一直保留，直到被下一次 update 覆盖
 }
 
-async function generateVideoReply(chat, userText) {
+async function generateVideoReply(chat, userText, speech = videoCallSpeech) {
+    if (!speech?.active) return;
     const recentChat = getCleanChatContext(chat, 15);
-    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, userText) : "";
+    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, userText, true) : "";
 
     let systemPrompt = `
 ${PROMPT_LIB.core.replace(/{{char}}/g, chat.name)}
@@ -11759,6 +11646,7 @@ ${PROMPT_LIB.antiStereotype}
 请结合画面内容和用户的语言"${userText}"进行回复。
 
 ${getFullPersona(chat)}
+${MiuApi.speechContext(chat, userText, true)}
 ${wbContext ? `【世界观】：\n${wbContext}\n` : ''}
 
 【参考 - 最近记录】：
@@ -11809,6 +11697,7 @@ if (typeof getVirtualTimePrompt === 'function') {
             return;
         }
 
+        if (!speech.active) return;
         let rawContent = data.choices[0].message.content;
 
         // ★★★ 核心修复：解析 JSON ★★★
@@ -11816,17 +11705,18 @@ if (typeof getVirtualTimePrompt === 'function') {
         // 同样拼接成字符串给播放器用
         let combinedText = (parsed.replies || []).join('\n');
         
-        await playVideoReplySequence(chat, combinedText);
+        await playVideoReplySequence(chat, combinedText, speech);
 
     } catch (e) {
         console.error("视频回复失败:", e);
-        addVideoMessage('ai', "(网络连接中断...)");
+        if (speech.active) addVideoMessage('ai', "(网络连接中断...)");
     }
 }
 
-async function triggerVideoFirstMessage(chat) {
+async function triggerVideoFirstMessage(chat, speech = videoCallSpeech) {
+    if (!speech?.active) return;
     const recentChat = getCleanChatContext(chat, 20);
-    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, recentChat) : "";
+    const wbContext = typeof getWorldBookContext === 'function' ? getWorldBookContext(chat, recentChat, true) : "";
 
     let systemPrompt = `
 ${PROMPT_LIB.core.replace(/{{char}}/g, chat.name)}
@@ -11838,6 +11728,7 @@ ${PROMPT_LIB.antiStereotype}
 用户此时正看着你的脸。
 
 ${getFullPersona(chat)}
+${MiuApi.speechContext(chat, recentChat, true)}
 ${wbContext ? `【世界观】：\n${wbContext}\n` : ''}
 
 【参考 - 文字聊天记录】：
@@ -11878,14 +11769,15 @@ let rawReply = data.choices[0].message.content;
 rawReply = rawReply.replace(/<(think|thinking|thought)>[\s\S]*?<\/\1>/gi, '').trim();
 
 // 3. 将清洗后的干净文本传给播放序列
-await playVideoReplySequence(chat, rawReply);
+await playVideoReplySequence(chat, rawReply, speech);
 
     } catch (e) { console.error(e); }
 }
 // =========================================
 // ★★★ 核心：视频回复解析序列 (动作上墙流式版) ★★★
 // =========================================
-async function playVideoReplySequence(chat, fullText) {
+async function playVideoReplySequence(chat, fullText, speech) {
+    if (!speech?.active) return;
     const TRANS_SPLIT = "@@@TRANS@@@";
     
     // 正则：匹配 (xxx) 或 [xxx] 或 *xxx*
@@ -11894,6 +11786,7 @@ async function playVideoReplySequence(chat, fullText) {
     const lines = fullText.split('\n').filter(l => l.trim());
 
     for (let line of lines) {
+        if (!speech.active) return;
         line = line.trim();
         if (!line) continue;
 
@@ -11910,6 +11803,7 @@ async function playVideoReplySequence(chat, fullText) {
         const segments = mainText.split(regex).filter(s => s.trim());
 
         for (let i = 0; i < segments.length; i++) {
+            if (!speech.active) return;
             const seg = segments[i].trim();
             if (!seg) continue;
 
@@ -11939,27 +11833,14 @@ async function playVideoReplySequence(chat, fullText) {
                 // 2. 发送气泡 (靠左)
                 addVideoMessage('ai', displayHtml);
 
-                // 3. 播放语音
-                if (chat.minimaxVoiceId) {
-                    const audioUrl = await fetchMiniMaxTTS(seg, chat.minimaxVoiceId);
-                    if (audioUrl) {
-                        const audio = new Audio(audioUrl);
-                        await new Promise(resolve => {
-                            audio.onended = resolve;
-                            audio.onerror = resolve;
-                            audio.play();
-                        });
-                    } else {
-                        await new Promise(r => setTimeout(r, 1000 + seg.length * 150));
-                    }
-                } else {
-                    await new Promise(r => setTimeout(r, 1500));
-                }
+                const played = await speech.say(seg, chat);
+                if (!speech.active) return;
+                if (!played) await new Promise(resolve => setTimeout(resolve, 850 + seg.length * 35));
             }
         }
         
         // 存入历史
-        saveToHistory(chat, line.replace(TRANS_SPLIT, " "), false);
+        if (speech.active) saveToHistory(chat, line.replace(TRANS_SPLIT, " "), false);
     }
 }
 

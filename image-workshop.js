@@ -20,7 +20,7 @@ const MiuWorkshop = (() => {
         'iosGptEndpoint', 'iosGptKey', 'iosGptModel', 'iosGptSize', 'iosGptQuality', 'iwGptStyle', 'iwGptFormat'
     ];
     const standalone = [
-        'iwNaiEndpoint', 'iwNaiProtocol', 'iwNaiInterval', 'iwNaiCharacter', 'iwGptStyle', 'iwGptFormat',
+        'iwNaiEndpoint', 'iwNaiProtocol', 'iwNaiInterval', 'iwGptStyle', 'iwGptFormat',
         'iwGptPositive', 'iwGptNegative', 'iwTestProvider', 'iwTestPrompt'
     ];
     const vibeModels = {
@@ -101,6 +101,7 @@ const MiuWorkshop = (() => {
         const positive = [provider === 'nai' ? get('naiDefaultPositive') : get('iwGptPositive')];
         const negative = [provider === 'nai' ? get('naiDefaultNegative') : get('iwGptNegative')];
         const roles = [];
+        let appearance = chat?.visualPrompt;
         for (const preset of items('prompts')) {
             if (!preset.enabled || !['both', provider].includes(preset.scope)) continue;
             positive.push(preset.artists, preset.positive);
@@ -117,12 +118,13 @@ const MiuWorkshop = (() => {
         for (const role of items('roles')) {
             const token = '{{' + role.alias + '}}';
             if (!text.includes(token) && (!chat || String(chat.id) !== role.id)) continue;
-            text = text.replaceAll(token, role.prompt || role.alias);
-            if (role.prompt && !text.includes(role.prompt)) positive.push(role.prompt);
+            const appearanceText = role.prompt ?? chat?.visualPrompt;
+            text = text.replaceAll(token, appearanceText || role.alias);
+            if (chat && String(chat.id) === role.id) appearance = undefined;
+            if (appearanceText && !text.includes(appearanceText)) positive.push(appearanceText);
             if (role.enabled && safeImage(role.image)) roles.push(role);
         }
-        if (provider === 'nai') positive.push(get('iwNaiCharacter'));
-        return { positive: join([...positive, chat?.visualPrompt, text.replace(/^[,\s]+|[,\s]+$/g, '')]), negative: join(negative), roles };
+        return { positive: join([...positive, appearance, text.replace(/^[,\s]+|[,\s]+$/g, '')]), negative: join(negative), roles };
     }
 
     function base64(bytes) {
@@ -343,6 +345,9 @@ const MiuWorkshop = (() => {
         const requestHeaders = headers(key);
         let payload = JSON.stringify(body);
         if (route === '/images/edits') {
+            const identities = prompt.roles.map((role, i) =>
+                'Use reference image ' + (i + 1) + ' to preserve the facial features of ' + role.alias + '.');
+            body.prompt = [body.prompt, ...identities, 'Use the requested scene, clothing and pose for the new image.'].join('\n');
             if (prompt.roles.length > 16) throw new Error('一次最多使用 16 张角色参考图');
             const form = new FormData();
             for (const [name, value] of Object.entries(body)) form.append(name, String(value));
@@ -649,9 +654,11 @@ const MiuWorkshop = (() => {
     $('iwRoleClear').onclick = () => { closeCrop(); roleImage = ''; setImage('iwRoleThumb', ''); $('iwRoleEnabled').checked = false; };
     $('iwRoleSave').onclick = async () => {
         const id = get('iwRole');
-        if (!id || !get('iwRoleAlias')) return status('iwRoleStatus', '请选择角色并填写角色变量');
+        const chat = chatList.find(item => String(item.id) === id);
+        if (!chat || !get('iwRoleAlias')) return status('iwRoleStatus', '请选择角色并填写角色变量');
+        chat.visualPrompt = get('iwRolePrompt');
         await saveItem('roles', {
-            id, alias: get('iwRoleAlias'), prompt: get('iwRolePrompt'), enabled: $('iwRoleEnabled').checked,
+            id, alias: get('iwRoleAlias'), prompt: chat.visualPrompt, enabled: $('iwRoleEnabled').checked,
             strength: clamp(get('iwRoleStrength'), 0.65), fidelity: clamp(get('iwRoleFidelity'), 0.8), image: roleImage
         });
         status('iwRoleStatus', '已保存');
@@ -785,6 +792,11 @@ const MiuWorkshop = (() => {
     }
 
     function hydrate() {
+        const previousCharacterPrompt = store().iwNaiCharacter;
+        if (previousCharacterPrompt) {
+            put('naiDefaultPositive', join([get('naiDefaultPositive'), previousCharacterPrompt]));
+            delete store().iwNaiCharacter;
+        }
         const defaults = { iwNaiProtocol: 'native', iwTestProvider: 'nai' };
         for (const id of standalone) put(id, store()[id] ?? defaults[id]);
         if (!store().iwTestProvider && api().imageProvider === 'gpt') put('iwTestProvider', 'gpt');
