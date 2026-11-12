@@ -541,6 +541,7 @@ function restoreDesktopImage(id, src) {
 }
 
 async function saveData() {
+    queuePersonalPreview('chatroom');
     // ★★★ 添加安全获取函数，防止元素不存在导致报错 ★★★
     const safeGetValue = (id, defaultVal = '') => {
         const el = document.getElementById(id);
@@ -562,6 +563,7 @@ async function saveData() {
     const settingsToSave = {
         id: 'main',
         apiSuite: globalData.apiSuite || {},
+        lastPersonalChatId: globalData.lastPersonalChatId ?? null,
         homeImages: Object.fromEntries(
             Array.from(document.querySelectorAll('[data-home-image][src]'), image => [image.id, image.src])
         ),
@@ -1289,9 +1291,15 @@ function selectCharForWb(id, name) {
 
 function openBeautifyPage() {
     const page = document.getElementById('beautifyPage');
-    if (!page.classList.contains('active')) page.querySelector('.personal-scroll').scrollTop = 0;
-    refreshBeautifyPage();
+    if (!page.classList.contains('active')) {
+        page.querySelector('.personal-scroll').scrollTop = 0;
+        const theme = document.querySelector('meta[name="theme-color"]');
+        page.dataset.previousTheme = theme.content;
+        theme.content = '#f1f0f5';
+    }
     page.classList.add('active');
+    refreshBeautifyPage();
+    startPersonalPreview();
 }
 
 function refreshBeautifyPage() {
@@ -1309,28 +1317,162 @@ function refreshBeautifyPage() {
         const src = document.getElementById('dockIcon' + i).getAttribute('src');
         setPreview('previewDock' + i, src);
         if (i < 4) {
-            setPreview('personalDock' + i, src);
             setPreview('personalEditDock' + i, src);
         }
     }
     for (const i of [5, 6]) {
         setPreview('previewApp' + i, document.getElementById('app' + i + 'Img').getAttribute('src'));
     }
-    setPreview('wallpaperPreviewImg', cssImage(document.body));
-    setPreview('chatRoomWallpaperPreviewImg', cssImage(document.getElementById('chatRoom')));
     setPreview('wcWallpaperPreviewImg', cssImage(document.getElementById('chatAppPage')));
     setPreview('vcWallpaperPreviewImg', globalData.voiceCallWallpaper);
     setPreview('offlineWallpaperPreviewImg', globalData.offlineWallpaper);
-    document.getElementById('personalPreviewDate').textContent = document.getElementById('realDateDisplay').textContent;
-    document.getElementById('personalPreviewTime').textContent = document.getElementById('realTimeDisplay').textContent;
+    queuePersonalPreview('home');
+    queuePersonalPreview('chatroom');
 }
 
 function closeBeautifyPage() {
     const editor = document.getElementById('personalEditor');
     if (editor.open) editor.close();
-    document.getElementById('beautifyPage').classList.remove('active');
+    const page = document.getElementById('beautifyPage');
+    page.classList.remove('active');
+    if (Object.hasOwn(page.dataset, 'previousTheme')) {
+        document.querySelector('meta[name="theme-color"]').content = page.dataset.previousTheme;
+        delete page.dataset.previousTheme;
+    }
+    stopPersonalPreview();
     leaveDesktopSettings('beautify');
     saveData();
+}
+
+let personalPreviewObserver;
+let personalPreviewResize;
+let personalPreviewAnimation = 0;
+const personalPreviewDirty = new Set();
+
+function queuePersonalPreview(scene) {
+    if (!document.getElementById('beautifyPage')?.classList.contains('active')) return;
+    personalPreviewDirty.add(scene);
+    if (personalPreviewAnimation) return;
+    personalPreviewAnimation = requestAnimationFrame(() => {
+        personalPreviewAnimation = 0;
+        for (const pending of personalPreviewDirty) renderPersonalPreview(pending);
+        personalPreviewDirty.clear();
+    });
+}
+
+function startPersonalPreview() {
+    if (personalPreviewObserver) return;
+    const home = document.querySelector('#phoneFrame > .miu-home');
+    const room = document.getElementById('chatRoom');
+    personalPreviewObserver = new MutationObserver(records => {
+        for (const { target } of records) queuePersonalPreview(home.contains(target) || target === document.body ? 'home' : 'chatroom');
+    });
+    personalPreviewObserver.observe(home, { attributes: true, childList: true, characterData: true, subtree: true });
+    personalPreviewObserver.observe(room, { attributes: true });
+    personalPreviewObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+    home.addEventListener('scroll', followPersonalDesktopScroll, true);
+    personalPreviewResize = new ResizeObserver(() => {
+        queuePersonalPreview('home');
+        queuePersonalPreview('chatroom');
+    });
+    for (const scene of ['home', 'chatroom']) {
+        const frame = document.getElementById('personalLive-' + scene);
+        personalPreviewResize.observe(frame.parentElement);
+        if (frame.hasAttribute('srcdoc')) continue;
+        frame.addEventListener('load', () => queuePersonalPreview(scene));
+        frame.srcdoc = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+            `<meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'">` +
+            '</head><body></body></html>';
+    }
+}
+
+function stopPersonalPreview() {
+    personalPreviewObserver?.disconnect();
+    personalPreviewObserver = undefined;
+    personalPreviewResize?.disconnect();
+    personalPreviewResize = undefined;
+    document.querySelector('#phoneFrame > .miu-home').removeEventListener('scroll', followPersonalDesktopScroll, true);
+    cancelAnimationFrame(personalPreviewAnimation);
+    personalPreviewAnimation = 0;
+    personalPreviewDirty.clear();
+}
+
+function followPersonalDesktopScroll() {
+    const preview = document.getElementById('personalLive-home').contentDocument;
+    if (!preview) return;
+    const sourcePages = document.getElementById('miuPages');
+    const previewPages = preview.getElementById('miuPages');
+    if (!previewPages || !sourcePages.clientWidth) return;
+    const index = Math.round(sourcePages.scrollLeft / sourcePages.clientWidth);
+    previewPages.scrollTo({ left: index * previewPages.clientWidth, behavior: 'instant' });
+    const sourcePage = sourcePages.children[index];
+    const previewPage = previewPages.children[index];
+    if (sourcePage && previewPage) previewPage.scrollTop = sourcePage.scrollTop;
+}
+
+function renderPersonalPreview(scene) {
+    const frame = document.getElementById('personalLive-' + scene);
+    const preview = frame.contentDocument;
+    if (!preview?.body || preview.URL !== 'about:srcdoc') return;
+    const viewport = frame.parentElement;
+    const width = document.getElementById('phoneFrame').clientWidth;
+    if (!width || !viewport.clientWidth) return;
+    const scale = viewport.clientWidth / width;
+    frame.style.width = width + 'px';
+    frame.style.height = viewport.clientHeight / scale + 'px';
+    frame.style.transform = 'scale(' + scale + ')';
+
+    if (!preview.getElementById('personal-preview-style')) {
+        for (const source of document.querySelectorAll('link[rel="stylesheet"]')) {
+            const link = preview.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = source.href;
+            link.addEventListener('load', () => queuePersonalPreview(scene), { once: true });
+            preview.head.append(link);
+        }
+        const style = preview.createElement('style');
+        style.id = 'personal-preview-style';
+        style.textContent = 'html, body { height: 100%; } .miu-home { height: 100%; }';
+        preview.head.append(style);
+    }
+    for (const id of ['global-font-style', 'dynamic-font-size', 'dynamic-chat-style']) {
+        if (!preview.getElementById(id)) {
+            const style = preview.createElement('style');
+            style.id = id;
+            preview.head.append(style);
+        }
+    }
+    for (const id of ['global-font-style', 'dynamic-font-size']) {
+        preview.getElementById(id).textContent = document.getElementById(id)?.textContent || '';
+    }
+    preview.documentElement.style.cssText = document.documentElement.style.cssText;
+    preview.body.className = document.body.className;
+    preview.body.style.cssText = document.body.style.cssText;
+    const shell = preview.importNode(document.getElementById('phoneFrame'), false);
+    preview.body.replaceChildren(shell);
+
+    if (scene === 'home') {
+        shell.append(preview.importNode(document.querySelector('#phoneFrame > .miu-home'), true));
+        followPersonalDesktopScroll();
+        return;
+    }
+    const chat = chatList.find(item => item.id === currentChatId)
+        || chatList.find(item => item.id === globalData.lastPersonalChatId) || chatList[0];
+    const overlay = preview.importNode(document.getElementById('appOverlay'), false);
+    overlay.classList.remove('miu-settings-route');
+    overlay.classList.add('active');
+    const source = document.getElementById('chatRoom');
+    const room = preview.importNode(source, true);
+    room.classList.add('active');
+    overlay.append(room);
+    shell.append(overlay);
+    preview.getElementById('dynamic-chat-style').textContent = chat?.customCss || '';
+    preview.getElementById('roomTitle').textContent = chat?.name || '聊天';
+    const messages = preview.getElementById('roomMessages');
+    messages.replaceChildren();
+    if (chat) renderMessages(chat, messages);
+    messages.scrollTop = messages.scrollHeight;
 }
 
 function bindPersonalSettings() {
@@ -1576,8 +1718,8 @@ async function handleImportFile(input) {
 function openGeneralSettings() { document.getElementById('generalSettingsPage').classList.add('active'); }
 function closeGeneralSettings() { document.getElementById('generalSettingsPage').classList.remove('active'); }
 
-function renderMessages(chat) {
-    const container = document.getElementById('roomMessages');
+function renderMessages(chat, container = document.getElementById('roomMessages')) {
+    const isPreview = container.ownerDocument !== document;
     
     // 1. 记录当前的滚动位置
     const prevScrollHeight = container.scrollHeight;
@@ -1596,7 +1738,7 @@ function renderMessages(chat) {
     let startIndex = 0;
     
     // 判断是否需要折叠
-    if (!chat.showFullHistory && totalMsgs > RENDER_LIMIT) {
+    if ((isPreview || !chat.showFullHistory) && totalMsgs > RENDER_LIMIT) {
         startIndex = totalMsgs - RENDER_LIMIT;
         
         // 添加“加载更多”按钮
@@ -1609,7 +1751,7 @@ function renderMessages(chat) {
             renderMessages(chat); 
             container.scrollTop = container.scrollHeight - oldHeight;
         };
-        container.appendChild(loadBtnDiv);
+        if (!isPreview) container.appendChild(loadBtnDiv);
     }
     
     const msgsToRender = chat.messages.slice(startIndex);
@@ -1867,6 +2009,7 @@ if (isSelf) {
         lastSenderType = currentSenderType; 
         container.appendChild(row); 
         
+        if (isPreview) return;
         // 事件绑定
         const bubbleNode = row.querySelector('.content');
         if (bubbleNode) {
@@ -1913,7 +2056,7 @@ if (isSelf) {
         }
     }); 
 
-    if (!chat.showFullHistory && !isMultiSelectMode) {
+    if (isPreview || (!chat.showFullHistory && !isMultiSelectMode)) {
         container.scrollTop = container.scrollHeight; 
     }
 }
@@ -2108,7 +2251,8 @@ function openChatRoom(id) {
     cancelReply(); 
     currentChatId = id; 
     const chat = chatList.find(c => c.id === id); 
-    if(!chat) return; 
+    if(!chat) return;
+    globalData.lastPersonalChatId = chat.id;
     
     // ===========================================
     // ★★★ 第一步修复核心：状态与索引重置 ★★★

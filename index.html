@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="gallery_app.css">
     <link rel="stylesheet" href="home.css?v=10">
     <link rel="stylesheet" href="api-settings.css?v=4">
-    <link rel="stylesheet" href="personal-settings.css?v=1">
+    <link rel="stylesheet" href="personal-settings.css?v=2">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -1390,19 +1390,14 @@
         <div class="personal-group personal-pair">
             <div class="personal-pair-item">
         <div class="personal-screen home">
-            <img id="wallpaperPreviewImg" alt="" hidden>
-            <div class="personal-screen-content" aria-hidden="true"><div class="personal-mini-clock"><span id="personalPreviewDate"></span><strong id="personalPreviewTime">--:--</strong></div>
-<div class="personal-mini-grid"><span><i class="fa-solid fa-comment" aria-hidden="true"></i></span><span><i class="fa-solid fa-heart" aria-hidden="true"></i></span><span><i class="fa-solid fa-terminal" aria-hidden="true"></i></span><span><i class="fa-solid fa-book" aria-hidden="true"></i></span><span><i class="fa-solid fa-users" aria-hidden="true"></i></span><span><i class="fa-solid fa-sliders" aria-hidden="true"></i></span><span><i class="fa-solid fa-cloud" aria-hidden="true"></i></span><span><i class="fa-solid fa-star" aria-hidden="true"></i></span></div><div class="personal-mini-dock"><span class="personal-mini-icon "><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="personalDock1" alt="" hidden></span><span class="personal-mini-icon "><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="personalDock2" alt="" hidden></span><span class="personal-mini-icon "><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="personalDock3" alt="" hidden></span></div></div>
+            <iframe id="personalLive-home" class="personal-live" title="主屏幕实时预览" sandbox="allow-same-origin" tabindex="-1" inert></iframe>
             <button type="button" class="personal-customize" data-personal-open="home" aria-label="自定义主屏幕壁纸">自定义</button>
         </div>
         <span>主屏幕</span>
     </div>
             <div class="personal-pair-item">
         <div class="personal-screen chatroom">
-            <img id="chatRoomWallpaperPreviewImg" alt="" hidden>
-            <div class="personal-screen-content" aria-hidden="true"><div class="personal-mini-chat-header"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i><strong>小记</strong><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></div>
-<div class="personal-mini-messages"><span>今晚有空吗？</span><span>有的，怎么啦？</span><span>一起去线下剧场吧。</span></div>
-<div class="personal-mini-composer"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>输入消息</span><i class="fa-solid fa-microphone" aria-hidden="true"></i></div></div>
+            <iframe id="personalLive-chatroom" class="personal-live" title="聊天页实时预览" sandbox="allow-same-origin" tabindex="-1" inert></iframe>
             <button type="button" class="personal-customize" data-personal-open="chatroom" aria-label="自定义聊天页壁纸">自定义</button>
         </div>
         <span>聊天页</span>
@@ -1531,7 +1526,7 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="script.js?v=8"></script>
+    <script data-cfasync="false" src="script.js?v=9"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
