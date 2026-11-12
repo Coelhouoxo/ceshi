@@ -1,0 +1,81 @@
+#apiSettingsPage.ios-api {
+    --api-ink: #1c1c1e;
+    --api-muted: #77777c;
+    --api-line: #dedee2;
+    --api-bg: #f2f2f7;
+    background: var(--api-bg);
+    color: var(--api-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+}
+.ios-api [hidden] { display: none !important; }
+.ios-api-bar { flex: none; height: 46px; display: flex; align-items: center; padding: 0 17px; }
+.ios-api button { color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ios-api-bar button { border: 0; background: transparent; padding: 5px 4px; min-height: 40px; display: flex; align-items: center; gap: 7px; font-size: 16px; }
+.ios-api-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 42px 16px calc(80px + var(--safe-bottom)); }
+.ios-api:not(:has([data-api-section="home"]:not([hidden]))) .ios-api-scroll { padding-top: 16px; padding-bottom: calc(24px + var(--safe-bottom)); }
+.ios-api h1 { margin: 0 0 13px; font-size: 32px; line-height: 1.18; font-weight: 750; letter-spacing: -.025em; }
+.ios-api-group { margin: 0 0 27px; border-radius: 24px; overflow: hidden; background: #fff; }
+.ios-api-row {
+    width: 100%; min-height: 49px; padding: 9px 16px; border: 0; background: transparent;
+    display: flex; align-items: center; gap: 11px; text-align: left; position: relative;
+    font-size: 16px;
+}
+.ios-api-row:not([hidden]) ~ .ios-api-row::before {
+    content: ""; position: absolute; inset: 0 16px auto; height: 1px; background: var(--api-line); transform: scaleY(.6);
+}
+.ios-api-row:has(.ios-api-glyph)::before { left: 55px !important; }
+.ios-api-primary:not([hidden]) + .ios-api-row::before { left: 82px; }
+.ios-api-row:active, .ios-api-action:active { background: #ebebef; }
+.ios-api-primary { min-height: 88px; }
+.ios-api-avatar { flex: none; width: 55px; height: 55px; border-radius: 50%; display: grid; place-items: center; background: #e8e8ed; color: #3c3c43; font-size: 19px; }
+.ios-api-row-text { flex: 1; min-width: 0; }
+.ios-api-primary strong { display: block; font-size: 19px; }
+.ios-api-primary small { display: block; color: var(--api-muted); margin-top: 4px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ios-api-summary { flex: 0 1 auto; max-width: 48%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--api-muted); font-size: 14px; }
+.ios-api-chevron { flex: none; color: #bcbcc1; font-size: 11px; }
+.ios-api-glyph { flex: none; display: grid; place-items: center; width: 27px; height: 27px; border-radius: 6px; color: white; font-size: 14px; background: #0789f9; }
+.ios-api-purple { background: #8054de; }
+.ios-api-gray { background: #77777c; }
+.ios-api-green { background: #31b75e; }
+.ios-api-orange { background: #ed8b26; }
+.ios-api-switch, .ios-api-field input[type="checkbox"] { flex: none; width: 51px; height: 28px; border-radius: 999px; background: #d0d0d3; position: relative; }
+.ios-api-field input[type="checkbox"] { appearance: none; border: 0; cursor: pointer; }
+.ios-api-switch::after, .ios-api-field input[type="checkbox"]::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 29px; height: 24px; border-radius: 999px;
+    background: white; box-shadow: 0 1px 3px #0002; transition: transform .15s;
+}
+.ios-api-row.checked .ios-api-switch, .ios-api-field input[type="checkbox"]:checked { background: #34c759; }
+.ios-api-row.checked .ios-api-switch::after, .ios-api-field input[type="checkbox"]:checked::after { transform: translateX(18px); }
+.ios-api-search {
+    position: absolute; bottom: calc(12px + var(--safe-bottom)); inset-inline: 24px; min-height: 46px;
+    display: flex; align-items: center; gap: 11px; padding: 0 16px; border-radius: 999px;
+    background: #ffffffd9; border: 1px solid #fff; box-shadow: 0 6px 20px #00000013;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+}
+.ios-api-search input { flex: 1; min-width: 0; height: 44px; padding: 0; background: transparent; border: 0; font: inherit; font-size: 16px; color: inherit; }
+.ios-api-field { display: flex; align-items: center; gap: 10px; padding: 8px 15px; min-height: 48px; font-size: 15px; }
+.ios-api-field + .ios-api-field { border-top: 1px solid #f0f0f2; }
+.ios-api-field > span { flex: none; }
+.ios-api-field input:not([type="checkbox"]), .ios-api-field select {
+    min-width: 0; width: 100%; min-height: 30px; text-align: right; border: 0; background: transparent;
+    font: inherit; font-size: 16px; color: #3c3c43;
+}
+.ios-api-field input[type="checkbox"] { margin-left: auto; }
+.ios-api-action { min-height: 42px; text-align: left; padding: 8px 15px; width: 100%; color: #0066cc !important; background: transparent; border: 0; font-size: 15px !important; }
+.ios-api-actions { display: flex; }
+.ios-api-actions > button { flex: 1; }
+#iosAuxDelete { color: #c22 !important; }
+.ios-api-disclosure { margin: 0 0 18px; color: var(--api-muted); font-size: 14px; }
+.ios-api-disclosure > summary { min-height: 40px; padding: 10px 12px; cursor: pointer; }
+.ios-api-note { margin: 0; padding: 6px 15px 11px; font-size: 13px; color: var(--api-muted); }
+.ios-api-note:empty { display: none; }
+.ios-api-model-results > button { overflow-wrap: anywhere; border-top: 1px solid #f0f0f2; }
+.ios-api-legacy { padding: 14px 16px; }
+.ios-api-legacy .api-input, .ios-api-legacy .settings-textarea, .ios-api-legacy .api-preset-select { color: var(--api-ink); background: #f5f5f7; border: 0; border-radius: 9px; font-size: 16px; }
+.ios-api-legacy .api-btn-small, .ios-api-legacy .plump-btn { background: #e9f2ff !important; color: #0066cc !important; border: 0 !important; border-radius: 9px; box-shadow: none !important; }
+.ios-api-legacy > .settings-card-box { margin: 0 !important; padding: 0; background: transparent; box-shadow: none; border: 0; }
+.ios-api-legacy .ios-model-open { flex: 1; min-width: 0; height: 44px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ios-api-legacy input[type="range"] { accent-color: #007aff; }
+.ios-api audio { width: calc(100% - 30px); margin: 4px 15px; }
+.ios-api :focus-visible { outline: 2px solid #007aff; outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) { .ios-api-switch::after, .ios-api-field input[type="checkbox"]::after { transition: none; } }

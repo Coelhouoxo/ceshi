@@ -82,45 +82,10 @@ function generateSystemPrompt(chat) {
 }
 
 function getFullPersona(chat) {
-    // 1. 获取当前时刻
-    const now = new Date();
-
-    // 2. ★★★ 核心修复：强制使用 Asia/Shanghai (北京时间) ★★★
-    // 无论你在哪个国家，或者手机时区怎么乱设，这里拿到的永远是北京时间
-    const fmt = (options) => new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Shanghai', 
-        hour12: false, // 强制24小时制
-        ...options
-    }).format(now);
-
-    const year = fmt({ year: 'numeric' });
-    const month = fmt({ month: 'numeric' });
-    const day = fmt({ day: 'numeric' });
-    
-    // 获取北京时间的小时数（纯数字）
-    const hour = parseInt(fmt({ hour: 'numeric' })); 
-    const minute = fmt({ minute: '2-digit' }).padStart(2, '0');
-
-    // 获取中文星期几 (例如: 周五)
-    const weekday = new Intl.DateTimeFormat('zh-CN', {
-        timeZone: 'Asia/Shanghai',
-        weekday: 'short'
-    }).format(now);
-
-    // 3. 计算时间段 (用上面获取到的准确 hour 来判断)
-    let period = "凌晨";
-    if (hour >= 6 && hour < 9) period = "早上";
-    else if (hour >= 9 && hour < 12) period = "上午";
-    else if (hour >= 12 && hour < 14) period = "中午";
-    else if (hour >= 14 && hour < 18) period = "下午";
-    else if (hour >= 18 && hour < 24) period = "晚上";
-
-    // 4. 组装字符串
-    const timeStr = `${year}年${month}月${day}日 (${weekday}) ${String(hour).padStart(2, '0')}:${minute} [${period}]`;
-
+    const timeStr = MiuApi.timeDescription(chat);
     const userName = chat.userRemark || chat.userRealName || "对方";
     return `
-【当前现实时间(北京时间)】：${timeStr}
+【当前时间感知】：${timeStr}
 【当前扮演角色】：${chat.name}
 【角色详细设定】：${chat.charPersona || "无"}
 【对方(你)的名字】：${userName}
@@ -591,6 +556,7 @@ async function saveData() {
 
     const settingsToSave = {
         id: 'main',
+        apiSuite: globalData.apiSuite || {},
         homeImages: Object.fromEntries(
             Array.from(document.querySelectorAll('[data-home-image][src]'), image => [image.id, image.src])
         ),
@@ -1988,6 +1954,8 @@ function openChatSettings() {
         document.getElementById('userPersona').value = chat.userPersona || '';
 
         document.getElementById('charVoiceId').value = chat.minimaxVoiceId || '';
+        document.getElementById('charFishVoiceId').value = chat.fishVoiceId || '';
+        document.getElementById('charElevenVoiceId').value = chat.elevenVoiceId || '';
 
         // 回填自定义回复条数限制，若未设置则默认为 1 - 3 条
         document.getElementById('charReplyMin').value = chat.replyMin !== undefined ? chat.replyMin : 1;
@@ -2106,6 +2074,8 @@ chat.showUserAvatar = document.getElementById('toggleUserAvatar').classList.cont
     chat.userPersona = document.getElementById('userPersona').value;
 
     chat.minimaxVoiceId = document.getElementById('charVoiceId').value.trim();
+    chat.fishVoiceId = document.getElementById('charFishVoiceId').value.trim();
+    chat.elevenVoiceId = document.getElementById('charElevenVoiceId').value.trim();
 
     // 保存自定义回复条数限制
     let rMin = parseInt(document.getElementById('charReplyMin').value);
@@ -2700,18 +2670,22 @@ async function fetchSecModels() {
  * 只要功能勾选了副 API，就绝对不向下回退到主 API。
  */
 window.getApiCredentials = function(featureName) {
-    // 1. 获取主 API 参数
-    const primEndpoint = document.getElementById('apiEndpoint')?.value.trim() || globalData.apiEndpoint || "";
-    const primKey = document.getElementById('apiKey')?.value.trim() || globalData.apiKey || "";
-    const primModel = document.getElementById('apiModel')?.value || globalData.apiModel || "";
-    const primTemp = parseFloat(document.getElementById('apiTemp')?.value) || parseFloat(globalData.apiTemp) || 1.0;
-    const primMaxTokens = parseInt(document.getElementById('apiMaxTokens')?.value) || parseInt(globalData.apiMaxTokens) || 2048;
+    const assigned = MiuApi.getAuxRoute(featureName);
+    if (assigned) return assigned;
+
+    const primEndpoint = document.getElementById('apiEndpoint')?.value.trim().replace(/\/+$/, '') || '';
+    const primKey = document.getElementById('apiKey')?.value.trim() || '';
+    const primModel = document.getElementById('apiModel')?.value || '';
+    const primaryTemperature = parseFloat(document.getElementById('apiTemp')?.value);
+    const primTemp = Number.isFinite(primaryTemperature) ? primaryTemperature : 1;
+    const primMaxTokens = parseInt(document.getElementById('apiMaxTokens')?.value, 10) || 2048;
 
     // 2. 获取副 API 参数
-    const secEndpoint = document.getElementById('secApiEndpoint')?.value.trim() || globalData.secApiEndpoint || "";
-    const secKey = document.getElementById('secApiKey')?.value.trim() || globalData.secApiKey || "";
-    const secModel = document.getElementById('secApiModel')?.value || globalData.secApiModel || "";
-    const secTemp = parseFloat(document.getElementById('secApiTemp')?.value) || parseFloat(globalData.secApiTemp) || 1.0;
+    const secEndpoint = document.getElementById('secApiEndpoint')?.value.trim().replace(/\/+$/, '') || '';
+    const secKey = document.getElementById('secApiKey')?.value.trim() || '';
+    const secModel = document.getElementById('secApiModel')?.value || '';
+    const secondaryTemperature = parseFloat(document.getElementById('secApiTemp')?.value);
+    const secTemp = Number.isFinite(secondaryTemperature) ? secondaryTemperature : 1;
     const secMaxTokens = parseInt(document.getElementById('secApiMaxTokens')?.value) || parseInt(globalData.secApiMaxTokens) || 2048;
 
     // 3. 判断当前功能是否勾选了副 API
@@ -2725,7 +2699,7 @@ window.getApiCredentials = function(featureName) {
     };
 
     const switchId = featureSwitchMap[featureName];
-    const isSecEnabled = switchId ? (document.getElementById(switchId)?.classList.contains('checked') || globalData[switchId] === true) : false;
+    const isSecEnabled = assigned === undefined && switchId && document.getElementById(switchId)?.classList.contains('checked');
 
     // 【严格隔离逻辑】：只要勾选了副 API，直接返回副 API 配置（即便未配置完整也会直接返回，以便请求时报错，实现绝对不向下回退）。
     if (isSecEnabled) {
@@ -2750,9 +2724,9 @@ window.getApiCredentials = function(featureName) {
     };
 };
 
-async function saveCurrentConfig() { const name = document.getElementById('configName').value.trim(); if (!name) { alert('请输入方案名称'); return; } const profile = { id: Date.now(), name: name, endpoint: document.getElementById('apiEndpoint').value, key: document.getElementById('apiKey').value, model: document.getElementById('apiModel').value, temp: document.getElementById('apiTemp').value }; apiProfiles.push(profile); await db.apiConfig.put(profile); renderApiProfiles(); document.getElementById('configName').value = ''; }
+async function saveCurrentConfig() { const name = document.getElementById('configName').value.trim(); if (!name) { alert('请输入方案名称'); return; } const profile = { id: Date.now(), name: name, endpoint: document.getElementById('apiEndpoint').value, key: document.getElementById('apiKey').value, model: document.getElementById('apiModel').value, temp: document.getElementById('apiTemp').value, maxTokens: document.getElementById('apiMaxTokens').value }; apiProfiles.push(profile); await db.apiConfig.put(profile); renderApiProfiles(); document.getElementById('configName').value = ''; }
 async function deleteProfile(index) { if(confirm('确定删除该方案吗？')) { const id = apiProfiles[index].id; apiProfiles.splice(index, 1); await db.apiConfig.delete(id); renderApiProfiles(); } }
-function loadProfile(index) { const p = apiProfiles[index]; document.getElementById('apiEndpoint').value = p.endpoint; document.getElementById('apiKey').value = p.key; const sel = document.getElementById('apiModel'); let exists = false; for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === p.model) exists = true; } if(!exists) { const opt = document.createElement('option'); opt.value = p.model; opt.innerText = p.model; sel.add(opt); } sel.value = p.model; document.getElementById('apiTemp').value = p.temp; document.getElementById('tempDisplay').innerText = p.temp; saveData(); alert(`已加载方案: ${p.name}`); }
+function loadProfile(index) { const p = apiProfiles[index]; document.getElementById('apiEndpoint').value = p.endpoint; document.getElementById('apiKey').value = p.key; const sel = document.getElementById('apiModel'); let exists = false; for(let i=0; i<sel.options.length; i++) { if(sel.options[i].value === p.model) exists = true; } if(!exists) { const opt = document.createElement('option'); opt.value = p.model; opt.innerText = p.model; sel.add(opt); } sel.value = p.model; document.getElementById('apiTemp').value = p.temp; document.getElementById('tempDisplay').innerText = p.temp; if (p.maxTokens != null) document.getElementById('apiMaxTokens').value = p.maxTokens; saveData(); alert(`已加载方案: ${p.name}`); }
 /* ========================================= */
 /* ★★★ API 配置管理 (美化下拉框版) ★★★ */
 /* ========================================= */
@@ -2772,6 +2746,8 @@ function renderApiProfiles() {
         option.innerText = p.name; 
         select.appendChild(option); 
     }); 
+    const selected = apiProfiles.findIndex(profile => profile.id === globalData.apiSuite?.presetId);
+    if (selected >= 0) select.value = String(selected);
 }
 
 // 2. 选中下拉框时加载配置 (新增)
@@ -2780,7 +2756,8 @@ function loadProfileFromSelect(el) {
     if (index === "") return; // 选了默认提示，不做操作
     
     // 调用原有的 loadProfile 逻辑 (你需要保留原有的 loadProfile 函数)
-    loadProfile(index); 
+    (globalData.apiSuite ??= {}).presetId = apiProfiles[index].id;
+    loadProfile(index);
     
     // 视觉反馈：选完后可以弹个轻提示，或者让下拉框保持选中状态
     // 此处无需额外代码，原生 select 会保持显示选中的项
@@ -2799,7 +2776,8 @@ async function deleteProfileFromSelect() {
     const profileName = apiProfiles[index].name;
     
     if(confirm(`确定要删除配置方案 “${profileName}” 吗？`)) { 
-        const id = apiProfiles[index].id; 
+        const id = apiProfiles[index].id;
+        if (globalData.apiSuite?.presetId === id) delete globalData.apiSuite.presetId;
         
         // 从数组移除
         apiProfiles.splice(index, 1); 
@@ -2811,10 +2789,16 @@ async function deleteProfileFromSelect() {
         
         // 重置下拉框到默认状态
         select.value = "";
+        await saveData();
     } 
 }
-function openApiSettings() { document.getElementById('apiSettingsPage').classList.add('active'); renderApiProfiles(); }
-function closeApiSettings() {
+function openApiSettings() {
+    document.getElementById('apiSettingsPage').classList.add('active');
+    renderApiProfiles();
+    MiuApi.open();
+}
+function closeApiSettings(force = false) {
+    if (!force && MiuApi.back()) return;
     document.getElementById('apiSettingsPage').classList.remove('active');
     leaveDesktopSettings('api');
     saveData();
@@ -3345,7 +3329,7 @@ async function confirmAddChar() {
 
 const overlay = document.getElementById('appOverlay'), chatPage = document.getElementById('chatAppPage'), genericPage = document.getElementById('genericAppPage'), appTitle = document.getElementById('appTitle');
 const desktopSettings = {
-    api: { open: openApiSettings, close: closeApiSettings },
+    api: { open: openApiSettings, close: () => closeApiSettings(true) },
     books: { open: openWorldBookSettings, close: closeWorldBookSettings },
     beautify: { open: openBeautifyPage, close: closeBeautifyPage }
 };
@@ -3721,20 +3705,12 @@ async function executeSummaryApi(chat, messagesArray, dateSuffix = "") {
 const promptText = messagesArray.map(m => `${m.isSelf ? userName : chat.name}: ${m.text}`).join('\n');
     const customInstruction = chat.chatMemory || ""; 
 
-    // ★ 获取经过时区和偏移量计算的【虚拟时间】
-    const tz = chat.userTimezone || 'Asia/Shanghai';
-    const offset = chat.userTimeOffset || 0;
-    const virtualMs = Date.now() + offset;
-    const virtualDateStr = new Intl.DateTimeFormat('zh-CN', { 
-        timeZone: tz, 
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', hour12: false 
-    }).format(new Date(virtualMs));
+    const virtualDateStr = MiuApi.timeDescription(chat, 'user');
 
     const systemPrompt = `
 [System Command]:
 你现在的任务是【记忆总结员】。
-当前总结时间（故事虚拟时间）：${virtualDateStr}。
+当前总结时间：${virtualDateStr}。
 正在总结的角色：${chat.name}。
 
 【通用要求】：
@@ -3757,8 +3733,8 @@ ${promptText.slice(0, 12000)}
         body: JSON.stringify({
             model: model,
             messages: [{ role: "user", content: systemPrompt }],
-            temperature: 0.5,
-            max_tokens: parseInt(document.getElementById('apiMaxTokens').value) || 2048
+            temperature: apiConfig.isSecondary ? temperature : 0.5,
+            max_tokens: maxTokens
         })
     });
 
@@ -4248,67 +4224,19 @@ async function generateAiReply(chat, isRegenerate = false) {
     let timeGapPrompt = "";
     
     // 2. 智能时间感知（双轨对比防错乱）
-    if (lastAiMsg) {
-        const vtNow = window.getVirtualTimeData(chat, false);
-        
-        // 计算虚拟时间差 (用于剧情)
-        const lastVirtualTime = lastAiMsg.virtualTimestamp || lastAiMsg.timestamp || Date.now();
-        const diffMinsVirtual = Math.floor((vtNow.ms - lastVirtualTime) / (1000 * 60));
-        
-        // 计算真实时间差 (用于防脾气)
-        const lastRealTime = lastAiMsg.timestamp || Date.now();
-        const diffMinsReal = Math.floor((Date.now() - lastRealTime) / (1000 * 60));
-
-        const currentHour = parseInt(vtNow.timeStr.split(':')[0]);
-
-        let timePeriodDesc = "";
-        if (currentHour >= 0 && currentHour < 5) timePeriodDesc = "深夜/凌晨";
-        else if (currentHour >= 5 && currentHour < 9) timePeriodDesc = "刚睡醒的清晨";
-        else if (currentHour >= 9 && currentHour < 12) timePeriodDesc = "上午";
-        else if (currentHour >= 12 && currentHour < 14) timePeriodDesc = "中午午休时间";
-        else if (currentHour >= 14 && currentHour < 18) timePeriodDesc = "下午";
-        else if (currentHour >= 18 && currentHour < 23) timePeriodDesc = "晚上";
-        else timePeriodDesc = "深夜";
-
-        // --- 场景 A: 间隔极短 (< 2分钟) ---
-        if (diffMinsVirtual < 2) {
-            timeGapPrompt = `(当前是实时对话，用户秒回了你)`;
+    if (lastAiMsg && MiuApi.timeMode() === 'real') {
+        const minutes = Math.max(0, Math.floor((Date.now() - (lastAiMsg.timestamp || Date.now())) / 60000));
+        if (minutes < 2) {
+            timeGapPrompt = '(当前是实时对话)';
+        } else {
+            const gap = minutes < 60 ? minutes + ' 分钟' :
+                minutes < 1440 ? (minutes / 60).toFixed(1) + ' 小时' : (minutes / 1440).toFixed(1) + ' 天';
+            timeGapPrompt = '(距上次发言约 ' + gap + '，按当前场景自然继续)';
         }
-        // --- 场景 B: 正常间隔 (< 1小时) ---
-        else if (diffMinsVirtual < 60) {
-            timeGapPrompt = `(距离你上次发言过去了 ${diffMinsVirtual} 分钟)`;
-        }
-        // --- 场景 C: 长时间间隔 (> 1小时) ---
-        else {
-            let timeDesc = diffMinsVirtual > 1440 ? `${(diffMinsVirtual / 1440).toFixed(1)}天` : `${(diffMinsVirtual / 60).toFixed(1)}小时`;
-
-            // ★★★ 核心：“时间机器”判断 ★★★
-            // 如果虚拟时间跨度极大（比如过了10小时），但真实时间只过了不到5分钟，说明用户拨动了时间！
-            const isTimeSkip = (diffMinsVirtual > 60 && diffMinsReal < 5);
-            const isMorningWakeUp = (currentHour >= 5 && currentHour <= 11) && (diffMinsVirtual > 360 && diffMinsVirtual < 840);
-
-            if (isTimeSkip) {
-                // 触发“剧情跳跃”逻辑，绝对禁止抱怨
-                timeGapPrompt = `
-[系统强指令：时间跳跃感知]
-剧情时间已快进，距离上次对话过去了 ${timeDesc}。
-【特殊情况判定】：这属于自然的剧情时间流逝（比如你们各自去忙了、或者睡了一觉到第二天），请根据【${timePeriodDesc}】的氛围自然开启新话题。
-**绝对禁止**抱怨用户消失或问用户去哪了！
-`;
-            } else if (isMorningWakeUp) {
-                timeGapPrompt = `[系统强指令：场景感知]\n距离上次对话过去了 ${timeDesc}。现在是早上，这只是正常的睡眠时间。请温和地打招呼，不要抱怨用户消失。`;
-            } else {
-                timeGapPrompt = `[系统强指令：用户回归]\n距离你上次发言已经过去了 ${timeDesc}。注意：是你发完消息后，用户一直没回。请根据人设做出被冷落的反应。`;
-            }
-        }
-    } else {
-        timeGapPrompt = `(这是新的对话，请主动开启话题)`;
+    } else if (!lastAiMsg) {
+        timeGapPrompt = '(这是新的对话，请主动开启话题)';
     }
 
-    // ============================================================
-    // ★★★ 新版时间感知逻辑 END ★★★
-    // ============================================================
-   
     const charName = chat.name;
     const activeSystemPrompt = generateSystemPrompt(chat); 
     
@@ -4496,7 +4424,7 @@ if (myStickers && myStickers.length > 0) {
     - 严禁连续多轮都发语音`;
 
     // 【图片/生图能力】(根据开关动态分离逻辑)
-    const useRealAI = globalData.naiEnabled && globalData.naiApiKey;
+    const useRealAI = MiuApi.imageReady();
     if (useRealAI) {
         systemPrompt += `\n【AI生图能力】：
     - 格式："[PHOTO:画面内容的详细英文提示词]"
@@ -4657,7 +4585,8 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
             contentToSend = `[回复 ${m.replyCtx.name}: ${m.replyCtx.content}]\n${contentToSend}`;
         }
         // 让 AI 知道每句话的确切发送时间
-        const datePrefix = m.virtualDate ? `[${m.virtualDate} ${m.time}] ` : '';
+        const messageTime = MiuApi.timeMode() === 'real' && m.timestamp ? MiuApi.messageTime(m.timestamp) : '';
+        const datePrefix = messageTime ? `[${messageTime}] ` : '';
         return { role: m.isSelf ? "user" : "assistant", content: datePrefix + contentToSend };
     });
     
@@ -4705,7 +4634,7 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
                     model: model, 
                     messages: messagesPayload, 
                     temperature: temp,
-                    max_tokens: parseInt(document.getElementById('apiMaxTokens').value) || 2048,
+                    max_tokens: maxTokens,
                     stream: isStream 
                 })
             });
@@ -5107,14 +5036,14 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
             // =====================================
             // ★ 分离版 [PHOTO:描述] 解析逻辑 ★
             // =====================================
-            const useRealAI = globalData.naiEnabled && globalData.naiApiKey;
+            const useRealAI = MiuApi.imageReady();
 
             if (!useRealAI) {
                 // 【模式 A：关闭了生图】 -> 全部解析为固定假照片
                 mainText = mainText.replace(/\[\s*(?:PHOTO|图片|照片|发图|生图|DRAW)\s*[:：]\s*(.*?)\]/gi, (match, desc) => {
                     const photoDesc = (desc || "图片").trim();
                     const fakeImgUrl = "https://img.heliar.top/file/1767108859529_IMG_9793.jpeg"; 
-                    return `<img src="${fakeImgUrl}" class="photo-msg-img" data-desc="${photoDesc}" onclick="showPhotoDescription(this.dataset.desc, event)">`;
+                    return `<img src="${fakeImgUrl}" class="photo-msg-img" data-desc="${MiuApi.escapeHtml(photoDesc)}" onclick="showPhotoDescription(this.dataset.desc, event)">`;
                 });
             } else {
                 // 【模式 B：开启了生图】 -> 触发真实绘画引擎
@@ -5127,19 +5056,16 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
                         titleEl.innerText = "对方正在画图...";
                     }
 
-                    const sizeParts = (globalData.naiSize || "1024x1024").split('x');
-                    const confW = sizeParts[0];
-                    const confH = sizeParts[1];
 
                     for (const m of matches) {
                         const matchStr = m[0];
                         const photoDesc = (m[1] || "图片").trim();
                         
                         // 阻塞等待，底层会自动拼接 角色提示词+全局正面词
-                        const imgUrl = await fetchNovelAIImage(chat, photoDesc);
+                        const imgUrl = await MiuApi.generateImage(chat, photoDesc);
                         
-                        const imgTag = `<img src="${imgUrl}" class="photo-msg-img" data-desc="${photoDesc}" style="width: 220px; height: auto !important; border-radius: 12px; display: block; object-fit: contain;" onclick="showPhotoDescription(this.dataset.desc, event)">`;
-                        mainText = mainText.replace(matchStr, imgTag);
+                        const imgTag = `<img src="${MiuApi.escapeHtml(imgUrl)}" class="photo-msg-img" data-desc="${MiuApi.escapeHtml(photoDesc)}" style="width: 220px; height: auto !important; border-radius: 12px; display: block; object-fit: contain;" onclick="showPhotoDescription(this.dataset.desc, event)">`;
+                        mainText = mainText.replace(matchStr, () => imgUrl ? imgTag : "[图片生成失败]");
                     }
                     
                     if (titleEl && currentChatId === chat.id) {
@@ -5154,11 +5080,7 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
                 let voiceContent = voiceMatch[1].trim();
                 let vDuration = Math.min(60, Math.max(1, Math.ceil(voiceContent.length / 3)));
                 
-                let audioUrl = null;
-                // 注意：TTS 请求会阻塞一点时间，这是正常的，如果不想阻塞需要改写成异步加载
-                if (chat.minimaxVoiceId) {
-                    audioUrl = await fetchMiniMaxTTS(voiceContent, chat.minimaxVoiceId);
-                }
+                const audioUrl = await MiuApi.messageVoice(voiceContent.split('::')[0], chat);
                 
                 const audioAttr = audioUrl ? `data-audio="${audioUrl}"` : "";
                 const visualClass = audioUrl ? "has-audio" : "";
@@ -5191,7 +5113,7 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
                 else if (voiceContent.includes("::")) {
                      const parts = voiceContent.split("::");
                      voiceContent = parts[0]; 
-                     finalTransHtml = `<div class="msg-trans-line"></div><div class="msg-trans-text">${parts[1]}</div>`;
+                     finalTransHtml = `<div class="msg-trans-line"></div><div class="msg-trans-text">${MiuApi.escapeHtml(parts[1])}</div>`;
                 }
 
                 const replacement = `
@@ -5200,10 +5122,10 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
                             <div class="voice-animate-icon"><div class="voice-line"></div><div class="voice-line"></div><div class="voice-line"></div><div class="voice-line"></div></div>
                             <span class="voice-duration">${vDuration}"</span>
                         </div>
-                        <div class="voice-trans-result">${voiceContent}${finalTransHtml}</div>
+                        <div class="voice-trans-result">${MiuApi.escapeHtml(voiceContent)}${finalTransHtml}</div>
                     </div>`;
                 
-                mainText = mainText.replace(voiceMatch[0], replacement);
+                mainText = mainText.replace(voiceMatch[0], () => replacement);
             }
 
             
@@ -7886,8 +7808,8 @@ ${todaysMoments || "（无）"}
                 model: model,
                 messages: [{ role: "user", content: systemPrompt }],
                 // ★ 温度适中，保持文笔的稳重感
-                temperature: 0.75, 
-                max_tokens: 10000
+                temperature: apiConfig.isSecondary ? apiConfig.temperature : 0.75,
+                max_tokens: apiConfig.isSecondary ? apiConfig.maxTokens : 10000
             })
         });
 
@@ -8615,8 +8537,8 @@ ${momentsText}
             body: JSON.stringify({
                 model: model,
                 messages: [{ role: "user", content: systemPrompt }],
-                temperature: 0.7,
-                max_tokens: parseInt(document.getElementById('apiMaxTokens').value) || 2048
+                temperature: apiConfig.isSecondary ? apiConfig.temperature : 0.7,
+                max_tokens: apiConfig.maxTokens
             })
         });
 
@@ -8665,16 +8587,7 @@ async function triggerAiSocialAction(chat, source = 'chat') {
 
     console.log(` [${source === 'life' ? '自主生活' : '聊天触发'}] 正在为 [${chat.name}] 生成自主行为...`);
     
-    // --- 1. 获取当前时间段 ---
-    const nowHour = new Date().getHours();
-    let timeContext = "";
-    if (nowHour >= 0 && nowHour < 6) timeContext = "深夜/凌晨 (注意：如果用户没睡，可以劝睡；如果自己困了就说晚安)";
-    else if (nowHour >= 6 && nowHour < 9) timeContext = "清晨 (适合发早安、开启新的一天)";
-    else if (nowHour >= 9 && nowHour < 12) timeContext = "上午工作/学习时间";
-    else if (nowHour >= 12 && nowHour < 14) timeContext = "午休时间";
-    else if (nowHour >= 14 && nowHour < 18) timeContext = "下午 (适合闲聊、分享日常)";
-    else if (nowHour >= 18 && nowHour < 23) timeContext = "晚上 (放松时间)";
-    else timeContext = "深夜";
+    const timeContext = MiuApi.timeDescription(chat);
 
     // --- 2. 构建聊天摘要 ---
     const recentChat = chat.messages.slice(-8).map(m => {
@@ -8692,7 +8605,7 @@ async function triggerAiSocialAction(chat, source = 'chat') {
     if (source === 'life') {
         contextPrompt = `
 【当前状态】：这是你根据自己的生活节奏，**主动**发起的行为（用户当前没有在和你说话）。
-【当前现实时间】：${timeContext}。
+【当前时间感知】：${timeContext}。
 【决策逻辑】：
 1. 如果上一句对话刚结束不到 10 分钟：请自然地承接上文。
 2. 如果已经隔了很久（超过 1 小时）：**严禁**强行接上一句的话题。**必须开启一个全新的话题**（如分享正在做的事、发照片、问候）。
@@ -8743,8 +8656,8 @@ if (typeof getVirtualTimePrompt === 'function') {
             body: JSON.stringify({
                 model: model,
                 messages: [{ role: "user", content: systemPrompt }],
-                temperature: 0.9,
-                max_tokens: parseInt(document.getElementById('apiMaxTokens').value) || 2048
+                temperature: apiConfig.isSecondary ? apiConfig.temperature : 0.9,
+                max_tokens: apiConfig.maxTokens
             })
         });
 
@@ -8784,29 +8697,28 @@ if (typeof getVirtualTimePrompt === 'function') {
                 if (voiceMatch) {
                     let voiceContent = voiceMatch[1].trim();
                     let vDuration = Math.min(60, Math.max(1, Math.ceil(voiceContent.length / 3)));
-                    if (chat.minimaxVoiceId) fetchMiniMaxTTS(voiceContent, chat.minimaxVoiceId);
-                    const replacement = `<div class="voice-inner-container" onclick="toggleVoiceText(this, event)"><div class="voice-main-row"><div class="voice-animate-icon"><div class="voice-line"></div><div class="voice-line"></div><div class="voice-line"></div><div class="voice-line"></div></div><span class="voice-duration">${vDuration}"</span></div><div class="voice-trans-result">${voiceContent}</div></div>`;
-                    mainText = mainText.replace(voiceMatch[0], replacement);
+                    const audioUrl = await MiuApi.messageVoice(voiceContent.split('::')[0], chat);
+                    const voiceAudio = audioUrl ? `data-audio="${audioUrl}"` : '';
+                    const replacement = `<div class="voice-inner-container ${audioUrl ? 'has-audio' : ''}" ${voiceAudio} onclick="toggleVoiceText(this, event)"><div class="voice-main-row"><div class="voice-animate-icon"><div class="voice-line"></div><div class="voice-line"></div><div class="voice-line"></div><div class="voice-line"></div></div><span class="voice-duration">${vDuration}"</span></div><div class="voice-trans-result">${MiuApi.escapeHtml(voiceContent)}</div></div>`;
+                    mainText = mainText.replace(voiceMatch[0], () => replacement);
                 }
-                 const useRealAI = globalData.naiEnabled && globalData.naiApiKey;
+                 const useRealAI = MiuApi.imageReady();
                 if (!useRealAI) {
                     mainText = mainText.replace(/\[\s*(?:PHOTO|图片|照片|发图|生图|DRAW)\s*[:：]\s*(.*?)\]/gi, (match, desc) => {
                         const photoDesc = (desc || "图片").trim();
-                        return `<img src="https://img.heliar.top/file/1767108859529_IMG_9793.jpeg" class="photo-msg-img" data-desc="${photoDesc}" onclick="showPhotoDescription(this.dataset.desc, event)">`;
+                        return `<img src="https://img.heliar.top/file/1767108859529_IMG_9793.jpeg" class="photo-msg-img" data-desc="${MiuApi.escapeHtml(photoDesc)}" onclick="showPhotoDescription(this.dataset.desc, event)">`;
                     });
                 } else {
                     const photoRegex = /\[\s*(?:PHOTO|图片|照片|发图|生图|DRAW)\s*[:：]\s*(.*?)\]/gi;
                     const matches =[...mainText.matchAll(photoRegex)];
                     if (matches.length > 0) {
-                        const sizeParts = (globalData.naiSize || "1024x1024").split('x');
-                        const confW = sizeParts[0];
-                        const confH = sizeParts[1];
+
                         for (const m of matches) {
                             const matchStr = m[0];
                             const photoDesc = (m[1] || "图片").trim();
-                            const imgUrl = await fetchNovelAIImage(chat, photoDesc);
-                            const imgTag = `<img src="${imgUrl}" class="photo-msg-img" data-desc="${photoDesc}" style="width: 220px; height: auto !important; border-radius: 12px; display: block; object-fit: contain;" onclick="showPhotoDescription(this.dataset.desc, event)">`;
-                            mainText = mainText.replace(matchStr, imgTag);
+                            const imgUrl = await MiuApi.generateImage(chat, photoDesc);
+                            const imgTag = `<img src="${MiuApi.escapeHtml(imgUrl)}" class="photo-msg-img" data-desc="${MiuApi.escapeHtml(photoDesc)}" style="width: 220px; height: auto !important; border-radius: 12px; display: block; object-fit: contain;" onclick="showPhotoDescription(this.dataset.desc, event)">`;
+                            mainText = mainText.replace(matchStr, () => imgUrl ? imgTag : "[图片生成失败]");
                         }
                     }
                 }
@@ -10502,50 +10414,10 @@ function toggleApiStream() {
 
 // 【修改版】MiniMax TTS 核心功能
 async function fetchMiniMaxTTS(text, voiceId) {
-    // 获取全局配置
-    const groupId = document.getElementById('minimaxGroupId').value;
-    const apiKey = document.getElementById('minimaxApiKey').value;
-    
-    if (!groupId || !apiKey || !voiceId) {
-        console.warn("MiniMax TTS 配置缺失，跳过语音生成");
-        return null; 
-    }
-
-    const url = `https://api.minimax.chat/v1/text_to_speech?GroupId=${groupId}`;
-    
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                voice_id: voiceId,
-                text: text,
-                model: "speech-01", 
-                speed: 1.0,
-                vol: 1.0,
-                pitch: 0
-            })
-        });
-
-        if (!response.ok) {
-            console.error("MiniMax TTS API Error:", response.status);
-            return null;
-        }
-
-        // MiniMax 返回的是音频流 (Blob)
-        const blob = await response.blob();
-        
-        // ★★★ 核心修改点：转为 Base64 字符串 ★★★
-        // 旧代码: const audioUrl = URL.createObjectURL(blob);
-        const audioUrl = await blobToBase64(blob); 
-        
-        return audioUrl;
-
-    } catch (e) {
-        console.error("MiniMax TTS 请求失败:", e);
+        return await MiuApi.minimaxSpeech(text, voiceId);
+    } catch (error) {
+        console.warn('MiniMax 语音生成失败', error.message);
         return null;
     }
 }
@@ -12642,7 +12514,7 @@ JSON 格式严格定义：
 
     try {
         // ★★★ 这里是解决问题的核心：获取设置页的 token 上限，兜底设为 4096 ★★★
-        const maxTokensSetting = parseInt(document.getElementById('apiMaxTokens').value) || 4096;
+        const maxTokensSetting = apiConfig.isSecondary ? apiConfig.maxTokens : parseInt(document.getElementById('apiMaxTokens').value) || 4096;
 
         const response = await fetch(`${endpoint}/chat/completions`, {
             method: 'POST',
@@ -12650,7 +12522,7 @@ JSON 格式严格定义：
             body: JSON.stringify({
                 model: model,
                 messages:[{ role: "user", content: systemPrompt }],
-                temperature: 0.8,
+                temperature: apiConfig.isSecondary ? apiConfig.temperature : 0.8,
                 max_tokens: maxTokensSetting // 放开限制，给深度思考留足空间
             })
         });
@@ -13070,7 +12942,7 @@ async function fetchNovelAIImage(chat, aiImageDescription) {
                     bytes[i] = binaryString.charCodeAt(i);
                 }
                 const blob = new Blob([bytes], { type: isPNG ? "image/png" : "image/jpeg" });
-                return URL.createObjectURL(blob);
+                return blobToBase64(blob);
             }
         } 
         
@@ -13088,7 +12960,7 @@ async function fetchNovelAIImage(chat, aiImageDescription) {
         if (startIndex !== -1) {
             const pngData = bytes.slice(startIndex);
             const blob = new Blob([pngData], { type: "image/png" });
-            return URL.createObjectURL(blob);
+            return blobToBase64(blob);
         } else {
             return "https://placehold.co/800x800/eeeeee/999999?text=Image+Parse+Error";
         }
@@ -14270,45 +14142,8 @@ window.resetVirtualTime = function(btnElement) {
 
 // 【绝对安全拦截器】
 window.getVirtualTimePrompt = function(chat) {
-    const isCharTzSet = chat.charTimezone && chat.charTimezone !== 'Asia/Shanghai';
-    const isUserTzSet = chat.userTimezone && chat.userTimezone !== 'Asia/Shanghai';
-    const hasOffset = chat.charTimeOffset !== undefined || chat.userTimeOffset !== undefined;
-
-    // ★ 绝对防御：如果什么都没设置（全是默认），返回空字符串，绝不影响原有时间逻辑
-    if (!isCharTzSet && !isUserTzSet && !hasOffset) {
-        return ""; 
-    }
-
-    const getTzInfo = (tz, offset) => {
-        const ms = Date.now() + (offset || 0);
-        const formatter = new Intl.DateTimeFormat('zh-CN', {
-            timeZone: tz || 'Asia/Shanghai',
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', weekday: 'short', hour12: false
-        });
-        const timeStr = formatter.format(new Date(ms));
-        
-        const hourFormatter = new Intl.DateTimeFormat('en-US', { timeZone: tz || 'Asia/Shanghai', hour: 'numeric', hour12: false });
-        const hour = parseInt(hourFormatter.format(new Date(ms)));
-        let period = "深夜";
-        if (hour >= 6 && hour < 9) period = "早晨";
-        else if (hour >= 9 && hour < 12) period = "上午";
-        else if (hour >= 12 && hour < 14) period = "中午";
-        else if (hour >= 14 && hour < 18) period = "下午";
-        else if (hour >= 18 && hour < 24) period = "晚上";
-        return { timeStr, period };
-    };
-
-    const charInfo = getTzInfo(chat.charTimezone, chat.charTimeOffset);
-    const userInfo = getTzInfo(chat.userTimezone, chat.userTimeOffset);
-
-    let prompt = `\n\n【⚠️特殊时空/异地设定 (核心指令)】：\n`;
-    prompt += `请严格以本条设定的时间为准，忽略上方系统给出的默认现实时间！\n`;
-    prompt += `你(Char)当前所在的当地时间是：${charInfo.timeStr}，处于[${charInfo.period}]。\n`;
-    prompt += `用户(User)当前所在的当地时间是：${userInfo.timeStr}，处于[${userInfo.period}]。\n`;
-    prompt += `(请在聊天中自然符合你的当地时间作息，体现出时差或异地感。不要生硬地去汇报时间，自然流露即可。)`;
-    
-    return prompt;
+    if (MiuApi.timeMode() !== 'real' || !chat.userTimezone || chat.userTimezone === chat.charTimezone) return '';
+    return `\n【用户当地时间】：${MiuApi.timeDescription(chat, 'user')}。请自然地体现时差。`;
 };
 
 /* ========================================= */
@@ -15270,8 +15105,8 @@ ${promptText.slice(0, 12000)}
         body: JSON.stringify({
             model: model,
             messages: [{ role: "user", content: systemPrompt }],
-            temperature: 0.6,
-            max_tokens: parseInt(document.getElementById('apiMaxTokens').value) || 2048
+            temperature: apiConfig.isSecondary ? apiConfig.temperature : 0.6,
+            max_tokens: apiConfig.maxTokens
         })
     });
 
@@ -15323,6 +15158,8 @@ function exportSingleChatRecord() {
                 visualPrompt: chat.visualPrompt || "",
                 chatMemory: chat.chatMemory || "",
                 minimaxVoiceId: chat.minimaxVoiceId || "",
+                fishVoiceId: chat.fishVoiceId || "",
+                elevenVoiceId: chat.elevenVoiceId || "",
                 replyMin: chat.replyMin,
                 replyMax: chat.replyMax,
                 customCss: chat.customCss || "",
@@ -15379,6 +15216,8 @@ function importSingleChatRecord(input) {
                         if (data.chatData.visualPrompt !== undefined) chat.visualPrompt = data.chatData.visualPrompt;
                         if (data.chatData.chatMemory !== undefined) chat.chatMemory = data.chatData.chatMemory;
                         if (data.chatData.minimaxVoiceId !== undefined) chat.minimaxVoiceId = data.chatData.minimaxVoiceId;
+                        if (data.chatData.fishVoiceId !== undefined) chat.fishVoiceId = data.chatData.fishVoiceId;
+                        if (data.chatData.elevenVoiceId !== undefined) chat.elevenVoiceId = data.chatData.elevenVoiceId;
                         if (data.chatData.customCss !== undefined) chat.customCss = data.chatData.customCss;
                         if (data.chatData.offlineSettings !== undefined) chat.offlineSettings = data.chatData.offlineSettings;
                         if (data.chatData.offlineCss !== undefined) chat.offlineCss = data.chatData.offlineCss;
