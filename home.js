@@ -434,6 +434,29 @@
         closeEditor(true);
     }
 
+    async function validateImage(state, src, attempt) {
+        if (editing !== state || state.imageAttempt !== attempt) return;
+        editorError.textContent = '正在检查图片…';
+        positionEditor();
+        const candidate = new Image();
+        let timeout;
+        try {
+            candidate.src = src;
+            const timeLimit = new Promise((_, reject) => {
+                timeout = setTimeout(reject, 12000);
+            });
+            await Promise.race([candidate.decode(), timeLimit]);
+            if (state.imageAttempt === attempt) saveImage(state, src);
+        } catch {
+            if (editing === state && state.imageAttempt === attempt) {
+                editorError.textContent = '图片加载失败，请检查链接或换一张图。';
+                positionEditor();
+            }
+        } finally {
+            clearTimeout(timeout);
+        }
+    }
+
     editor.addEventListener('click', event => {
         const action = event.target.closest('[data-editor-action]')?.dataset.editorAction;
         if (!editing || !action) return;
@@ -461,13 +484,14 @@
         if (editing.field) {
             saveText(editing);
         } else if (editing.url) {
+            const attempt = editing.imageAttempt = Symbol();
             const src = editorInput.value.trim();
             if (!/^https?:\/\//i.test(src)) {
                 editorError.textContent = '请输入 http 或 https 图片链接。';
                 positionEditor();
                 return;
             }
-            saveImage(editing, src);
+            validateImage(editing, src, attempt);
         }
     });
 
@@ -476,10 +500,14 @@
         const file = editorFile.files[0];
         editorFile.value = '';
         if (!state?.image || !file) return;
+        const attempt = state.imageAttempt = Symbol();
         const reader = new FileReader();
-        reader.addEventListener('load', () => saveImage(state, reader.result));
+        reader.addEventListener('load', () => validateImage(state, reader.result, attempt));
         reader.addEventListener('error', () => {
-            if (editing === state) editorError.textContent = '图片读取失败。';
+            if (editing === state && state.imageAttempt === attempt) {
+                editorError.textContent = '图片读取失败。';
+                positionEditor();
+            }
         });
         reader.readAsDataURL(file);
     });
