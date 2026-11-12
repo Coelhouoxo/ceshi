@@ -1,225 +1,3 @@
-const _0xSalt = "MiuPhone_Secret_2026"; 
-
-function _safeLocalStorageGet(key) {
-    try { return localStorage.getItem(key); } catch (e) { return null; }
-}
-
-function _safeLocalStorageSet(key, value) {
-    try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
-}
-
-function _cookieGet(name) {
-    try {
-        const encodedName = encodeURIComponent(name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const match = document.cookie.match(new RegExp('(?:^|; )' + encodedName + '=([^;]*)'));
-        return match ? decodeURIComponent(match[1]) : null;
-    } catch (e) { return null; }
-}
-
-function _cookieSet(name, value, opts = {}) {
-    try {
-        const parts = [];
-        parts.push(`${encodeURIComponent(name)}=${encodeURIComponent(value)}`);
-        parts.push(`Path=${opts.path || '/'}`);
-        if (opts.maxAgeSeconds) parts.push(`Max-Age=${opts.maxAgeSeconds}`);
-        if (opts.domain) parts.push(`Domain=${opts.domain}`);
-        if (opts.sameSite) parts.push(`SameSite=${opts.sameSite}`);
-        if (opts.secure) parts.push('Secure');
-        document.cookie = parts.join('; ');
-        return true;
-    } catch (e) { return false; }
-}
-
-function _isProbablyIP(hostname) {
-    if (!hostname) return false;
-    if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname)) return true;
-    return hostname.includes(':');
-}
-
-function _guessBaseDomain(hostname) {
-    if (!hostname) return null;
-    if (hostname === 'localhost' || hostname.endsWith('.localhost')) return null;
-    if (_isProbablyIP(hostname)) return null;
-    const parts = hostname.split('.').filter(Boolean);
-    if (parts.length < 2) return null;
-    return parts.slice(-2).join('.');
-}
-
-function _setCookieWithFallback(name, value, days = 400) {
-    const maxAgeSeconds = Math.max(1, Math.floor(days * 24 * 60 * 60));
-    const secure = location.protocol === 'https:';
-    const sameSite = 'Lax';
-
-    const baseDomain = _guessBaseDomain(location.hostname);
-    if (baseDomain) {
-        _cookieSet(name, value, { maxAgeSeconds, domain: baseDomain, sameSite, secure });
-        if (_cookieGet(name) === value) return;
-    }
-    _cookieSet(name, value, { maxAgeSeconds, sameSite, secure });
-}
-
-function _getMachineID() {
-    const lsId = _safeLocalStorageGet('miu_device_id');
-    const ckId = _cookieGet('miu_device_id');
-    let id = lsId || ckId;
-    if (!id) {
-        const p1 = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const p2 = Math.random().toString(36).substring(2, 6).toUpperCase();
-        id = `MIU-${p1}-${p2}`;
-    }
-    if (id) {
-        if (!lsId) _safeLocalStorageSet('miu_device_id', id);
-        if (!ckId) _setCookieWithFallback('miu_device_id', id);
-    }
-    return id;
-}
-
-function _calcHash_V1(did) {
-    let s = did + _0xSalt;
-    let h = 0;
-    for (let i = 0; i < s.length; i++) {
-        h = ((h << 5) - h) + s.charCodeAt(i);
-        h = h & h;
-    }
-    return Math.abs(h).toString(16).toUpperCase().padStart(8, '0');
-}
-
-// 2. 【新算法 V2】(高强度混淆)
-function _calcHash_V2(did) {
-    const salt = _0xSalt + "V2_Upgrade"; // 独立的盐
-    const str = did + salt;
-    // 自定义字典 (去除了易混淆字符 I,1,O,0)
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
-    
-    let hash = 5381;
-    let hash2 = 0;
-    
-    // 双重哈希混合
-    for (let i = 0; i < str.length; i++) {
-        const c = str.charCodeAt(i);
-        hash = ((hash << 5) + hash) + c; 
-        hash2 = ((hash2 << 4) ^ (hash2 >> 28)) ^ c; 
-    }
-    
-    hash = Math.abs(hash);
-    hash2 = Math.abs(hash2);
-    
-    let code = "";
-    // 前6位
-    for(let i=0; i<6; i++) {
-        code += chars[hash % chars.length];
-        hash = Math.floor(hash / chars.length);
-    }
-    // 后6位
-    for(let i=0; i<6; i++) {
-        code += chars[hash2 % chars.length];
-        hash2 = Math.floor(hash2 / chars.length);
-    }
-    
-    // 格式化为 XXXX-XXXX-XXXX
-    const final = code.match(/.{1,4}/g).join('-');
-    return final;
-}
-
-// =========================================
-// ★★★ 启动验证逻辑 (包含自动升级) ★★★
-// =========================================
-window.secureBoot = function(startAppCallback) {
-    const did = _getMachineID();
-    
-    // 获取存储中的 Token
-    const lsToken = _safeLocalStorageGet('miu_sec_token');
-    const ckToken = _cookieGet('miu_sec_token');
-    const savedCode = lsToken || ckToken;
-    
-    // 计算正确答案
-    const validCodeV1 = _calcHash_V1(did); // 旧版
-    const validCodeV2 = _calcHash_V2(did); // 新版
-    
-    // 1. 验证通过：已经是新版激活码
-    if (savedCode === validCodeV2) {
-        // 同步存储，防止单边丢失
-        if (!lsToken) _safeLocalStorageSet('miu_sec_token', validCodeV2);
-        if (!ckToken) _setCookieWithFallback('miu_sec_token', validCodeV2);
-        
-        if(typeof startAppCallback === 'function') startAppCallback();
-        return;
-    }
-    
-    // 2. 自动升级：检测到老版激活码 -> 自动替换为新版 -> 通过
-    if (savedCode === validCodeV1) {
-        console.log("检测到老用户，执行 V2 安全升级...");
-        _safeLocalStorageSet('miu_sec_token', validCodeV2);
-        _setCookieWithFallback('miu_sec_token', validCodeV2);
-        
-        if(typeof startAppCallback === 'function') startAppCallback();
-        return;
-    }
-
-    // 3. 验证失败：显示激活弹窗 (仅接受新版 V2 码)
-    _renderActivationModal(did, validCodeV2, startAppCallback);
-};
-
-// 辅助：渲染弹窗并绑定事件
-function _renderActivationModal(did, validCodeV2, callback) {
-    const mask = document.createElement('div');
-    mask.id = 'activation-overlay'; 
-    
-    mask.innerHTML = `
-        <div class="activation-card">
-            <div class="act-title">Miu Phone</div>
-            <div class="act-desc">请输入新的激活码。</div>
-            
-            <div class="device-code-box">
-                <span class="dc-label">设备码:</span>
-                <span class="dc-value" id="did-text">${did}</span>
-                <button class="dc-copy-btn" id="copy-btn">复制</button>
-            </div>
-
-            <input type="text" class="act-input" id="act-input" placeholder="输入激活码">
-            
-            <button class="act-confirm-btn" id="unlock-btn">立即激活</button>
-            
-            <div class="act-footer-text">
-                请联系作者获取激活码<br>
-                <span style="display:block; margin-top:6px; font-size:12px; color:#aaa;">
-                    小红书：Miu小手机作者winter
-                </span>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(mask);
-
-    // 复制设备码
-    document.getElementById('copy-btn').onclick = function() {
-        navigator.clipboard.writeText(did).then(() => {
-            const btn = document.getElementById('copy-btn');
-            btn.innerText = "已复制";
-            setTimeout(() => btn.innerText = "复制", 2000);
-        });
-    };
-
-    // 激活按钮逻辑
-    document.getElementById('unlock-btn').onclick = function() {
-        const inputRaw = document.getElementById('act-input').value.trim().toUpperCase();
-        
-        if (inputRaw === validCodeV2) {
-            _safeLocalStorageSet('miu_sec_token', validCodeV2);
-            _setCookieWithFallback('miu_sec_token', validCodeV2);
-            alert("激活成功！");
-            
-            const overlay = document.getElementById('activation-overlay');
-            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-            
-            // 启动 App
-            if(typeof callback === 'function') callback();
-        } else {
-            alert("激活码错误");
-            document.getElementById('act-input').value = '';
-        }
-    };
-}
 // 定义全局指令处理器列表
 window.aiCommandProcessors = [];
 
@@ -538,8 +316,8 @@ if (streamToggle) {
             if(globalData.kawaiiText) document.getElementById('kawaiiText').innerText = globalData.kawaiiText;
             if(globalData.kawaiiBottomText) document.getElementById('kawaiiBottomText').innerText = globalData.kawaiiBottomText;
             if(globalData.widgetTitle) document.getElementById('widgetTitle').innerText = globalData.widgetTitle;
-            if(globalData.captchaLabel) document.getElementById('captchaLabel').innerText = globalData.captchaLabel;
-            if(globalData.captchaInput) document.getElementById('captchaInput').innerText = globalData.captchaInput;
+            if(globalData.captchaLabel && globalData.captchaLabel !== "I'm not a robot") document.getElementById('captchaLabel').innerText = globalData.captchaLabel;
+            if(globalData.captchaInput && globalData.captchaInput !== 'Type what u see') document.getElementById('captchaInput').innerText = globalData.captchaInput;
             if(globalData.captchaImg) document.getElementById('captchaImg').src = globalData.captchaImg;
             if(globalData.dockIcon1) document.getElementById('dockIcon1').src = globalData.dockIcon1;
             if(globalData.dockIcon2) document.getElementById('dockIcon2').src = globalData.dockIcon2;
@@ -3585,27 +3363,6 @@ overlay.addEventListener('touchstart', (e) => { const rect = overlay.getBounding
 overlay.addEventListener('touchend', (e) => { if (!appIsSwiping) return; if (e.changedTouches[0].clientX - appStartX > 60) { handleAppSwipeBack(); } appIsSwiping = false; });
 
 
-function updateClock() { 
-    const now = new Date(); 
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; 
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; 
-    
-    // ★★★ 主屏幕时间 ★★★
-    const timeEl = document.getElementById('realTimeDisplay');
-    const dateEl = document.getElementById('realDateDisplay');
-    if(timeEl) timeEl.innerText = timeStr;
-    if(dateEl) dateEl.innerText = dateStr;
-    
-    // ★★★ kawaii 卡片时间（如果有的话）★★★
-    const kTimeEl = document.querySelector('.k-time-text');
-    const kDateEl = document.querySelector('.k-date-text');
-    if(kTimeEl) kTimeEl.innerText = timeStr;
-    if(kDateEl) kDateEl.innerText = dateStr;
-}
-
-// 每秒更新一次
-setInterval(updateClock, 1000); 
-
 function changeDockIcon(index, type) { uploadContext = { type: 'dock', index: index }; if (type === 'link') { const u = prompt("请输入图片链接:"); if(u) handleBeautifyImageUpdate(u); } else { document.getElementById('fileInput').click(); } }
 function changeAppIcon(index, type) { uploadContext = { type: 'app', index: index }; if (type === 'link') { const u = prompt("请输入图片链接:"); if(u) handleBeautifyImageUpdate(u); } else { document.getElementById('fileInput').click(); } }
 function clearWallpaper() { document.body.style.backgroundImage = ''; document.body.classList.remove('has-wallpaper'); openBeautifyPage(); saveData(); }
@@ -3688,34 +3445,10 @@ if (msgInputArea) {
 }
 
 
-function bootApp() {
-    if (typeof window.secureBoot === 'function') {
-        // 调用启动验证
-        window.secureBoot(function() {
-            console.log("验证通过");
-            // 验证通过后，才去加载数据库和渲染界面
-            loadAllDataFromDB(); 
-        });
-    } else {
-        // 如果走到这里，说明你 script.js 顶部的代码没粘贴对
-        console.error("Critical: Security module missing.");
-        alert("系统错误");
-    }
-}
-
-// 启动监听 (保持不变)
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootApp);
+    document.addEventListener('DOMContentLoaded', loadAllDataFromDB, { once: true });
 } else {
-    bootApp();
-}
-
-// Cloudflare Rocket Loader/异步脚本可能导致此脚本在 DOMContentLoaded 之后才执行，
-// 这会让 addEventListener('DOMContentLoaded', ...) 永远不触发，从而跳过激活校验与数据加载。
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootApp);
-} else {
-    bootApp();
+    loadAllDataFromDB();
 }
 
 function renderMemSummaryList(chat) {

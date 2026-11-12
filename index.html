@@ -22,105 +22,156 @@
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
+    <link rel="stylesheet" href="home.css">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
-        <!-- ... content ... -->
-        <!-- 主屏幕 -->
-        <div class="screen-content">
-            <!-- Header -->
-            <div class="bubble-image-wrapper" id="bubbleWrapper" onclick="showMenu(event, 'header')"><img src="https://placehold.co/360x300/transparent/ccc?text=Header+Image" id="headerImg" class="bubble-image"></div>
-            
-            <div class="profile-section">
-                <img src="https://placehold.co/100x100/e0e0e0/333?text=A" alt="Avatar" class="avatar" id="avatarImg" onclick="showMenu(event, 'avatar')">
-                <div class="info-card">
-                    <div class="kaomoji" id="homeKaomoji" onclick="editText(this)">> ω <</div>
-                    <div class="text-group">
-                        <div class="handle editable-text" id="homeHandle" onclick="editText(this)">@Yueyuemiao77</div>
-                        <div class="bio editable-text" id="homeBio" onclick="editText(this)">♫ ₊˚ 幸せのメロディー ✧ ⁺</div>
-                        <div class="location" onclick="editLocation()"><i class="fas fa-map-marker-alt"></i> <span id="locationText">和鸟</span></div>
+        <main class="miu-home" aria-label="小手机桌面">
+            <div class="miu-pages" id="miuPages" tabindex="0" aria-label="桌面页面">
+                <section class="miu-page" aria-label="第 1 页">
+                    <div class="miu-sheet">
+                        <div class="miu-clock">
+                            <div id="realDateDisplay"></div>
+                            <time id="realTimeDisplay">--:--</time>
+                        </div>
+                        <div class="miu-profile">
+                            <button type="button" class="miu-photo miu-profile-photo" onclick="showMenu(event, 'avatar')" aria-label="更换桌面头像">
+                                <i class="fa-solid fa-user" aria-hidden="true"></i><img id="avatarImg" alt="">
+                            </button>
+                            <div class="miu-identity">
+                                <div id="homeHandle" onclick="editText(this)">@Yueyuemiao77</div>
+                                <div id="homeBio" onclick="editText(this)">♫ ₊˚ 幸せのメロディー ✧ ⁺</div>
+                            </div>
+                            <button type="button" class="miu-icon-button miu-profile-settings" onclick="openBeautifyPage()" aria-label="美化设置"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="miu-location" onclick="editLocation()">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="locationText">和鸟</span>
+                        </div>
+                        <div class="miu-app-grid">
+                            <button type="button" class="miu-app" style="--column:1" onclick="openApp('Page 1')"><span class="miu-tile"><i class="fa-solid fa-comment" aria-hidden="true"></i></span><span>聊天</span></button>
+                            <button type="button" class="miu-app" style="--column:3" onclick="openCoupleSpace()"><span class="miu-tile"><i class="fa-solid fa-heart" aria-hidden="true"></i></span><span>情侣空间</span></button>
+                            <button type="button" class="miu-app" style="--column:2" onclick="openApiSettings()"><span class="miu-tile"><i class="fa-solid fa-code" aria-hidden="true"></i></span><span>API</span></button>
+                            <button type="button" class="miu-app" style="--column:4" onclick="openWorldBookSettings()"><span class="miu-tile"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span><span>世界书</span></button>
+                        </div>
+                        <div class="miu-duo">
+                            <div class="miu-duo-pair">
+                                <div>
+                                    <span id="homeKaomoji" onclick="editText(this)">• ᴗ •</span>
+                                    <button type="button" class="miu-photo" onclick="showMenu(event, 'kawaiiAvatarLeft')" aria-label="更换左头像"><i class="fa-solid fa-user" aria-hidden="true"></i><img id="kawaiiAvatarLeft" alt=""></button>
+                                </div>
+                                <div>
+                                    <span id="kawaiiText" onclick="editText(this)">○ ᵕ ○</span>
+                                    <button type="button" class="miu-photo" onclick="showMenu(event, 'kawaiiAvatarRight')" aria-label="更换右头像"><i class="fa-solid fa-user" aria-hidden="true"></i><img id="kawaiiAvatarRight" alt=""></button>
+                                </div>
+                            </div>
+                            <p id="kawaiiBottomText" onclick="editText(this)">보고 싶어요 ♡</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="section-title" id="widgetTitle" onclick="editText(this)">Widget Island</div>
-            
-            <!-- 分栏布局 -->
-            <div class="main-layout-row">
-                <!-- 左侧 -->
-                <div class="kawaii-wrapper">
-                    <div class="avatar-row">
-                        <img src="https://placehold.co/100x100/eee/999?text=L" class="kawaii-avatar" id="kawaiiAvatarLeft" onclick="showMenu(event, 'kawaiiAvatarLeft')">
-                        <img src="https://placehold.co/100x100/ddd/888?text=R" class="kawaii-avatar" id="kawaiiAvatarRight" onclick="showMenu(event, 'kawaiiAvatarRight')">
+                </section>
+                <section class="miu-page" aria-label="第 2 页">
+                    <div class="miu-sheet">
+                        <div class="miu-planner">
+                            <div class="miu-mini-clock">
+                                <span>TIME</span>
+                                <time class="k-time-text">--:--</time>
+                                <span class="miu-mini-emblem" aria-hidden="true"><i class="fa-solid fa-moon" aria-hidden="true"></i></span>
+                            </div>
+                            <fieldset class="miu-todos">
+                                <legend>To do list</legend>
+                                <label><input type="checkbox"> 早点休息</label>
+                                <label><input type="checkbox"> 听一首歌</label>
+                                <label><input type="checkbox"> 记录今天</label>
+                            </fieldset>
+                        </div>
+                        <div class="miu-separator" aria-hidden="true">✧</div>
+                        <p class="miu-calendar-note" id="widgetTitle" onclick="editText(this)">영원히 함께하자</p>
+                        <div class="miu-calendar" aria-label="日历">
+                            <div class="miu-calendar-head">
+                                <span id="miuCalendarMonth" aria-live="polite"></span>
+                                <button type="button" class="miu-icon-button" id="miuPreviousMonth" aria-label="上个月"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                                <button type="button" class="miu-icon-button" id="miuNextMonth" aria-label="下个月"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="miu-calendar-grid" id="miuCalendarDays"></div>
+                        </div>
+                        <div class="miu-app-grid">
+                            <button type="button" class="miu-app" style="--column:2" disabled><span class="miu-tile"><i class="fa-solid fa-cloud-moon" aria-hidden="true"></i></span><span>(˶ᵔ ᵕ ᵔ˶)</span></button>
+                            <button type="button" class="miu-app" style="--column:4" onclick="openBeautifyPage()"><span class="miu-tile"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span><span>美化</span></button>
+                            <button type="button" class="miu-app" style="--column:1" disabled><span class="miu-tile"><i class="fa-solid fa-feather" aria-hidden="true"></i></span><span>(｡•́‿•̀｡)</span></button>
+                            <button type="button" class="miu-app" style="--column:3" disabled><span class="miu-tile"><i class="fa-solid fa-star" aria-hidden="true"></i></span><span>(づ˘⌣˘)づ</span></button>
+                        </div>
                     </div>
-                    <div class="kawaii-card">
-                        <div class="kawaii-text" id="kawaiiText" onclick="editText(this)">●ω● かわいい可愛.!!</div>
-                        <div class="kawaii-white-box">
-                            <div class="kawaii-time-row"><div class="k-time-text" id="realTimeDisplay">00:00</div></div>
-                            <div class="k-date-text" id="realDateDisplay">2025-01-01</div>
-                            <div class="k-icons-row">
-                                <div class="k-icon-btn"><i class="fas fa-wifi"></i></div>
-                                <div class="k-icon-btn"><i class="fas fa-broadcast-tower"></i></div>
-                                <div class="k-icon-btn"><i class="fab fa-bluetooth-b bluetooth-icon"></i></div>
+                </section>
+                <section class="miu-page" aria-label="第 3 页">
+                    <div class="miu-sheet">
+                        <div class="miu-banner-top">
+                            <span id="captchaLabel" onclick="editText(this)">片刻</span>
+                            <button type="button" class="miu-icon-button" onclick="toggleMusicPanel(true)" aria-label="打开播放列表"><i class="fa-solid fa-headphones" aria-hidden="true"></i></button>
+                        </div>
+                        <button type="button" class="miu-photo miu-banner" id="bubbleWrapper" onclick="showMenu(event, 'header')" aria-label="更换横幅">
+                            <span aria-hidden="true">✧</span><img id="headerImg" alt="">
+                        </button>
+                        <div class="miu-media-grid">
+                            <div class="miu-app" style="--column:1">
+                            <button type="button" class="miu-tile" id="app5IconWrapper" onclick="openCheckPhoneSelector()" aria-labelledby="app5Label">
+                                <img style="display:none" id="app5Img" alt="">
+                                <i class="fa-solid fa-mobile-screen-button" id="app5Default" aria-hidden="true"></i>
+                            </button>
+                            <span id="app5Label" onclick="editText(this)">查手机</span>
+                        </div>
+                            <div class="miu-app" style="--column:2">
+                            <button type="button" class="miu-tile" id="app6IconWrapper" onclick="openGalleryApp()" aria-labelledby="app6Label">
+                                <img style="display:none" id="app6Img" alt="">
+                                <i class="fa-solid fa-images" id="app6Default" aria-hidden="true"></i>
+                            </button>
+                            <span id="app6Label" onclick="editText(this)">真实相册</span>
+                        </div>
+                            <figure class="miu-memory">
+                                <figcaption>Memory</figcaption>
+                                <button type="button" class="miu-photo miu-memory-photo" onclick="showMenu(event, 'captcha')" aria-label="更换照片卡片"><i class="fa-solid fa-camera-retro" aria-hidden="true"></i><img id="captchaImg" alt=""></button>
+                                <p id="captchaInput" onclick="editText(this)">留一张给今天</p>
+                            </figure>
+                        </div>
+                        <div class="miu-player" aria-label="音乐播放器">
+                            <div class="miu-track">
+                                <span class="miu-record" aria-hidden="true"><i class="fa-solid fa-compact-disc" aria-hidden="true"></i></span>
+                                <div>
+                                    <div id="miuTrackName">未选择歌曲</div>
+                                    <div id="miuTrackArtist">播放列表</div>
+                                </div>
+                                <button type="button" class="miu-icon-button" onclick="toggleMusicPanel(true)" aria-label="播放列表"><i class="fa-solid fa-wave-square" aria-hidden="true"></i></button>
+                            </div>
+                            <div class="miu-track-time">
+                                <span id="miuTrackElapsed">0:00</span>
+                                <progress id="miuTrackProgress" max="1" value="0" aria-label="播放进度"></progress>
+                                <span id="miuTrackRemaining">–:––</span>
+                            </div>
+                            <div class="miu-player-controls">
+                                <button type="button" class="miu-icon-button" onclick="openMusicSearchModal()" aria-label="搜索歌曲"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+                                <button type="button" class="miu-icon-button" onclick="prevTrack()" aria-label="上一首"><i class="fa-solid fa-backward-step" aria-hidden="true"></i></button>
+                                <button type="button" class="miu-icon-button" id="miuPlay" aria-label="播放"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
+                                <button type="button" class="miu-icon-button" onclick="nextTrack()" aria-label="下一首"><i class="fa-solid fa-forward-step" aria-hidden="true"></i></button>
+                                <button type="button" class="miu-icon-button" onclick="toggleMusicPanel(true)" aria-label="打开音乐列表"><i class="fa-solid fa-list-ul" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </div>
-                    <div class="kawaii-bottom-text" id="kawaiiBottomText" onclick="editText(this)">《My Mood》</div>
-                </div>
-
-                <div class="right-column">
-    <div class="right-apps-row">
-        
-        <!-- 软件5：查手机入口 -->
-        <!-- 注意：必须保留 mini-app-item 这个外层包裹 -->
-        <div class="mini-app-item">
-            <div class="mini-app-icon" id="app5IconWrapper" onclick="openCheckPhoneSelector()">
-                <!-- 如果有自定义图则显示图 -->
-                <img src="" style="display:none;" id="app5Img">
-                <!-- 默认显示手机图标 -->
-                <i class="fas fa-mobile-alt" id="app5Default" style="font-size: 24px;"></i>
+                </section>
             </div>
-            <!-- 文字标签必须在 icon 下面 -->
-            <div class="mini-app-label" id="app5Label" onclick="editText(this)">查手机</div>
-        </div>
-<div class="mini-app-item">
-    <!-- 修改 onclick 为 openGalleryApp() -->
-    <div class="mini-app-icon" id="app6IconWrapper" onclick="openGalleryApp()">
-        <img src="" style="display:none;" id="app6Img">
-        <!-- 换个相册图标 -->
-        <i class="fas fa-images" id="app6Default" style="font-size: 24px;"></i>
-    </div>
-    <div class="mini-app-label" id="app6Label" onclick="editText(this)">真实相册</div>
-</div>
-                    </div>
-                    <div class="camera-widget">
-                        <div class="captcha-top"><div class="captcha-checkbox"></div><div class="captcha-label" id="captchaLabel" onclick="editText(this)">I'm not a robot</div></div>
-                        <div class="captcha-body">
-                            <div class="captcha-input-row"><div class="captcha-input" id="captchaInput" onclick="editText(this)">Type what u see</div><div class="captcha-verify-btn">Verify</div></div>
-                            <div class="captcha-content-row">
-                                <div class="captcha-img-container"><img src="https://placehold.co/150x80/white/333?text=Anime+Girl" class="captcha-img" id="captchaImg" onclick="showMenu(event, 'captcha')"></div>
-                                <div class="captcha-icons-col"><i class="fas fa-sync-alt c-icon"></i><i class="fas fa-headphones c-icon"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <nav class="miu-pagination" aria-label="桌面翻页">
+                <svg class="miu-page-wave" viewBox="0 0 400 34" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0 5 C70 5 70 29 130 29 S197 5 260 5 S330 29 400 29 M0 29 C70 29 70 5 130 5 S197 29 260 29 S330 5 400 5"/>
+                </svg>
+                <button type="button" aria-label="第 1 页" aria-current="page"></button>
+                <button type="button" aria-label="第 2 页"></button>
+                <button type="button" aria-label="第 3 页"></button>
+            </nav>
+            <div class="miu-dock" aria-label="常用应用">
+                <button type="button" class="dock-btn miu-tile" onclick="openApp('Page 1')" aria-label="聊天"><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="dockIcon1" src="https://placehold.co/40/white/ccc?text=🤍" alt=""></button>
+                <button type="button" class="dock-btn miu-tile" onclick="openCoupleSpace()" aria-label="情侣空间"><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="dockIcon2" src="https://placehold.co/40/white/ccc?text=🍷" alt=""></button>
+                <button type="button" class="dock-btn miu-tile" onclick="openWallet()" aria-label="钱包"><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="dockIcon3" src="https://placehold.co/40/white/ccc?text=🐰" alt=""></button>
+                <button type="button" class="dock-btn miu-tile" onclick="openApp('Page 4')" aria-label="论坛"><i class="fa-solid fa-compass" aria-hidden="true"></i><img id="dockIcon4" src="https://placehold.co/40/white/ccc?text=🐱" alt=""></button>
             </div>
+        </main>
 
-            <!-- 搜索栏 -->
-            <div class="search-pill-container">
-                <div class="search-pill"><i class="fas fa-search"></i> 搜索</div>
-            </div>
-
-        </div>
-        
-        <!-- Dock -->
-        <div class="dock-capsule">
-            <div class="dock-btn" onclick="openApp('Page 1')"><img id="dockIcon1" src="https://placehold.co/40/white/ccc?text=🤍" alt="Btn1"></div>
-            <div class="dock-btn" onclick="openCoupleSpace()"><img id="dockIcon2" src="https://placehold.co/40/white/ccc?text=🍷" alt="Btn2"></div>
-            <div class="dock-btn" onclick="openWallet()"><img id="dockIcon3" src="https://placehold.co/40/white/ccc?text=🐰" alt="Btn3"></div>
-            <div class="dock-btn" onclick="openApp('Page 4')"><img id="dockIcon4" src="https://placehold.co/40/white/ccc?text=🐱" alt="Btn4"></div>
-        </div>
-        
         <div class="popover-menu" id="popMenu"><div class="menu-item" onclick="changeByLink()"><i class="fas fa-link"></i> 图片链接</div><div class="menu-item" onclick="triggerFileInput()"><i class="fas fa-image"></i> 本地图片</div></div>
         <input type="file" id="fileInput" accept="image/*" style="display: none;">
         <input type="file" id="importInput" accept="*" style="display: none;" onchange="handleImportFile(this)">
@@ -1579,6 +1630,7 @@
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
     <script data-cfasync="false" src="script.js"></script>
+    <script data-cfasync="false" src="home.js" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>
