@@ -1,7 +1,7 @@
 .miu-home {
-    --miu-ink: #27282b;
-    --miu-muted: #5c5d61;
-    --miu-line: rgba(37, 38, 43, .14);
+    --miu-ink: #282828;
+    --miu-muted: #5d5d5d;
+    --miu-line: rgba(38, 38, 38, .14);
     --miu-gap: clamp(12px, 2.1dvh, 22px);
     display: flex;
     flex-direction: column;
@@ -24,7 +24,7 @@ body.has-wallpaper .miu-home {
 }
 
 .miu-home button:focus-visible, .miu-pages:focus-visible {
-    outline: 2px solid #60616a;
+    outline: 2px solid #616161;
     outline-offset: -2px;
 }
 
@@ -69,7 +69,7 @@ body.has-wallpaper .miu-home {
     justify-items: center;
     gap: 3px;
     padding-block: 3px clamp(4px, 1.3dvh, 12px);
-    color: #28262d;
+    color: #272727;
     text-align: center;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Roboto, sans-serif;
     font-variant-numeric: tabular-nums;
@@ -144,7 +144,7 @@ body.has-wallpaper .miu-home {
 
 .miu-home .miu-profile-settings {
     background: #ffffff4f;
-    border: 1px solid #ffffff91;
+    border: 1px solid #d4d4d4;
 }
 
 .miu-location {
@@ -195,7 +195,7 @@ body.has-wallpaper .miu-home {
     aspect-ratio: 1;
     border: 0;
     border-radius: 12px;
-    background: #fdfdff75;
+    background: #fdfdfd75;
 }
 
 .miu-home :is(#app5IconWrapper, #app6IconWrapper) { width: 55px; border-radius: 18px; }
@@ -213,7 +213,7 @@ body.has-wallpaper .miu-home {
     text-overflow: ellipsis;
     background: #ffffffa6;
     padding: 3px 8px;
-    border: 1px solid #b8b8be45;
+    border: 1px solid #b8b8b845;
     border-radius: 20px;
     cursor: pointer;
 }
@@ -239,10 +239,10 @@ body.has-wallpaper .miu-home {
 .miu-todos { min-width: 0; border: 0; color: var(--miu-muted); font-size: 12px; }
 .miu-todos legend { margin-bottom: 5px; letter-spacing: .08em; }
 .miu-todos label { display: flex; align-items: center; gap: 6px; min-height: 24px; cursor: pointer; }
-.miu-todos input { appearance: none; width: 12px; height: 12px; border: 1px solid #85858b; border-radius: 50%; background: #fff4; }
-.miu-todos input:checked { background: #686970; box-shadow: inset 0 0 0 2px #ececef; }
-.miu-todos input:focus-visible { outline: 2px solid #60616a; outline-offset: 2px; }
-.miu-separator { display: flex; align-items: center; gap: 9px; color: #71727b; font-size: 11px; }
+.miu-todos input { appearance: none; width: 12px; height: 12px; border: 1px solid #858585; border-radius: 50%; background: #fff4; }
+.miu-todos input:checked { background: #696969; box-shadow: inset 0 0 0 2px #ececec; }
+.miu-todos input:focus-visible { outline: 2px solid #616161; outline-offset: 2px; }
+.miu-separator { display: flex; align-items: center; gap: 9px; color: #727272; font-size: 11px; }
 .miu-separator::before, .miu-separator::after { content: ""; flex: 1; height: 1px; background: var(--miu-line); }
 .miu-calendar-widget { display: grid; gap: var(--miu-gap); }
 .miu-calendar-note { color: var(--miu-muted); text-align: center; font-size: 12px; cursor: pointer; }
@@ -251,10 +251,10 @@ body.has-wallpaper .miu-home {
 .miu-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; gap: 2px; color: var(--miu-muted); font-size: 11px; }
 .miu-calendar-grid > span { display: grid; place-items: center; height: clamp(18px, 3.45dvh, 29px); font-variant-numeric: tabular-nums; }
 .miu-calendar-grid .miu-weekday { font-size: 9px; letter-spacing: .05em; }
-.miu-calendar-grid .miu-today { border-radius: 999px; background: #dcdce0; font-weight: 700; color: var(--miu-ink); }
+.miu-calendar-grid .miu-today { border-radius: 999px; background: #dcdcdc; font-weight: 700; color: var(--miu-ink); }
 
 .miu-week-card {
-    --miu-paper-ink: #454147;
+    --miu-paper-ink: #424242;
     display: grid;
     gap: 14px;
     padding: 4px 0;
@@ -271,37 +271,37 @@ body.has-wallpaper .miu-home {
     width: 21px;
     height: 21px;
     border-radius: 50%;
-    background: #454147;
+    background: #424242;
     color: #fff;
     font-size: 9px;
     pointer-events: none;
 }
-.miu-week-avatar { width: 100%; aspect-ratio: 1; border-radius: 50%; background: #fff9; box-shadow: inset 0 0 0 1px #665d661c; }
-.miu-week-copy > strong { display: block; color: #27242a; font: 700 20px/1.18 Georgia, "Songti SC", serif; }
+.miu-week-avatar { width: 100%; aspect-ratio: 1; border-radius: 50%; background: #fff9; box-shadow: inset 0 0 0 1px #6060601c; }
+.miu-week-copy > strong { display: block; color: #252525; font: 700 20px/1.18 Georgia, "Songti SC", serif; }
 .miu-week-copy > strong .miu-week-star { font-size: 11px; vertical-align: .22em; }
-.miu-week-copy > p, .miu-week-date { margin-top: 4px; font-size: 11px; color: #716970; }
-.miu-week-date i { margin-right: 2px; color: #766c75; }
+.miu-week-copy > p, .miu-week-date { margin-top: 4px; font-size: 11px; color: #6b6b6b; }
+.miu-week-date i { margin-right: 2px; color: #6f6f6f; }
 .miu-week-days { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .miu-week-days span {
     padding: 3px 6px;
-    border: 1px solid #84798428;
+    border: 1px solid #7c7c7c28;
     border-radius: 999px;
     font-size: 9px;
     line-height: 1.2;
     white-space: nowrap;
 }
 .miu-week-timeline { position: relative; display: grid; gap: 7px; }
-.miu-week-timeline::before { content: ""; position: absolute; top: 12px; bottom: 7px; left: 12px; width: 1px; background: #6b5d6b32; }
+.miu-week-timeline::before { content: ""; position: absolute; top: 12px; bottom: 7px; left: 12px; width: 1px; background: #61616132; }
 .miu-week-entry { display: flex; align-items: center; gap: 7px; min-height: 30px; font-size: 11px; }
 .miu-week-entry p { flex: 1; min-width: 0; font-weight: 620; }
-.miu-week-entry > time { margin-left: auto; color: #716970; font-size: 10px; font-variant-numeric: tabular-nums; }
+.miu-week-entry > time { margin-left: auto; color: #6b6b6b; font-size: 10px; font-variant-numeric: tabular-nums; }
 .miu-week-mark, .miu-week-status { flex: none; display: grid; place-items: center; border-radius: 50%; }
-.miu-week-mark { z-index: 1; width: 25px; height: 25px; background: #f3e7eb; color: #776873; font-size: 10px; }
-.miu-week-status { width: 17px; height: 17px; color: white; background: #655b64; font-size: 8px; }
-.miu-week-status-open { border: 4px solid #655b64; background: transparent; }
-.miu-week-album { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 5px; border-radius: 8px; padding: 5px 6px; background: #e7dde958; }
+.miu-week-mark { z-index: 1; width: 25px; height: 25px; background: #eaeaea; color: #6c6c6c; font-size: 10px; }
+.miu-week-status { width: 17px; height: 17px; color: white; background: #5e5e5e; font-size: 8px; }
+.miu-week-status-open { border: 4px solid #5e5e5e; background: transparent; }
+.miu-week-album { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 5px; border-radius: 8px; padding: 5px 6px; background: #f0f0f0; }
 .miu-week-album small, .miu-week-album strong { display: block; }
-.miu-week-album small { color: #716970; font-size: 9px; }
+.miu-week-album small { color: #6b6b6b; font-size: 9px; }
 .miu-week-album strong { font-size: 11px; font-weight: 650; }
 .miu-week-photos { flex: none; display: flex; gap: 3px; }
 .miu-week-photos .miu-photo { width: clamp(25px, 9vw, 42px); aspect-ratio: 1; border-radius: 6px; background: #fffc; }
@@ -312,12 +312,12 @@ body.has-wallpaper .miu-home {
 .miu-home .camera-widget .captcha-verify-btn { padding-inline: 5px; }
 .miu-home .camera-widget .captcha-img-container { flex: 1; min-width: 0; border: 1px solid #eee; background: transparent; }
 
-.miu-memo { display: grid; gap: 7px; font-size: 11px; color: #454147; }
+.miu-memo { display: grid; gap: 7px; font-size: 11px; color: #424242; }
 .miu-memo-head, .miu-memo-meta, .miu-memo-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.miu-memo-head > span, .miu-memo-meta > span:last-child { padding: 4px 7px; border: 1px solid #c7bfc52f; border-radius: 2px; background: #ffffff65; font-size: 10px; }
+.miu-memo-head > span, .miu-memo-meta > span:last-child { padding: 4px 7px; border: 1px solid #c1c1c12f; border-radius: 2px; background: #ffffff65; font-size: 10px; }
 .miu-memo-head > span:first-child { min-width: 38%; display: flex; justify-content: space-between; align-items: center; }
 .miu-memo-head i { margin-left: 5px; }
-.miu-memo-card { padding: 10px 11px 7px; border: 1px solid #d6ccd350; border-radius: 4px; background: linear-gradient(120deg, #fffc, #fbf8faac 64%, #eee7ec6e); }
+.miu-memo-card { padding: 10px 11px 7px; border: 1px solid #cfcfcf50; border-radius: 4px; background: linear-gradient(120deg, #fff, #f5f5f5); }
 .miu-memo-profile { display: flex; align-items: center; gap: 11px; }
 .miu-home .miu-memo-frame {
     flex: none;
@@ -325,30 +325,30 @@ body.has-wallpaper .miu-home {
     aspect-ratio: 1;
     display: grid;
     padding: 3px;
-    border: 1px solid #aca9af6b;
+    border: 1px solid #aaaaaa6b;
     border-radius: 17px;
-    background: linear-gradient(145deg, #fff, #eeebef);
-    box-shadow: 0 0 0 1px #fffc, inset 0 0 0 1px #fffc, 0 1px 2px #655d691c;
+    background: linear-gradient(145deg, #fff, #ececec);
+    box-shadow: 0 0 0 1px #fffc, inset 0 0 0 1px #fffc, 0 1px 2px #6060601c;
 }
-.miu-memo-photo { width: 100%; height: 100%; border-radius: 12px; background: #e5e2e6a6; box-shadow: inset 0 0 0 1px #b1aab33b; }
+.miu-memo-photo { width: 100%; height: 100%; border-radius: 12px; background: #e3e3e3a6; box-shadow: inset 0 0 0 1px #acacac3b; }
 .miu-memo-profile strong { display: block; font-size: 14px; }
-.miu-memo-profile p { margin-top: 4px; color: #716970; font-size: 10px; }
-.miu-memo-mark { align-self: start; margin-left: auto; color: #817881; white-space: nowrap; }
-.miu-memo-meta { margin-top: 7px; color: #716970; font-size: 10px; font-variant-numeric: tabular-nums; }
+.miu-memo-profile p { margin-top: 4px; color: #6b6b6b; font-size: 10px; }
+.miu-memo-mark { align-self: start; margin-left: auto; color: #7b7b7b; white-space: nowrap; }
+.miu-memo-meta { margin-top: 7px; color: #6b6b6b; font-size: 10px; font-variant-numeric: tabular-nums; }
 .miu-memo-meta > span:last-child { min-width: 64px; text-align: center; }
 .miu-bracket { position: relative; min-width: 0; display: flex; align-items: center; gap: 5px; min-height: 24px; padding-inline: 8px; }
-.miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 3px; width: 4px; border: 1px solid #55495399; pointer-events: none; }
+.miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 3px; width: 4px; border: 1px solid #4c4c4c99; pointer-events: none; }
 .miu-bracket::before { left: 0; border-right: 0; }
 .miu-bracket::after { right: 0; border-left: 0; }
 .miu-memo-note { width: 72%; font-weight: 600; }
 .miu-memo-bottom { gap: 12px; }
 .miu-memo-bottom > div { flex: 1; }
 .miu-memo-progress { justify-content: space-between; font-variant-numeric: tabular-nums; }
-.miu-memo-progress-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-width: 0; width: 55%; border-left: 1px solid #7a6e7855; padding-left: 4px; }
-.miu-memo-progress progress { width: 36%; min-width: 16px; height: 8px; border: 0; appearance: none; color: #655c64; accent-color: #655c64; background: #dcd4da; }
-.miu-memo-progress progress::-webkit-progress-bar { background: #dcd4da; }
-.miu-memo-progress progress::-webkit-progress-value { background: #655c64; }
-.miu-memo-progress progress::-moz-progress-bar { background: #655c64; }
+.miu-memo-progress-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; min-width: 0; width: 55%; border-left: 1px solid #71717155; padding-left: 4px; }
+.miu-memo-progress progress { width: 36%; min-width: 16px; height: 8px; border: 0; appearance: none; color: #5e5e5e; accent-color: #5e5e5e; background: #d6d6d6; }
+.miu-memo-progress progress::-webkit-progress-bar { background: #d6d6d6; }
+.miu-memo-progress progress::-webkit-progress-value { background: #5e5e5e; }
+.miu-memo-progress progress::-moz-progress-bar { background: #5e5e5e; }
 
 .miu-pagination {
     position: relative;
@@ -358,8 +358,8 @@ body.has-wallpaper .miu-home {
     min-height: 32px;
 }
 .miu-pagination button { z-index: 1; display: grid; place-items: center; border: 0; background: none; width: 24px; height: 30px; border-radius: 8px; }
-.miu-pagination button::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a6a6ae; box-shadow: 0 0 0 2px #f5f5f6; }
-.miu-pagination button[aria-current]::after { background: #4b4c54; }
+.miu-pagination button::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a7a7a7; box-shadow: 0 0 0 2px #f5f5f5; }
+.miu-pagination button[aria-current]::after { background: #4c4c4c; }
 
 .miu-dock {
     flex: none;
@@ -376,13 +376,13 @@ body.has-wallpaper .miu-home {
     background: linear-gradient(155deg, #ffffff47, #ffffff1b 52%, #ffffff30);
     -webkit-backdrop-filter: blur(10px) saturate(128%);
     backdrop-filter: blur(10px) saturate(128%);
-    box-shadow: inset 0 1px 1px #ffffff85, inset 0 -1px 1px #ffffff60, 0 4px 14px #44303912;
+    box-shadow: inset 0 1px 1px #ffffff85, inset 0 -1px 1px #ffffff60, 0 4px 14px #35353512;
 }
 .miu-home .miu-dock .miu-tile {
     width: clamp(42px, 13vw, 51px);
     border-radius: 13px;
     background: #fff9;
-    color: #474049;
+    color: #424242;
     font-size: 18px;
 }
 .miu-home .miu-dock .miu-tile:has(img[src]:not(.miu-image-failed)) { background: transparent; }
@@ -394,8 +394,8 @@ body.has-wallpaper .miu-home {
 
 .miu-home [data-home-item] { -webkit-touch-callout: none; }
 .miu-home .miu-drag-source { opacity: .3; }
-.miu-home .miu-drop-target { outline: 1px dashed #767780; outline-offset: 3px; border-radius: 8px; }
-.miu-home .miu-drop-page { background: #77778130; }
+.miu-home .miu-drop-target { outline: 1px dashed #777777; outline-offset: 3px; border-radius: 8px; }
+.miu-home .miu-drop-page { background: #78787830; }
 .miu-drag-preview {
     position: fixed;
     z-index: var(--z-max);
@@ -405,7 +405,7 @@ body.has-wallpaper .miu-home {
     pointer-events: none;
     border-radius: 12px;
     background: #f9f9f9ee;
-    box-shadow: 0 8px 24px #22232a34;
+    box-shadow: 0 8px 24px #23232334;
     overflow: hidden;
     opacity: .92;
 }
@@ -413,7 +413,7 @@ body.has-wallpaper .miu-home {
 
 .miu-home [data-home-text] { cursor: text; }
 .miu-home [data-home-text]:empty { display: inline-block; min-width: 1ch; min-height: 1em; }
-.miu-home [data-home-text]:focus-visible { outline: 1px solid #857382; outline-offset: 2px; border-radius: 3px; }
+.miu-home [data-home-text]:focus-visible { outline: 1px solid #787878; outline-offset: 2px; border-radius: 3px; }
 .miu-editor {
     position: fixed;
     z-index: var(--z-max);
@@ -425,9 +425,9 @@ body.has-wallpaper .miu-home {
     padding: 9px;
     border: 1px solid #fff9;
     border-radius: 13px;
-    background: #fff9fbf2;
-    color: #453a44;
-    box-shadow: 0 8px 24px #4f34432b, inset 0 1px #fff;
+    background: #fafafa;
+    color: #3d3d3d;
+    box-shadow: 0 8px 24px #3b3b3b2b, inset 0 1px #fff;
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     font: 12px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -435,12 +435,16 @@ body.has-wallpaper .miu-home {
 .miu-editor [hidden], .miu-editor[hidden], .miu-editor small:empty { display: none; }
 .miu-editor-head, .miu-editor-input-row { display: flex; align-items: center; gap: 6px; }
 .miu-editor-head { justify-content: space-between; padding-left: 3px; }
-.miu-editor button { border: 0; border-radius: 7px; background: #eee4eb; color: inherit; font: inherit; padding: 6px 8px; cursor: pointer; }
+.miu-editor button { border: 0; border-radius: 7px; background: #e7e7e7; color: inherit; font: inherit; padding: 6px 8px; cursor: pointer; }
 .miu-editor button.miu-editor-close { background: transparent; font-size: 18px; line-height: 1; padding: 1px 5px; }
-.miu-editor-photo { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.miu-editor[data-mode="photo"] { width: min(210px, calc(100vw - 16px)); }
+.miu-editor-photo { display: grid; gap: 5px; }
+.miu-editor-photo > button { display: flex; align-items: center; gap: 7px; text-align: left; min-height: 32px; }
+.miu-editor[data-mode="photo"] .miu-editor-input-row:not([hidden]) { display: grid; gap: 5px; }
+.miu-editor[data-mode="photo"] .miu-editor-input-row input { width: 100%; }
 .miu-editor-photo img { width: 24px; height: 24px; border-radius: 5px; object-fit: cover; }
-.miu-editor-input-row input { flex: 1; min-width: 0; padding: 6px; border: 1px solid #dcd2db; border-radius: 7px; background: #fff; color: inherit; font-size: 16px; }
+.miu-editor-input-row input { flex: 1; min-width: 0; padding: 6px; border: 1px solid #d5d5d5; border-radius: 7px; background: #fff; color: inherit; font-size: 16px; }
 .miu-editor-input-row button { flex: none; }
-.miu-editor #miuEditorReset { justify-self: start; background: transparent; padding: 1px 3px; color: #786a77; }
-.miu-editor small { color: #8a3953; }
-.miu-editor :focus-visible { outline: 1px solid #857382; }
+.miu-editor #miuEditorReset { justify-self: start; background: transparent; padding: 1px 3px; color: #6e6e6e; }
+.miu-editor small { color: #4c4c4c; }
+.miu-editor :focus-visible { outline: 1px solid #787878; }

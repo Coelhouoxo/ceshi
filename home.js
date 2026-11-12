@@ -1,19 +1,4 @@
 (() => {
-    // Older Android shortcuts may still be running with the standalone manifest.
-    if (/Android/i.test(navigator.userAgent) && matchMedia('(display-mode: standalone)').matches &&
-        document.fullscreenEnabled && document.documentElement.requestFullscreen) {
-        const fullscreenOnInteraction = event => {
-            if (!event.isTrusted || navigator.userActivation?.isActive === false) return;
-            document.removeEventListener('pointerup', fullscreenOnInteraction, true);
-            document.removeEventListener('keydown', fullscreenOnInteraction, true);
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
-            }
-        };
-        document.addEventListener('pointerup', fullscreenOnInteraction, true);
-        document.addEventListener('keydown', fullscreenOnInteraction, true);
-    }
-
     const pages = document.getElementById('miuPages');
     const slides = Array.from(pages.children);
     const dots = Array.from(document.querySelectorAll('.miu-pagination button'));
@@ -118,7 +103,11 @@
         suppressClickUntil = 0;
         const rect = item.getBoundingClientRect();
         const state = {
-            item, icon: event.target.closest('[data-home-edit-icon], [data-home-pick-image]'), field: event.target.closest('[data-home-text]'), startX: point.clientX, startY: point.clientY,
+            item,
+            icon: event.target.closest('[data-home-edit-icon], [data-home-pick-image]'),
+            field: event.target.closest('[data-home-text]'),
+            readOnly: Boolean(event.target.closest('[data-home-readonly]')),
+            startX: point.clientX, startY: point.clientY,
             x: point.clientX, y: point.clientY,
             offsetX: point.clientX - rect.left, offsetY: point.clientY - rect.top,
             edge: 0, edgeAt: 0
@@ -235,7 +224,7 @@
         clearInterval(state.scroll);
         if (!state.held) return;
         suppressClickUntil = performance.now() + 500;
-        if (commit && !state.moved) {
+        if (commit && !state.moved && !state.readOnly) {
             const field = state.field || state.item.querySelector('[data-home-text]');
             if (state.icon) openIconMenu(state.icon);
             else if (field) openEditor(field);
@@ -377,6 +366,7 @@
         const field = image ? null : anchor;
         const isPercent = field?.hasAttribute('data-home-percent');
         editing = { anchor, image, field, isPercent, url: false };
+        editor.dataset.mode = image ? 'photo' : 'text';
         editorTitle.textContent = image ? '更换图片' : '修改内容';
         editorInput.type = isPercent ? 'number' : 'text';
         editorInput.min = isPercent ? '0' : '';
@@ -574,24 +564,18 @@
         const firstColumn = (displayedMonth.getDay() + 6) % 7;
         const monthLength = new Date(year, month + 1, 0).getDate();
         const currentMonth = year === today.getFullYear() && month === today.getMonth();
-        renderText(calendarMonth, monthFormat.format(displayedMonth).toUpperCase());
+        calendarMonth.textContent = monthFormat.format(displayedMonth).toUpperCase();
         calendarDays.replaceChildren();
 
-        weekdays.forEach((weekday, index) => {
+        weekdays.forEach(weekday => {
             const heading = document.createElement('span');
             heading.className = 'miu-weekday';
             heading.textContent = weekday;
-            heading.dataset.homeText = 'calendar-weekday-' + index;
-            registerText(heading);
             calendarDays.append(heading);
         });
         for (let day = 1 - firstColumn; day <= monthLength; day++) {
             const cell = document.createElement('span');
-            if (day > 0) {
-                cell.textContent = day;
-                cell.dataset.homeText = 'calendar-day-' + year + '-' + month + '-' + day;
-                registerText(cell);
-            }
+            if (day > 0) cell.textContent = day;
             if (currentMonth && day === today.getDate()) {
                 cell.className = 'miu-today';
                 cell.setAttribute('aria-current', 'date');
