@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
-    <link rel="stylesheet" href="home.css?v=2">
+    <link rel="stylesheet" href="home.css?v=4">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -42,26 +42,30 @@
                                 <div id="homeHandle" onclick="editText(this)">@Yueyuemiao77</div>
                                 <div id="homeBio" onclick="editText(this)">♫ ₊˚ 幸せのメロディー ✧ ⁺</div>
                             </div>
-                            <button type="button" class="miu-icon-button miu-profile-settings" onclick="openBeautifyPage()" aria-label="美化设置"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
+                            <button type="button" class="miu-icon-button miu-profile-settings" onclick="openDesktopSettings('beautify')" aria-label="美化设置"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
                         </div>
                         <div class="miu-location" data-home-item="location" onclick="editLocation()">
                             <i class="fa-solid fa-location-dot" aria-hidden="true"></i> <span id="locationText">和鸟</span>
                         </div>
                         <div class="miu-app" data-home-item="chat" style="--column:1">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换聊天图标"><img id="miuIcon-chat" alt="" draggable="false" data-home-image></button>
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openApp('Page 1')" aria-label="聊天"><img id="miuIcon-chat" alt="" draggable="false" data-home-image></button>
                             <button type="button" class="miu-app-name" onclick="openApp('Page 1')">聊天</button>
                         </div>
                         <div class="miu-app" data-home-item="couple" style="--column:3">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换情侣空间图标"><img id="miuIcon-couple" alt="" draggable="false" data-home-image></button>
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openCoupleSpace()" aria-label="情侣空间"><img id="miuIcon-couple" alt="" draggable="false" data-home-image></button>
                             <button type="button" class="miu-app-name" onclick="openCoupleSpace()">情侣空间</button>
                         </div>
                         <div class="miu-app" data-home-item="api" style="--column:2">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换API图标"><img id="miuIcon-api" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openApiSettings()">API</button>
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('api')" aria-label="API"><img id="miuIcon-api" alt="" draggable="false" data-home-image></button>
+                            <button type="button" class="miu-app-name" onclick="openDesktopSettings('api')">API</button>
+                        </div>
+                        <div class="miu-app" data-home-item="dock-forum" style="--column:3">
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openApp('Page 4')" aria-label="论坛"><img id="dockIcon4" alt="" draggable="false"></button>
+                            <button type="button" class="miu-app-name" onclick="openApp('Page 4')">论坛</button>
                         </div>
                         <div class="miu-app" data-home-item="books" style="--column:4">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换世界书图标"><img id="miuIcon-books" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openWorldBookSettings()">世界书</button>
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('books')" aria-label="世界书"><img id="miuIcon-books" alt="" draggable="false" data-home-image></button>
+                            <button type="button" class="miu-app-name" onclick="openDesktopSettings('books')">世界书</button>
                         </div>
                         <div class="miu-duo" data-home-item="duo">
                             <div class="miu-duo-pair">
@@ -110,8 +114,8 @@
                             <span class="miu-app-name">(˶ᵔ ᵕ ᵔ˶)</span>
                         </div>
                         <div class="miu-app" data-home-item="beautify" style="--column:4">
-                            <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换美化图标"><img id="miuIcon-beautify" alt="" draggable="false" data-home-image></button>
-                            <button type="button" class="miu-app-name" onclick="openBeautifyPage()">美化</button>
+                            <button type="button" class="miu-tile" data-home-edit-icon onclick="openDesktopSettings('beautify')" aria-label="美化"><img id="miuIcon-beautify" alt="" draggable="false" data-home-image></button>
+                            <button type="button" class="miu-app-name" onclick="openDesktopSettings('beautify')">美化</button>
                         </div>
                         <div class="miu-app" data-home-item="feather" style="--column:1">
                             <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换(｡•́‿•̀｡)图标"><img id="miuIcon-feather" alt="" draggable="false" data-home-image></button>
@@ -154,7 +158,7 @@
                             </div>
                         </div>
                         <div class="miu-app" data-home-item="check-phone" style="--column:1">
-                            <button type="button" class="miu-tile" id="app5IconWrapper" onclick="showMenu(event, 'home')" aria-label="更换查手机图标"><img id="app5Img" alt="" draggable="false"><span id="app5Default" hidden></span></button>
+                            <button type="button" class="miu-tile" id="app5IconWrapper" data-home-edit-icon onclick="openCheckPhoneSelector()" aria-label="查手机"><img id="app5Img" alt="" draggable="false"><span id="app5Default" hidden></span></button>
                             <button type="button" class="miu-app-name" onclick="openCheckPhoneSelector()"><span id="app5Label">查手机</span></button>
                         </div>
                         <div class="camera-widget" data-home-item="camera" style="--column:3">
@@ -168,12 +172,12 @@
                             </div>
                         </div>
                         <div class="miu-app" data-home-item="gallery" style="--column:2">
-                            <button type="button" class="miu-tile" id="app6IconWrapper" onclick="showMenu(event, 'home')" aria-label="更换真实相册图标"><img id="app6Img" alt="" draggable="false"><span id="app6Default" hidden></span></button>
+                            <button type="button" class="miu-tile" id="app6IconWrapper" data-home-edit-icon onclick="openGalleryApp()" aria-label="真实相册"><img id="app6Img" alt="" draggable="false"><span id="app6Default" hidden></span></button>
                             <button type="button" class="miu-app-name" onclick="openGalleryApp()"><span id="app6Label">真实相册</span></button>
                         </div>
                         <div class="miu-player" data-home-item="player" aria-label="音乐播放器">
                             <div class="miu-player-head">
-                                <button type="button" class="miu-player-tab" onclick="toggleMusicPanel(true)">Music <i class="fa-solid fa-angle-down" aria-hidden="true"></i></button>
+                                <button type="button" class="miu-player-tab" onclick="toggleMusicPanel(true)">音乐库 <i class="fa-solid fa-angle-down" aria-hidden="true"></i></button>
                                 <button type="button" class="miu-player-tab" onclick="openMusicSearchModal()">搜索歌曲 <i class="fa-solid fa-angle-right" aria-hidden="true"></i></button>
                             </div>
                             <div class="miu-player-card">
@@ -186,9 +190,13 @@
                                     <button type="button" class="miu-icon-button" onclick="toggleMusicPanel(true)" aria-label="播放列表"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></button>
                                 </div>
                                 <div class="miu-player-meta">
-                                    <span><i class="fa-regular fa-clock" aria-hidden="true"></i> <span id="miuTrackElapsed">0:00</span> <span id="miuTrackRemaining">–:––</span></span>
-                                    <button type="button" onclick="toggleMusicPanel(true)">播放列表</button>
+                                    <span id="miuTrackStatus">等待播放</span>
+                                    <button type="button" onclick="toggleMusicPanel(true)">查看队列</button>
                                 </div>
+                            </div>
+                            <div class="miu-bracket miu-player-timing" aria-label="播放时间">
+                                <span><i class="fa-regular fa-clock" aria-hidden="true"></i> <span id="miuTrackElapsed">0:00</span></span>
+                                <span id="miuTrackRemaining">–:––</span>
                             </div>
                             <div class="miu-player-bottom">
                                 <div class="miu-bracket miu-player-controls">
@@ -215,20 +223,16 @@
             </nav>
             <div class="miu-dock" aria-label="常用应用">
                 <div class="miu-app" data-home-item="dock-chat" style="--column:1">
-                    <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换聊天图标"><img id="dockIcon1" alt="" draggable="false"></button>
+                    <button type="button" class="miu-tile" data-home-edit-icon onclick="openApp('Page 1')" aria-label="聊天"><i class="fa-solid fa-comment" aria-hidden="true"></i><img id="dockIcon1" alt="" draggable="false"></button>
                     <button type="button" class="miu-app-name" onclick="openApp('Page 1')">聊天</button>
                 </div>
                 <div class="miu-app" data-home-item="dock-couple" style="--column:2">
-                    <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换情侣空间图标"><img id="dockIcon2" alt="" draggable="false"></button>
+                    <button type="button" class="miu-tile" data-home-edit-icon onclick="openCoupleSpace()" aria-label="情侣空间"><i class="fa-solid fa-heart" aria-hidden="true"></i><img id="dockIcon2" alt="" draggable="false"></button>
                     <button type="button" class="miu-app-name" onclick="openCoupleSpace()">情侣空间</button>
                 </div>
                 <div class="miu-app" data-home-item="dock-wallet" style="--column:3">
-                    <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换钱包图标"><img id="dockIcon3" alt="" draggable="false"></button>
+                    <button type="button" class="miu-tile" data-home-edit-icon onclick="openWallet()" aria-label="钱包"><i class="fa-solid fa-wallet" aria-hidden="true"></i><img id="dockIcon3" alt="" draggable="false"></button>
                     <button type="button" class="miu-app-name" onclick="openWallet()">钱包</button>
-                </div>
-                <div class="miu-app" data-home-item="dock-forum" style="--column:4">
-                    <button type="button" class="miu-tile" onclick="showMenu(event, 'home')" aria-label="更换论坛图标"><img id="dockIcon4" alt="" draggable="false"></button>
-                    <button type="button" class="miu-app-name" onclick="openApp('Page 4')">论坛</button>
                 </div>
             </div>
         </main>
@@ -424,15 +428,8 @@
                         <div class="doll-deco"></div>
                     </div>
 
-                    <!-- 2. API 设置入口 -->
-                    <div class="api-card" onclick="openApiSettings()">
-                        <div class="icon-img icon-api"></div>API 设置
-                    </div>
-                    
-                    <!-- 3. 设置列表 -->
+                    <!-- 设置列表 -->
                     <div class="settings-list">
-                        <div class="setting-item" onclick="openWorldBookSettings()"><div class="icon-img icon-theme"></div>世界书</div>
-                        <div class="setting-item" onclick="openBeautifyPage()"><div class="icon-img icon-theme"></div>美化主题</div>
                         <div class="setting-item" onclick="openFontSettings()"><div class="icon-img icon-theme"></div>字体</div>
                         <div class="setting-item" onclick="openUserMaskPage()"><div class="icon-img icon-theme"></div>面具</div>
                         <div class="setting-item" onclick="openDataModal()"><div class="icon-img icon-theme"></div>数据备份与重置</div>
@@ -930,6 +927,67 @@
                 </div> 
             </div> 
             
+
+</div>
+
+  <!-- Font Settings (Fix: Moved out) -->
+            <div class="api-settings-page" id="fontSettingsPage">
+                <div class="api-header">
+                    <i class="fas fa-chevron-left api-back-btn" onclick="closeFontSettings()"></i>
+                    <span class="api-title">全局字体</span>
+                    <div style="width:40px"></div>
+                </div>
+                <div class="api-content">
+                    <div class="api-input-group">
+                        <label>字体预览</label>
+                        <div class="font-preview-box" id="fontPreviewBox">
+                            <div class="font-text-cn">跟你聊天很开心，被你老公打死也值了</div>
+                            <div class="font-text-en">Miu Phone is really fun, so fun</div>
+                        </div>
+                    </div>
+
+                    <div class="api-input-group">
+                        <label>设置新字体</label>
+                        <div class="edit-btns-row">
+                            <button class="edit-btn" onclick="setFontByLink()">链接导入 (URL)</button>
+                            <button class="edit-btn" onclick="document.getElementById('fontFileInput').click()">本地文件导入 (TTF/WOFF)</button>
+                            <button class="edit-btn" style="color:red" onclick="resetDefaultFont()">恢复默认</button>
+                        </div>
+                        <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display:none" onchange="handleFontFile(this)">
+                    </div>
+
+                    <div class="api-divider" style="height:1px; background:#eee; margin:10px 0;"></div>
+
+                    <div class="api-input-group">
+                        <label>保存当前字体为方案</label>
+                        <div class="api-row-flex">
+                            <input type="text" class="api-input" id="fontSchemeName" placeholder="方案名称 (例如: 圆圆的字体)">
+                            <button class="api-btn-small" onclick="saveFontScheme()">保存</button>
+                        </div>
+                    </div>
+                    <div class="font-slider-wrapper">
+                        <div class="font-slider-header">
+                            <span class="font-slider-label">字体大小 (Font Size)</span>
+                            <span id="fontSizeDisplay" class="font-slider-value">16px</span>
+                        </div>
+                        <input type="range" id="fontSizeSlider" min="12" max="30" step="1" value="16" oninput="document.getElementById('fontSizeDisplay').innerText = this.value + 'px'">
+                    </div>
+                    <div class="api-input-group">
+                        <label>已保存的字体方案</label>
+                        <div id="fontSchemeList" style="margin-top:5px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- General Settings (Fix: Moved out) -->
+            <div class="api-settings-page" id="generalSettingsPage">
+                <div class="api-header"><i class="fas fa-chevron-left api-back-btn" onclick="closeGeneralSettings()"></i><span class="api-title">设置</span><div style="width:40px"></div></div>
+                <div class="api-content">
+                    <div class="api-input-group"><label>数据备份与恢复</label><button class="api-save-btn" onclick="exportBackup()"><i class="fas fa-file-export"></i> 导出备份 (JSON)</button><button class="api-save-btn" style="background:#fff; color:#000; border:1px solid #ddd;" onclick="document.getElementById('importInput').click()"><i class="fas fa-file-import"></i> 恢复备份</button></div>
+                </div>
+            </div>
+
+                        <!-- World Book Settings Page (REDESIGN) -->
             <div class="api-settings-page" id="apiSettingsPage">
 
                 <div class="api-header"><i class="fas fa-chevron-left api-back-btn" onclick="closeApiSettings()"></i><span class="api-title">API 配置</span><div style="width:40px"></div></div>
@@ -1266,66 +1324,7 @@
             </div>
         </div>
     </div>
-</div>
 
-  <!-- Font Settings (Fix: Moved out) -->
-            <div class="api-settings-page" id="fontSettingsPage">
-                <div class="api-header">
-                    <i class="fas fa-chevron-left api-back-btn" onclick="closeFontSettings()"></i>
-                    <span class="api-title">全局字体</span>
-                    <div style="width:40px"></div>
-                </div>
-                <div class="api-content">
-                    <div class="api-input-group">
-                        <label>字体预览</label>
-                        <div class="font-preview-box" id="fontPreviewBox">
-                            <div class="font-text-cn">跟你聊天很开心，被你老公打死也值了</div>
-                            <div class="font-text-en">Miu Phone is really fun, so fun</div>
-                        </div>
-                    </div>
-
-                    <div class="api-input-group">
-                        <label>设置新字体</label>
-                        <div class="edit-btns-row">
-                            <button class="edit-btn" onclick="setFontByLink()">链接导入 (URL)</button>
-                            <button class="edit-btn" onclick="document.getElementById('fontFileInput').click()">本地文件导入 (TTF/WOFF)</button>
-                            <button class="edit-btn" style="color:red" onclick="resetDefaultFont()">恢复默认</button>
-                        </div>
-                        <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display:none" onchange="handleFontFile(this)">
-                    </div>
-
-                    <div class="api-divider" style="height:1px; background:#eee; margin:10px 0;"></div>
-
-                    <div class="api-input-group">
-                        <label>保存当前字体为方案</label>
-                        <div class="api-row-flex">
-                            <input type="text" class="api-input" id="fontSchemeName" placeholder="方案名称 (例如: 圆圆的字体)">
-                            <button class="api-btn-small" onclick="saveFontScheme()">保存</button>
-                        </div>
-                    </div>
-                    <div class="font-slider-wrapper">
-                        <div class="font-slider-header">
-                            <span class="font-slider-label">字体大小 (Font Size)</span>
-                            <span id="fontSizeDisplay" class="font-slider-value">16px</span>
-                        </div>
-                        <input type="range" id="fontSizeSlider" min="12" max="30" step="1" value="16" oninput="document.getElementById('fontSizeDisplay').innerText = this.value + 'px'">
-                    </div>
-                    <div class="api-input-group">
-                        <label>已保存的字体方案</label>
-                        <div id="fontSchemeList" style="margin-top:5px;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- General Settings (Fix: Moved out) -->
-            <div class="api-settings-page" id="generalSettingsPage">
-                <div class="api-header"><i class="fas fa-chevron-left api-back-btn" onclick="closeGeneralSettings()"></i><span class="api-title">设置</span><div style="width:40px"></div></div>
-                <div class="api-content">
-                    <div class="api-input-group"><label>数据备份与恢复</label><button class="api-save-btn" onclick="exportBackup()"><i class="fas fa-file-export"></i> 导出备份 (JSON)</button><button class="api-save-btn" style="background:#fff; color:#000; border:1px solid #ddd;" onclick="document.getElementById('importInput').click()"><i class="fas fa-file-import"></i> 恢复备份</button></div>
-                </div>
-            </div>
-
-                        <!-- World Book Settings Page (REDESIGN) -->
             <div class="wb-settings-page" id="worldBookSettingsPage">
                 <div class="wb-main-header">
                     <i class="fas fa-chevron-left" style="font-size:20px;cursor:pointer;" onclick="closeWorldBookSettings()"></i>
@@ -1464,7 +1463,6 @@
                 <div class="dock-btn"><img id="previewDock1" src=""></div>
                 <div class="dock-btn"><img id="previewDock2" src=""></div>
                 <div class="dock-btn"><img id="previewDock3" src=""></div>
-                <div class="dock-btn"><img id="previewDock4" src=""></div>
             </div>
         </div>
         
@@ -1491,13 +1489,6 @@
                     <button class="edit-btn" onclick="changeDockIcon(3, 'local')">相册</button>
                 </div>
             </div>
-            <div class="edit-card">
-                <div class="edit-card-title">应用 4</div>
-                <div class="edit-btns-row">
-                    <button class="edit-btn" onclick="changeDockIcon(4, 'link')">链接</button>
-                    <button class="edit-btn" onclick="changeDockIcon(4, 'local')">相册</button>
-                </div>
-            </div>
         </div>
 
         <div class="api-divider" style="height:1px; background:#f0f0f0; margin: 10px 0 20px 0;"></div>
@@ -1511,6 +1502,14 @@
         </div>
 
         <div class="edit-grid">
+            <div class="edit-card">
+                <div class="edit-card-title">论坛</div>
+                <div class="dock-btn"><img id="previewDock4" alt=""></div>
+                <div class="edit-btns-row">
+                    <button class="edit-btn" onclick="changeDockIcon(4, 'link')">链接</button>
+                    <button class="edit-btn" onclick="changeDockIcon(4, 'local')">相册</button>
+                </div>
+            </div>
             <div class="edit-card">
                 <div class="edit-card-title">软件 5</div>
                 <div class="edit-btns-row">
@@ -1690,8 +1689,8 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="script.js?v=2"></script>
-    <script data-cfasync="false" src="home.js?v=2" defer></script>
+    <script data-cfasync="false" src="script.js?v=4"></script>
+    <script data-cfasync="false" src="home.js?v=4" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>

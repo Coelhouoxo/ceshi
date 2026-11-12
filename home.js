@@ -40,8 +40,7 @@
     const home = pages.closest('.miu-home');
     const sheets = slides.map(slide => slide.querySelector('.miu-sheet'));
     const dock = home.querySelector('.miu-dock');
-    const zones = [...sheets, dock];
-    const items = new Map(Array.from(home.querySelectorAll('[data-home-item]'), item => [item.dataset.homeItem, item]));
+    const items = new Map(sheets.flatMap(sheet => Array.from(sheet.children, item => [item.dataset.homeItem, item])));
     const layoutKey = 'miu-home-layout-v2';
 
     function setColumn(item, column) {
@@ -61,25 +60,32 @@
         if (Array.isArray(saved)) {
             const restored = new Set();
             saved.forEach((entries, index) => {
-                const zone = zones[index];
+                const zone = sheets[index];
                 if (!zone || !Array.isArray(entries)) return;
                 entries.forEach(entry => {
                     if (!Array.isArray(entry)) return;
                     const [id, col] = entry;
                     const item = items.get(id);
-                    if (!item || restored.has(id) || (zone === dock && !item.classList.contains('miu-app'))) return;
+                    if (!item || restored.has(id)) return;
                     restored.add(id);
                     setColumn(item, Number.isInteger(col) ? col : getColumn(item));
                     zone.append(item);
                 });
             });
+            if (!restored.has('dock-forum')) {
+                const firstSheet = sheets[0];
+                const books = items.get('books');
+                const duo = items.get('duo');
+                const next = books?.parentElement === firstSheet ? books : duo?.parentElement === firstSheet ? duo : null;
+                firstSheet.insertBefore(items.get('dock-forum'), next);
+            }
         }
     } catch {
         // The default DOM order is usable when storage is unavailable.
     }
 
     function saveLayout() {
-        const layout = zones.map(zone => Array.from(zone.children, item => [item.dataset.homeItem, getColumn(item)]));
+        const layout = sheets.map(zone => Array.from(zone.children, item => [item.dataset.homeItem, getColumn(item)]));
         try {
             localStorage.setItem(layoutKey, JSON.stringify(layout));
         } catch {
@@ -97,7 +103,7 @@
         suppressClickUntil = 0;
         const rect = item.getBoundingClientRect();
         const state = {
-            item, startX: point.clientX, startY: point.clientY,
+            item, icon: event.target.closest('[data-home-edit-icon]'), startX: point.clientX, startY: point.clientY,
             x: point.clientX, y: point.clientY,
             offsetX: point.clientX - rect.left, offsetY: point.clientY - rect.top,
             edge: 0, edgeAt: 0
@@ -105,6 +111,8 @@
         gesture = state;
         state.hold = setTimeout(() => {
             if (gesture !== state) return;
+            state.held = true;
+            if (item.parentElement === dock) return;
             const preview = item.cloneNode(true);
             preview.removeAttribute('id');
             preview.querySelectorAll('[id]').forEach(element => element.removeAttribute('id'));
@@ -129,8 +137,8 @@
         if (!hit || !home.contains(hit)) return null;
 
         const isApp = state.item.classList.contains('miu-app');
-        const zone = hit.closest('.miu-dock') ? dock : sheets[slides.indexOf(hit.closest('.miu-page'))];
-        if (!zone || (zone === dock && !isApp)) return null;
+        const zone = sheets[slides.indexOf(hit.closest('.miu-page'))];
+        if (!zone) return null;
 
         const candidates = Array.from(zone.children).filter(item => item !== state.item);
         const target = hit.closest('[data-home-item]');
@@ -148,12 +156,11 @@
             if (sameSize) return { zone, target, swap: true, column };
             return { zone, target, before: state.y < targetRect.top + targetRect.height / 2 ? target : target.nextElementSibling, column };
         }
-        if (target === state.item || (zone === dock && candidates.length >= 4)) return null;
+        if (target === state.item) return null;
 
         const before = candidates.find(item => {
             const rect = item.getBoundingClientRect();
-            return zone === dock ? state.x < rect.left + rect.width / 2 :
-                state.y < rect.top || (state.y < rect.bottom && state.x < rect.left + rect.width / 2);
+            return state.y < rect.top || (state.y < rect.bottom && state.x < rect.left + rect.width / 2);
         });
         return { zone, before, target: before, column };
     }
@@ -196,11 +203,11 @@
         state.x = point.clientX;
         state.y = point.clientY;
         const moved = Math.hypot(state.x - state.startX, state.y - state.startY) > 8;
-        if (!state.preview && moved) {
+        state.moved ||= moved;
+        if (!state.preview && moved && !state.held) {
             finishGesture(false);
         } else if (state.preview) {
             if (event.cancelable) event.preventDefault();
-            state.moved ||= moved;
             paintGesture(state);
         }
     }
@@ -211,8 +218,10 @@
         gesture = undefined;
         clearTimeout(state.hold);
         clearInterval(state.scroll);
-        if (!state.preview) return;
+        if (!state.held) return;
         suppressClickUntil = performance.now() + 500;
+        if (commit && !state.moved && state.icon) openIconMenu(state.icon);
+        if (!state.preview) return;
         const drop = commit && state.moved ? findDrop(state) : null;
         state.item.classList.remove('miu-drag-source');
         state.highlight?.classList.remove('miu-drop-target', 'miu-drop-page');
@@ -257,8 +266,17 @@
         if (event.pointerType === 'mouse') finishGesture(false);
     });
     window.addEventListener('blur', () => finishGesture(false));
+    function openIconMenu(icon) {
+        showMenu({ currentTarget: icon, detail: 0, stopPropagation() {} }, 'home');
+    }
+
     home.addEventListener('contextmenu', event => {
         if (event.target.closest('[data-home-item]')) event.preventDefault();
+        const icon = event.target.closest('[data-home-edit-icon]');
+        if (icon && !gesture) {
+            event.stopPropagation();
+            openIconMenu(icon);
+        }
     });
     home.addEventListener('click', event => {
         if (performance.now() >= suppressClickUntil) return;
@@ -276,7 +294,19 @@
     const clock = document.getElementById('realTimeDisplay');
     const miniClock = document.querySelector('.miu-mini-clock time');
     const dateLabel = document.getElementById('realDateDisplay');
-    const dateFormat = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+    const dateFormat = new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' });
+    const lunarFormat = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { year: 'numeric', month: 'long', day: 'numeric' });
+    const lunarDays = '一二三四五六七八九十';
+
+    function formatClockDate(date) {
+        const solar = dateFormat.format(date);
+        const parts = Object.fromEntries(lunarFormat.formatToParts(date).map(part => [part.type, part.value]));
+        const day = Number(parts.day);
+        if (!parts.yearName || !parts.month || day < 1 || day > 30 || !Number.isInteger(day)) return solar;
+        const lunarDay = day <= 10 ? '初' + lunarDays[day - 1] : day === 20 ? '二十' :
+            day === 30 ? '三十' : (day < 20 ? '十' : '廿') + lunarDays[day % 10 - 1];
+        return solar + ' · ' + parts.yearName + '年' + parts.month + lunarDay;
+    }
     const monthFormat = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
     const weekTime = document.getElementById('miuWeekTime');
     const weekDate = document.getElementById('miuWeekDate');
@@ -336,14 +366,14 @@
                 label.dateTime = time;
                 label.textContent = time;
             }
-            dateLabel.textContent = dateFormat.format(now);
+            dateLabel.textContent = formatClockDate(now);
         }
         if (today.toDateString() !== now.toDateString()) {
             if (displayedMonth.getMonth() === today.getMonth() && displayedMonth.getFullYear() === today.getFullYear()) {
                 displayedMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             }
             today = now;
-            dateLabel.textContent = dateFormat.format(now);
+            dateLabel.textContent = formatClockDate(now);
             renderCalendar();
             renderWeek();
         }
@@ -391,6 +421,7 @@
     const remaining = document.getElementById('miuTrackRemaining');
     const progress = document.getElementById('miuTrackProgress');
     const percent = document.getElementById('miuTrackPercent');
+    const playbackStatus = document.getElementById('miuTrackStatus');
 
     function formatDuration(seconds) {
         return Math.floor(seconds / 60) + ':' + String(Math.floor(seconds % 60)).padStart(2, '0');
@@ -410,6 +441,7 @@
         remaining.textContent = total ? '−' + formatDuration(total - position) : '–:––';
         progress.value = total ? position / total : 0;
         percent.textContent = Math.floor(progress.value * 100) + '%';
+        playbackStatus.textContent = playing ? '正在播放' : track ? '已暂停' : '等待播放';
     }
 
     play.addEventListener('click', () => {

@@ -14,7 +14,7 @@
 }
 
 body.has-wallpaper .miu-home {
-    background: linear-gradient(180deg, rgba(243, 243, 245, .68), rgba(250, 250, 250, .73));
+    background: linear-gradient(180deg, rgba(243, 243, 245, .65), rgba(250, 250, 250, .53) 75%, rgba(250, 250, 250, .1));
 }
 
 .miu-home button {
@@ -67,24 +67,28 @@ body.has-wallpaper .miu-home {
 .miu-clock {
     display: grid;
     justify-items: center;
-    gap: 2px;
+    gap: 3px;
+    padding-block: 3px clamp(4px, 1.3dvh, 12px);
+    color: #28262d;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Roboto, sans-serif;
     font-variant-numeric: tabular-nums;
 }
 
 .miu-clock #realDateDisplay {
-    color: #515257;
-    font-size: 13px;
+    font-size: clamp(12px, 4.05vw, 17px);
     font-weight: 600;
-    letter-spacing: .06em;
+    line-height: 1.3;
+    letter-spacing: -.015em;
 }
 
 .miu-clock time {
-    color: #25262a;
-    font-size: clamp(54px, 10dvh, 102px);
-    line-height: .99;
+    display: block;
+    font-size: clamp(82px, min(29vw, 16dvh), 132px);
+    line-height: .94;
     font-weight: 650;
-    letter-spacing: -.075em;
-    padding-inline-end: .075em;
+    letter-spacing: -.06em;
+    padding-inline-end: .06em;
 }
 
 .miu-profile, .miu-banner-top, .miu-track, .miu-calendar-head {
@@ -190,9 +194,11 @@ body.has-wallpaper .miu-home {
     width: clamp(40px, 6.2dvh, 52px);
     aspect-ratio: 1;
     border: 0;
-    border-radius: 11px;
+    border-radius: 12px;
     background: #fdfdff75;
 }
+
+.miu-home :is(#app5IconWrapper, #app6IconWrapper) { width: 55px; border-radius: 18px; }
 
 .miu-home button.miu-tile:active { transform: scale(.94); }
 .miu-home .miu-tile:has(img[src]:not(.miu-image-failed)) { background: transparent; }
@@ -284,18 +290,18 @@ body.has-wallpaper .miu-home {
 .miu-home .camera-widget .captcha-top { width: auto; max-width: 100%; align-self: center; white-space: nowrap; }
 .miu-home .camera-widget .captcha-input { min-width: 0; overflow: hidden; white-space: nowrap; }
 .miu-home .camera-widget .captcha-verify-btn { padding-inline: 5px; }
-.miu-home .camera-widget .captcha-img-container { border: 1px solid #eee; background: transparent; }
+.miu-home .camera-widget .captcha-img-container { flex: 1; min-width: 0; border: 1px solid #eee; background: transparent; }
 
-.miu-player { display: grid; gap: 7px; font-size: 11px; }
+.miu-player { display: grid; gap: 8px; font-size: 11px; }
 .miu-player-head, .miu-player-meta, .miu-player-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .miu-home .miu-player-tab, .miu-player-meta button { padding: 4px 7px; border: 1px solid #dddddf65; border-radius: 3px; background: #ffffff5e; font-size: 10px; }
 .miu-player-tab i { margin-left: 6px; }
-.miu-player-card { padding: 10px; border: 1px solid #e0e0e490; border-radius: 6px; background: #ffffff50; }
+.miu-player-card { padding: 12px; border: 1px solid #e0e0e490; border-radius: 5px; background: linear-gradient(120deg, #ffffff66, #e9e9ed65); }
 .miu-track { gap: 9px; }
-.miu-track .miu-record { width: 53px; aspect-ratio: 1; border-radius: 12px; background: #e2e2e78c; }
+.miu-track .miu-record { width: 56px; aspect-ratio: 1; border-radius: 13px; background: #e2e2e78c; }
 #miuTrackName { font-size: 13px; }
 .miu-player-meta { margin-top: 7px; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
-.miu-player-meta > span > span + span { margin-left: 5px; }
+.miu-player-timing { width: 72%; height: 26px; justify-content: space-between !important; color: var(--miu-muted); font-variant-numeric: tabular-nums; }
 .miu-bracket { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-evenly; gap: 5px; padding-inline: 9px; }
 .miu-bracket::before, .miu-bracket::after { content: ""; position: absolute; inset-block: 5px; width: 4px; border: 1px solid #55576185; pointer-events: none; }
 .miu-bracket::before { left: 0; border-right: 0; }
@@ -331,9 +337,43 @@ body.has-wallpaper .miu-home {
 .miu-pagination button::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #a6a6ae; box-shadow: 0 0 0 2px #f5f5f6; }
 .miu-pagination button[aria-current]::after { background: #4b4c54; }
 
-.miu-dock { min-height: calc(65px + var(--safe-bottom)); display: flex; justify-content: center; align-items: center; gap: clamp(13px, 5vw, 25px); padding: 8px 16px calc(10px + var(--safe-bottom)); }
-.miu-dock .miu-app { min-width: 44px; gap: 3px; }
-.miu-dock .miu-app-name { font-size: 9px; }
+.miu-dock {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 76px));
+    justify-content: center;
+    align-items: start;
+    gap: clamp(14px, 6vw, 26px);
+    padding: 7px 16px calc(11px + var(--safe-bottom));
+}
+.miu-dock .miu-app { gap: 4px; }
+.miu-dock .miu-app-name { font-size: 10px; }
+.miu-home .miu-dock .miu-tile {
+    width: clamp(49px, 15vw, 62px);
+    border-radius: 18px;
+    background:
+        radial-gradient(ellipse at 25% -12%, #ffffff9c, transparent 51%),
+        radial-gradient(ellipse at 105% 110%, #ffffff50, transparent 63%),
+        linear-gradient(148deg, #ffffff21, #53515e1d 73%, #ffffff26);
+    -webkit-backdrop-filter: blur(9px) saturate(142%);
+    backdrop-filter: blur(9px) saturate(142%);
+    box-shadow: inset 0 1px 1px #ffffffcf, inset 0 -1px 1px #ffffff57,
+        inset 1px 0 1px #ffffff6b, 0 4px 12px #22202b20;
+    color: #35343c;
+    font-size: 20px;
+}
+.miu-dock .miu-tile:has(img[src]:not(.miu-image-failed)) > i { visibility: hidden; }
+.miu-dock .miu-tile img { inset: 12%; width: 76%; height: 76%; border-radius: 12px; }
+.miu-dock .miu-tile::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 9% 3%, #ffffff53, transparent 37%);
+}
+
+.app-overlay.miu-settings-route > :is(#chatAppPage, #genericAppPage, #forumPage) { display: none !important; }
+
 .miu-home [data-home-item] { -webkit-touch-callout: none; }
 .miu-home .miu-drag-source { opacity: .3; }
 .miu-home .miu-drop-target { outline: 1px dashed #767780; outline-offset: 3px; border-radius: 8px; }

@@ -950,6 +950,7 @@ function openWorldBookSettings() {
 function closeWorldBookSettings() {
     document.getElementById('worldBookSettingsPage').classList.remove('active');
     document.getElementById('wbPopMenu').style.display = 'none';
+    leaveDesktopSettings('books');
 }
 function toggleWbMenu(e) {
     e.stopPropagation();
@@ -1397,7 +1398,8 @@ function openBeautifyPage() {
 }
 
 function closeBeautifyPage() { 
-    document.getElementById('beautifyPage').classList.remove('active'); 
+    document.getElementById('beautifyPage').classList.remove('active');
+    leaveDesktopSettings('beautify');
     saveData(); 
 }
 
@@ -2264,15 +2266,6 @@ function showMenu(e, t) {
     // 特殊情况处理
     if (t === 'home') {
         currentTargetImg = e.currentTarget.querySelector('img');
-        const appName = e.currentTarget.closest('.miu-app')?.querySelector('button.miu-app-name');
-        if (appName) {
-            const open = document.createElement('button');
-            open.type = 'button';
-            open.className = 'menu-item miu-menu-app';
-            open.textContent = '打开应用';
-            open.addEventListener('click', () => appName.click());
-            menu.prepend(open);
-        }
         if (currentTargetImg?.id === 'app5Img' || currentTargetImg?.id === 'app6Img') {
             const label = document.getElementById(currentTargetImg.id.replace('Img', 'Label'));
             const rename = document.createElement('button');
@@ -2322,6 +2315,16 @@ function showMenu(e, t) {
         // 边界检查（防止菜单跑出屏幕右边）
         if (leftPos + 130 > r.width) leftPos = e.clientX - r.left - 130;
         
+        if (t === 'home') {
+            if (!e.detail) {
+                const button = e.currentTarget.getBoundingClientRect();
+                leftPos = button.left - r.left;
+                topPos = button.bottom - r.top + 6;
+            }
+            menu.style.display = 'flex';
+            leftPos = Math.max(6, Math.min(leftPos, r.width - menu.offsetWidth - 6));
+            topPos = Math.max(6, Math.min(topPos, r.height - menu.offsetHeight - 6));
+        }
         menu.style.left = leftPos + 'px'; 
         menu.style.top = topPos + 'px'; 
         
@@ -2811,7 +2814,11 @@ async function deleteProfileFromSelect() {
     } 
 }
 function openApiSettings() { document.getElementById('apiSettingsPage').classList.add('active'); renderApiProfiles(); }
-function closeApiSettings() { document.getElementById('apiSettingsPage').classList.remove('active'); saveData(); }
+function closeApiSettings() {
+    document.getElementById('apiSettingsPage').classList.remove('active');
+    leaveDesktopSettings('api');
+    saveData();
+}
 // [修改] 适配新的底栏类名 (.nav-item)
 function switchAppTab(index) {
     // 1. 隐藏所有页面
@@ -3337,6 +3344,38 @@ async function confirmAddChar() {
 }
 
 const overlay = document.getElementById('appOverlay'), chatPage = document.getElementById('chatAppPage'), genericPage = document.getElementById('genericAppPage'), appTitle = document.getElementById('appTitle');
+const desktopSettings = {
+    api: { open: openApiSettings, close: closeApiSettings },
+    books: { open: openWorldBookSettings, close: closeWorldBookSettings },
+    beautify: { open: openBeautifyPage, close: closeBeautifyPage }
+};
+let desktopSettingsRoute = null;
+
+function openDesktopSettings(route, fromHistory = false) {
+    if (!Object.hasOwn(desktopSettings, route) || desktopSettingsRoute) return;
+    desktopSettingsRoute = route;
+    overlay.classList.add('miu-settings-route', 'active');
+    desktopSettings[route].open();
+    if (!fromHistory) history.pushState({ miuDesktopSettings: route }, '');
+}
+
+function leaveDesktopSettings(route) {
+    if (desktopSettingsRoute !== route) return;
+    desktopSettingsRoute = null;
+    overlay.classList.remove('active', 'miu-settings-route');
+    if (history.state?.miuDesktopSettings === route) history.back();
+}
+
+window.addEventListener('popstate', event => {
+    const route = event.state?.miuDesktopSettings;
+    if (desktopSettingsRoute === route) return;
+    if (desktopSettingsRoute) desktopSettings[desktopSettingsRoute].close();
+    if (route) openDesktopSettings(route, true);
+});
+
+// A reload starts from the desktop even if the last history entry was a settings page.
+if (history.state?.miuDesktopSettings) history.replaceState(null, '');
+
 function openApp(appName) { 
     // 打开主遮罩
     overlay.classList.add('active'); 
