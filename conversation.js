@@ -208,6 +208,7 @@ function paintConversationContour(bubble) {
     const height = bubble.offsetHeight;
     if (width < 20 || height < 20) return;
     const row = bubble.closest('.Miu-miu');
+    if (row?.classList.contains('ai')) return;
     const tail = row?.classList.contains('conversation-tail');
     const right = width;
     const radius = Math.min(18.5, height / 2, width / 2);

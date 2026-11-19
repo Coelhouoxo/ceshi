@@ -189,15 +189,15 @@
     padding-top: 0 !important;
 }
 #chatRoom[data-wallpaper] {
-    --incoming-color: linear-gradient(110deg, #d6d7f41c, #24304442 57%, #0d263447);
-    --incoming-tail: #53647769;
+    --incoming-color: rgba(233, 233, 235, .82);
+    --incoming-tail: rgba(233, 233, 235, .82);
     --sent-end: #0085f5e8;
     --sent-surface: linear-gradient(165deg, #0094fae8, var(--sent-end));
 }
 #chatRoom[data-tone="dark"] {
     --chat-ink: #fff;
-    --incoming-color: linear-gradient(110deg, #d6d7f41c, #24304442 57%, #0d263447);
-    --incoming-tail: #24304442;
+    --incoming-color: rgba(50, 53, 62, .80);
+    --incoming-tail: rgba(50, 53, 62, .80);
     --chat-muted: #ffffffb5;
     --glass-tint: linear-gradient(147deg, #31536b22, #122c4018 55%, #16435827);
     --edge-fade-top: #07101ea0;
@@ -779,3 +779,35 @@
 #msgActionMenu.conversation-actions .msg-action-item i { width: 20px; font-size: 16px; text-align: center; }
 #msgActionMenu.conversation-actions .msg-action-item:active { background: #8190a026; }
 #msgActionMenu.conversation-actions [data-action="multi"] { border-top: 1px solid #8882; margin-top: 6px; padding-top: 10px; }
+
+
+/* Keep blur on the rounded body instead of a clipped backdrop layer. */
+#chatRoom .Miu-miu.ai .conversation-text {
+    background: var(--incoming-color) !important;
+    border-radius: 18.5px !important;
+    -webkit-backdrop-filter: blur(5px) saturate(116%) !important;
+    backdrop-filter: blur(5px) saturate(116%) !important;
+}
+#chatRoom .Miu-miu.ai .conversation-contour {
+    display: none;
+}
+#chatRoom .Miu-miu.ai.conversation-tail .conversation-text::after {
+    content: "" !important;
+    display: block !important;
+    position: absolute;
+    inset: auto auto -4px 6px;
+    width: 12px;
+    height: 10px;
+    background: var(--incoming-color);
+    clip-path: path("M5 0H12C10 3 6 7 1 9C0 9.5 0 8.5 1 8C3.5 5.6 5 3 5 0Z");
+    transform: none !important;
+    z-index: -1;
+    pointer-events: none;
+}
+#chatRoom .Miu-miu.ai .content.voice-bubble {
+    background: var(--incoming-color) !important;
+}
+#chatRoom .Miu-miu.ai .conversation-text,
+#chatRoom .Miu-miu.user .conversation-text {
+    text-shadow: none !important;
+}
