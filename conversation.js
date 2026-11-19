@@ -18,7 +18,9 @@ function toggleInboxEdit(button) {
     button.textContent = active ? '完成' : '编辑';
 }
 
-function openInboxConversation(id) {
+function openInboxConversation(key) {
+    const id = chatList.find(chat => String(chat.id) === String(key))?.id;
+    if (id == null) return;
     if (document.getElementById('view-messages').classList.contains('inbox-editing')) {
         editChat(id);
     } else {

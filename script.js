@@ -426,11 +426,9 @@ if (streamToggle) {
         
         chatList = chats || [];
         chatList.forEach(chat => {
-            if (chat.messages.length > 0) {
-                updateChatLastMsg(chat); 
-            }
+            if (!Array.isArray(chat.messages)) chat.messages = [];
+            if (chat.messages.length) updateChatLastMsg(chat);
         });
-        chatList.forEach(chat => { if(!chat.messages) chat.messages = []; });
         chatList.sort((a, b) => { if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned; return b.id - a.id; });
         renderChatList();   
     
@@ -1764,13 +1762,14 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
 
     msgsToRender.forEach((msg, relativeIndex) => {
         const realIndex = startIndex + relativeIndex;
-        if (msg.isHidden) return;
-        if (msg.text && msg.text.includes('[邀请语音通话]')) return;
+        if (!msg || typeof msg !== 'object' || msg.isHidden) return;
+        const text = typeof msg.text === 'string' ? msg.text : String(msg.contentDescription || '');
+        if (text.includes('[邀请语音通话]')) return;
         // 在外层获取一次当前的虚拟日期，用来判断“今天”是哪天
         const nowVirtualDate = window.getVirtualTimeData ? window.getVirtualTimeData(chat, true).dateStr : "Today";
 
         // --- 1. 动态跨天与点击切换的时间线逻辑 ---
-        const [hh, mm] = (msg.time || "00:00").split(':').map(Number);
+        const [hh, mm] = String(msg.time || "00:00").split(':').map(Number);
         const currentMinutes = hh * 60 + mm; 
         const currentDateStr = msg.virtualDate || nowVirtualDate; 
 
@@ -1811,7 +1810,7 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
         lastTimeMinutes = currentMinutes; 
         lastDateStr = currentDateStr; 
         // --- 撤回逻辑 ---
-        const isAiPureCommand = (!msg.isSelf && msg.text.trim() === '[WITHDRAWN]');
+        const isAiPureCommand = (!msg.isSelf && text.trim() === '[WITHDRAWN]');
         if (msg.isRecalled || isAiPureCommand) {
             const recallRow = document.createElement('div');
             recallRow.className = 'recall-notice-row';
@@ -1910,22 +1909,22 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
             `;
         }
 
-         else if (msg.text.includes('couple-card')) {
+         else if (text.includes('couple-card')) {
         specialClass = 'couple-msg-bubble'; 
-        customContent = msg.text; 
+        customContent = text;
     }
         // 2. 原有的判断逻辑 (保持兼容)
-        else if (msg.text.includes('voice-inner-container')) specialClass = 'voice-bubble';
-        else if (msg.text.includes('photo-msg-img') || msg.text.includes('album-msg-img')) {
+        else if (text.includes('voice-inner-container')) specialClass = 'voice-bubble';
+        else if (text.includes('photo-msg-img') || text.includes('album-msg-img')) {
             const photo = conversationPhotoCard(msg, container.ownerDocument);
             if (photo) {
                 specialClass = 'conversation-media';
                 customContent = photo.outerHTML;
             }
         }
-        else if (msg.text.includes('chat-sticker-img') && !msg.text.includes('span')) specialClass = 'sticker-only';
-        else if (msg.text.includes('retweet-card') || msg.text.includes('转发的帖子')) specialClass = 'retweet-only'; 
-        let displayText = customContent || msg.text || '';
+        else if (text.includes('chat-sticker-img') && !text.includes('span')) specialClass = 'sticker-only';
+        else if (text.includes('retweet-card') || text.includes('转发的帖子')) specialClass = 'retweet-only';
+        let displayText = customContent || text;
         
         // 核心修复：更严谨地判断是否为富文本 (语音/图片/转账/表情包)
         const isRichContent = displayText.includes('voice-inner-container') || 
@@ -1948,7 +1947,7 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
 
         let replyBubbleHtml = '';
         if (msg.replyCtx) {
-            let shortContent = msg.replyCtx.content || '';
+            let shortContent = String(msg.replyCtx.content || '');
             if (shortContent.length > 40) shortContent = shortContent.slice(0, 40) + '...';
             
             replyBubbleHtml = `<div class="reply-tiny-bubble">
@@ -2246,10 +2245,12 @@ function applyChatCustomCss(cssCode) {
 }
 
 function openChatRoom(id) {
-    cancelReply(); 
-    currentChatId = id; 
-    const chat = chatList.find(c => c.id === id); 
-    if(!chat) return;
+    const chat = chatList.find(item => String(item.id) === String(id));
+    if (!chat) return;
+    if (!Array.isArray(chat.messages)) chat.messages = [];
+
+    cancelReply();
+    currentChatId = chat.id;
     globalData.lastPersonalChatId = chat.id;
     
     // ===========================================
@@ -2283,32 +2284,43 @@ function openChatRoom(id) {
     document.getElementById('chatMemory').value = chat.chatMemory || '';
     document.getElementById('customCssInput').value = chat.customCss || '';
     
-    // 应用样式和标题
-    applyChatCustomCss(chat.customCss);
-    populateConversationContact(document, chat);
-
-    // 渲染消息 (此时因为上面重置了 flag，只会渲染最后 30 条)
-    renderMessages(chat); 
-    
-    // 显示聊天室
+    const app = document.getElementById('appOverlay');
     const room = document.getElementById('chatRoom');
+    const history = document.getElementById('roomMessages');
+    const inbox = document.getElementById('chatAppPage');
+    if (inbox.style.display === 'none') {
+        inbox.style.display = 'flex';
+        switchAppTab(0);
+    }
+    document.getElementById('roomTitle').textContent = chat.name || '聊天';
+    app.classList.add('active', 'chat-reading');
     room.classList.add('active');
-    document.getElementById('appOverlay').scrollTop = 0;
+    app.scrollTop = 0;
     document.getElementById('phoneFrame').scrollTop = 0;
 
-    // ★★★ 修复点 2：延迟滚动到底部 (解决进入不跳转底部的问题) ★★★
-    setTimeout(() => {
-        const container = document.getElementById('roomMessages');
-        if (container) {
-            // 强制将滚动条拉到最下面
-            container.scrollTop = container.scrollHeight;
-        }
-    }, 10); 
-};
+    try {
+        populateConversationContact(document, chat);
+        applyChatCustomCss(chat.customCss);
+        renderMessages(chat);
+    } catch (error) {
+        console.error('Unable to render conversation', error);
+        const notice = document.createElement('p');
+        notice.className = 'conversation-render-error';
+        notice.textContent = '部分聊天记录暂时无法显示';
+        history.append(notice);
+    }
+    requestAnimationFrame(() => {
+        if (currentChatId === chat.id) history.scrollTop = history.scrollHeight;
+    });
+}
 
 function exitChatRoom() {
-    // 1. 在退出前，强制重新计算当前对话的最后一条消息预览
-    if (currentChatId) {
+    document.getElementById('chatRoom').classList.remove('active');
+    document.getElementById('appOverlay').classList.remove('chat-reading');
+    applyChatCustomCss('');
+
+    // Update the inbox after the user can return to it.
+    if (currentChatId != null) {
         const chat = chatList.find(c => c.id === currentChatId);
         if (chat) {
             updateChatLastMsg(chat); // 更新预览文字
@@ -2317,13 +2329,8 @@ function exitChatRoom() {
         }
     }
 
-    // 2. 关闭聊天室界面
-    document.getElementById('chatRoom').classList.remove('active'); 
     currentChatId = null;
-    
-    // 3. 清除动态样式
-    applyChatCustomCss(''); 
-};
+}
 const menu = document.getElementById('popMenu'), fileInput = document.getElementById('fileInput'), frame = document.getElementById('phoneFrame');
 let currentTargetImg = null; 
 
@@ -2892,11 +2899,12 @@ function renderChatList() {
     if (!container) return;
     container.innerHTML = ''; // 清空旧内容
 
-    const query = document.getElementById('inbox-query').value.trim().toLocaleLowerCase();
+    const query = (document.getElementById('inbox-query')?.value || '').trim().toLocaleLowerCase();
+    const lastActivity = chat => chat.messages?.[chat.messages.length - 1]?.timestamp || chat.id;
     const visibleChats = chatList.filter(chat =>
         [chat.name, chat.msg || chat.preview].some(value => String(value || '').toLocaleLowerCase().includes(query))
     ).sort((a, b) => Number(!!b.isPinned) - Number(!!a.isPinned)
-        || (b.messages?.at(-1)?.timestamp || b.id) - (a.messages?.at(-1)?.timestamp || a.id));
+        || lastActivity(b) - lastActivity(a));
     const pinnedItems = visibleChats.filter(chat => chat.isPinned);
     const normalItems = visibleChats.filter(chat => !chat.isPinned);
     if (!visibleChats.length && query) {
@@ -2921,7 +2929,7 @@ function renderChatList() {
                 </div>
                 
                 <!-- 内容层 -->
-                <div class="chat-item-content${chat.inboxUnread ? ' inbox-unread' : ''}" onclick="openInboxConversation(${chat.id})">
+                <div class="chat-item-content${chat.inboxUnread ? ' inbox-unread' : ''}" data-chat-id="${MiuApi.escapeHtml(chat.id)}" onclick="openInboxConversation(this.dataset.chatId)">
                     ${inboxAvatarMarkup(chat)}
                     <div class="chat-info">
                         <div class="chat-name-row">
@@ -3300,11 +3308,12 @@ function openApp(appName) {
     if (forumPage) forumPage.style.display = 'none';
 
     // 3. 判断打开哪个应用
-    if (appName === 'Page 1') { 
+    if (appName === 'Page 1') {
+        if (document.getElementById('chatRoom').classList.contains('active')) exitChatRoom();
         // --- 微信/聊天列表 ---
         if (chatPage) chatPage.style.display = 'flex'; 
+        switchAppTab(0);
         renderChatList(); 
-        switchAppTab(0); 
         
     } else if (appName === 'Page 4') {
         // --- ★★★ 论坛 App (Dock 第4个图标) ★★★ ---
@@ -3327,7 +3336,10 @@ function openApp(appName) {
         if (appTitle) appTitle.innerText = appName; 
     } 
 }
-function closeApp() { overlay.classList.remove('active'); }
+function closeApp() {
+    if (document.getElementById('chatRoom').classList.contains('active')) exitChatRoom();
+    overlay.classList.remove('active', 'chat-reading');
+}
 function switchWechatTab(el) { document.querySelectorAll('.wechat-tab-btn').forEach(tab => tab.classList.remove('active')); el.classList.add('active'); }
 document.addEventListener('DOMContentLoaded', () => PageNav.init());
 
@@ -5384,16 +5396,17 @@ function updateChatLastMsg(chat) {
     }
 
     // --- 3. 处理特殊的 HTML 消息类型 ---
-    if (lastMsg.text.includes('voice-inner-container')) { 
+    const text = typeof lastMsg.text === 'string' ? lastMsg.text : '';
+    if (text.includes('voice-inner-container')) {
         chat.msg = '[语音]';
-    } else if (lastMsg.text.includes('chat-sticker-img')) {
+    } else if (text.includes('chat-sticker-img')) {
         chat.msg = '[动画表情]';
-    } else if (lastMsg.text.includes('<img')) {
+    } else if (text.includes('<img')) {
         chat.msg = '[图片]';
-    } else if (lastMsg.text.includes('transfer-card')) {
+    } else if (text.includes('transfer-card')) {
         chat.msg = '[转账]';
     } else {
-        let cleanText = lastMsg.text.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '');
+        let cleanText = text.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '');
         chat.msg = cleanText;
     }
 }

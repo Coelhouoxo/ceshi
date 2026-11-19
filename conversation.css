@@ -154,9 +154,15 @@
 .inbox-dock .inbox-round { background: #fffffff5; }
 
 /* Keep every floating element on the same chat-width canvas. */
-#appOverlay:has(#chatRoom.active) { overflow: clip; background: #fff; }
-#appOverlay:has(#chatRoom.active) > #chatAppPage { visibility: hidden; }
-#chatRoom:not(.active), #voice-call-overlay:not(.active), #video-call-overlay:not(.active) {
+#appOverlay.chat-reading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: calc(var(--z-chatroom) - 1);
+    background: #fff;
+    pointer-events: none;
+}
+#voice-call-overlay:not(.active), #video-call-overlay:not(.active) {
     visibility: hidden;
     pointer-events: none;
 }
@@ -581,4 +587,12 @@
         backdrop-filter: none;
     }
     #chatRoom[data-tone="dark"] .conversation-glass:not(.photo-save) { background: #223143; }
+}
+
+#chatRoom .conversation-render-error {
+    margin: 16px auto;
+    padding: 8px 12px;
+    color: var(--chat-muted);
+    font-size: 13px;
+    text-align: center;
 }
