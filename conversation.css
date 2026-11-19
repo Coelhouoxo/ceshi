@@ -189,17 +189,17 @@
     padding-top: 0 !important;
 }
 #chatRoom[data-wallpaper] {
-    --incoming-color: linear-gradient(125deg, #d5d7e5a6, #a5afb9a8);
-    --incoming-tail: #aab3bd;
-    --sent-end: #0085f5ed;
+    --incoming-color: linear-gradient(110deg, #d6d7f41c, #24304442 57%, #0d263447);
+    --incoming-tail: #53647769;
+    --sent-end: #0085f5e8;
     --sent-surface: linear-gradient(165deg, #0094fae8, var(--sent-end));
 }
 #chatRoom[data-tone="dark"] {
     --chat-ink: #fff;
-    --incoming-color: linear-gradient(115deg, #444957c9, #2d3745ca);
-    --incoming-tail: #333d4b;
+    --incoming-color: linear-gradient(110deg, #d6d7f41c, #24304442 57%, #0d263447);
+    --incoming-tail: #24304442;
     --chat-muted: #ffffffb5;
-    --glass-tint: linear-gradient(147deg, #c7e6ff48, #122c401f 51%, #88afd749);
+    --glass-tint: linear-gradient(147deg, #31536b22, #122c4018 55%, #16435827);
     --edge-fade-top: #07101ea0;
     --edge-fade-bottom: #07101eb0;
 }
@@ -219,7 +219,7 @@
     position: absolute;
     z-index: -1;
     inset: calc(-1 * var(--chat-top)) 0 0;
-    background: linear-gradient(var(--edge-fade-top), transparent 100%);
+    background: linear-gradient(var(--edge-fade-top), #f8f8f859 48%, transparent);
     -webkit-backdrop-filter: blur(.55px);
     backdrop-filter: blur(.55px);
     -webkit-mask-image: linear-gradient(#000 11%, #000a 53%, transparent);
@@ -301,6 +301,9 @@
     background: transparent;
     border-radius: 0;
     box-shadow: none;
+    --history-fade: linear-gradient(#0003, #0009 calc(var(--chat-top) + 39px), #000 calc(var(--chat-top) + 119px), #000 calc(100% - 104px), #000c calc(100% - 50px), #0002);
+    -webkit-mask-image: var(--history-fade);
+    mask-image: var(--history-fade);
     overflow-anchor: none;
     scrollbar-width: thin;
     scrollbar-color: #9996 transparent;
@@ -346,9 +349,9 @@
 #chatRoom .Miu-miu .conversation-glyph { min-width: 47px; text-align: center; }
 #chatRoom .Miu-miu.user .conversation-text { --bubble-paint: var(--sent-surface); color: #fff !important; }
 #chatRoom[data-wallpaper] .Miu-miu.ai .conversation-text {
-    -webkit-backdrop-filter: blur(2.4px) saturate(110%);
-    backdrop-filter: blur(2.4px) saturate(110%);
-    box-shadow: inset 0 0 0 .7px #ffffff4a !important;
+    -webkit-backdrop-filter: blur(5px) saturate(116%);
+    backdrop-filter: blur(5px) saturate(116%);
+    box-shadow: inset 0 0 0 .7px #e8e7ff52 !important;
 }
 #chatRoom .Miu-miu .conversation-text::before,
 #chatRoom .Miu-miu .conversation-text::after {
@@ -374,6 +377,43 @@
     transform: scaleX(-1);
     transform-origin: center;
 }
+/* Draw the body and tail as one contour. Older engines keep the rounded body and CSS tail. */
+@supports (clip-path: shape(from 0 0, line to 1px 1px, close)) {
+    #chatRoom .Miu-miu.conversation-tail .conversation-text {
+        background: transparent !important;
+        box-shadow: none !important;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+    #chatRoom .Miu-miu.conversation-tail .conversation-text::after {
+        inset: 0 0 -6px;
+        width: auto;
+        height: auto;
+        background: var(--bubble-paint);
+        clip-path: shape(from 18.5px 0,
+            hline to calc(100% - 18.5px),
+            curve to 100% 18.5px with calc(100% - 8px) 0 / 100% 8px,
+            vline to calc(100% - 24.5px),
+            curve to calc(100% - 18.5px) calc(100% - 6px) with 100% calc(100% - 14px) / calc(100% - 8px) calc(100% - 6px),
+            hline to 20px,
+            curve to 8.5px 100% with 16px calc(100% - 6px) / 11px 100%,
+            curve to 8px calc(100% - 2px) with 7px 100% / 7px calc(100% - 1px),
+            curve to 8px calc(100% - 10px) with 10px calc(100% - 5px) / 10px calc(100% - 7px),
+            curve to 0 calc(100% - 24.5px) with 4px calc(100% - 14px) / 0 calc(100% - 18px),
+            vline to 18.5px,
+            curve to 18.5px 0 with 0 8px / 8px 0,
+            close);
+        transform: none !important;
+    }
+    #chatRoom .Miu-miu.conversation-tail.user .conversation-text::after {
+        inset: 0 0 -6px;
+        transform: scaleX(-1) !important;
+    }
+    #chatRoom[data-wallpaper] .Miu-miu.ai.conversation-tail .conversation-text::after {
+        -webkit-backdrop-filter: blur(5px) saturate(116%);
+        backdrop-filter: blur(5px) saturate(116%);
+    }
+}
 #chatRoom .Miu-miu .content:is(.conversation-media, .sticker-only, .transfer-msg) {
     background: transparent !important;
     padding: 0 !important;
@@ -391,7 +431,7 @@
 }
 #chatRoom #newRoomFooter::before {
     inset: -24px 0 0;
-    background: linear-gradient(0deg, var(--edge-fade-bottom), transparent);
+    background: linear-gradient(0deg, var(--edge-fade-bottom), #fff3 53%, transparent);
     -webkit-mask-image: linear-gradient(to top, #000 10%, #0009 55%, transparent);
     mask-image: linear-gradient(to top, #000 10%, #0009 55%, transparent);
 }
@@ -433,18 +473,75 @@
 .conversation-field:has(textarea:not(:placeholder-shown)) .send-btn .composer-send { display: block !important; }
 .conversation-field:has(textarea:not(:placeholder-shown)) .send-btn .composer-wave { display: none; }
 #chatRoom #chatToolsPanel:not(.sticker-mode) {
+    --glass-tint: linear-gradient(155deg, #ffffffc4, #ffffff91 64%, #ffffffab);
+    left: 12px !important;
     right: auto !important;
-    width: min(250px, calc(100% - 30px)) !important;
-    bottom: max(74px, calc(57px + env(safe-area-inset-bottom))) !important;
-    background: #ffffffde !important;
-    -webkit-backdrop-filter: blur(5px) saturate(130%);
-    backdrop-filter: blur(5px) saturate(130%);
-    overflow: auto !important;
+    width: min(250px, calc(100% - 24px)) !important;
+    max-height: min(60%, 460px) !important;
+    bottom: max(64px, calc(52px + env(safe-area-inset-bottom, 0px))) !important;
+    background: #ffffffe0 !important;
+    border-radius: 28px !important;
+    padding: 16px 10px 12px !important;
+    box-shadow: 0 16px 40px #0002;
+    overflow-y: auto !important;
 }
-#chatRoom #chatToolsPanel:not(.sticker-mode) .tools-grid { display: flex !important; flex-direction: column; gap: 3px; }
-#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-item { display: flex; flex-direction: row; align-items: center; gap: 11px; width: 100%; padding: 3px 6px; }
-#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-icon-box { width: 32px; height: 32px; margin: 0; }
-#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-name { margin: 0; font-size: 14px; }
+#chatRoom #chatToolsPanel[data-refraction]:not(.sticker-mode) { background: transparent !important; }
+#chatRoom[data-tone="dark"] #chatToolsPanel:not(.sticker-mode) {
+    --glass-tint: linear-gradient(155deg, #121a2fbe, #192735a1);
+    color: white;
+}
+#chatRoom #chatToolsPanel:not(.sticker-mode) .tools-grid { display: flex !important; flex-direction: column; gap: 0; }
+#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-item {
+    display: flex; flex-direction: row; align-items: center; gap: 14px;
+    width: 100%; padding: 6px 12px; border-radius: 14px;
+}
+#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-item:active { background: #8882; }
+#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-icon-box {
+    color: #fff; background: var(--tool-color, #7c8496); box-shadow: none;
+    width: 38px; height: 38px; margin: 0; font-size: 17px; border-radius: 50%;
+}
+#chatRoom #chatToolsPanel:not(.sticker-mode) .tool-name { color: inherit; margin: 0; font-size: 16px; }
+#chatRoom .tool-item[data-chat-tool="album"] { order: -4; --tool-color: #277cf4; }
+#chatRoom .tool-item[data-chat-tool="photo"] { order: -3; --tool-color: #58667a; }
+#chatRoom .tool-item[data-chat-tool="emoji"] { order: -2; --tool-color: #fa9b2c; }
+#chatRoom .tool-item[data-chat-tool="voice"] { order: -1; --tool-color: #f65c63; }
+#chatRoom .tool-item[data-chat-tool="payment"] { --tool-color: #41aa67; }
+#chatRoom .tool-icon-box .icon-album-bg, #chatRoom .tool-icon-box .icon-transfer-bg { filter: brightness(0) invert(1); }
+
+#chatRoom .Miu-miu .content.voice-bubble {
+    --wave-ink: #168dec;
+    --play-fill: #078cf5;
+    width: min(275px, 64vw) !important;
+    min-height: 72px;
+    padding: 10px 15px !important;
+    border-radius: 18.5px !important;
+    background: #e9e9eb !important;
+}
+#chatRoom[data-wallpaper] .Miu-miu.ai .content.voice-bubble {
+    background: linear-gradient(110deg, #a5b7ed24, #15364b52) !important;
+    -webkit-backdrop-filter: blur(2px) saturate(114%);
+    backdrop-filter: blur(2px) saturate(114%);
+}
+#chatRoom .Miu-miu.user .content.voice-bubble {
+    --wave-ink: #ffffffd8;
+    --play-fill: #ffffff44;
+    background: var(--sent-surface) !important;
+}
+#chatRoom .voice-bubble::before, #chatRoom .voice-bubble::after { display: none !important; }
+#chatRoom .voice-bubble .voice-inner-container { width: 100%; }
+#chatRoom .voice-bubble .voice-main-row { width: 100%; min-height: 50px; gap: 10px; }
+#chatRoom .voice-bubble .voice-main-row::before {
+    content: ''; flex: 0 0 25px; height: 25px; border-radius: 50%;
+    background: var(--play-fill) center / 12px 12px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M3 1.5 10 6 3 10.5z'/%3E%3C/svg%3E");
+}
+#chatRoom .voice-bubble .voice-animate-icon {
+    flex: 1; height: 38px; margin: 0;
+    justify-content: space-between; gap: 1px; transform: none; color: var(--wave-ink);
+}
+#chatRoom .voice-bubble .voice-line { width: 1.6px; height: var(--voice-height, 9px); animation: none; }
+#chatRoom .voice-bubble .voice-duration { flex: none; color: var(--chat-muted); font-size: 12px !important; }
+#chatRoom .Miu-miu.user .voice-bubble .voice-duration { color: #ffffffbc; }
+#chatRoom[data-tone="dark"] .Miu-miu.ai .voice-bubble { --wave-ink: #fff; }
 
 .conversation-photo {
     position: relative;
@@ -604,11 +701,16 @@
     overflow: hidden;
     border-radius: inherit;
 }
-.chat-optic::after {
+.chat-optic::before, .chat-optic::after {
     content: '';
     position: absolute;
     inset: 0;
     background: var(--glass-tint);
+}
+.chat-optic::before {
+    z-index: 1;
+    background: var(--optic-glint) center / 100% 100% no-repeat;
+    opacity: .55;
 }
 .chat-optic-wall {
     background-color: var(--chat-surface);

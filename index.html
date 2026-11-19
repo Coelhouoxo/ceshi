@@ -19,7 +19,7 @@
     <!-- 引入样式文件 -->
      <link rel="manifest" href="manifest.json?v=7">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="conversation.css?v=6">
+    <link rel="stylesheet" href="conversation.css?v=7">
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
@@ -579,33 +579,33 @@
 
     <div class="tools-grid" id="toolsMainMenu">
     <!-- 第1个：表情 -->
-    <div class="tool-item" onclick="openStickerView()">
+    <div class="tool-item" data-chat-tool="emoji" onclick="openStickerView()">
         <div class="tool-icon-box"><i class="far fa-laugh-squint"></i></div>
-        <div class="tool-name">Emoji</div>
+        <div class="tool-name">表情包</div>
     </div>
     <div class="tool-item" onclick="toggleChatTools(); openHeartVoice()">
         <div class="tool-icon-box"><i class="far fa-heart"></i></div>
         <div class="tool-name">心声</div>
     </div>
     <!-- 第2个：语音 -->
-    <div class="tool-item" onclick="startVoiceSimulation()">
+    <div class="tool-item" data-chat-tool="voice" onclick="startVoiceSimulation()">
         <div class="tool-icon-box"><i class="fas fa-microphone"></i></div>
-        <div class="tool-name">Voice</div>
+        <div class="tool-name">语音</div>
     </div>
     <!-- 第3个：拍照 -->
-    <div class="tool-item" onclick="openPhotoModal()">
+    <div class="tool-item" data-chat-tool="photo" onclick="openPhotoModal()">
         <div class="tool-icon-box"><i class="fas fa-camera"></i></div>
-        <div class="tool-name">Photo</div>
+        <div class="tool-name">文字照片</div>
     </div>
     <!-- 第4个：相册 -->
-    <div class="tool-item" onclick="triggerNativeAlbum()">
+    <div class="tool-item" data-chat-tool="album" onclick="triggerNativeAlbum()">
         <div class="tool-icon-box"><div class="icon-album-bg"></div></div>
-        <div class="tool-name">相册</div>
+        <div class="tool-name">照片与识图</div>
     </div>
     <!-- 第5个：转账 -->
-    <div class="tool-item" onclick="openTransferModal()">
+    <div class="tool-item" data-chat-tool="payment" onclick="openTransferModal()">
         <div class="tool-icon-box"><div class="icon-transfer-bg"></div></div>
-        <div class="tool-name">Transfer</div>
+        <div class="tool-name">转账</div>
     </div>
     <div class="tool-item" onclick="startVoiceCallUI()">
         <div class="tool-icon-box">
@@ -1524,8 +1524,8 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="conversation.js?v=3"></script>
-    <script defer src="conversation-optics.js?v=1"></script>
+    <script data-cfasync="false" src="conversation.js?v=4"></script>
+    <script defer src="conversation-optics.js?v=2"></script>
     <script data-cfasync="false" src="script.js?v=13"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>

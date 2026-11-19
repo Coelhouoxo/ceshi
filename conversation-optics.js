@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let frame = 0;
     let nextFilter = 0;
 
-    function applyLens(record, width, height, radius) {
-        const size = [width, height, radius].join(':');
+    function applyLens(record, width, height, radius, material) {
+        const size = [width, height, radius, material.strength].join(':');
         if (record.size === size) return true;
         const canvas = document.createElement('canvas');
         canvas.width = width;
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const context = canvas.getContext('2d');
         if (!context) return false;
         const pixels = context.createImageData(width, height);
+        const gloss = context.createImageData(width, height);
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const ux = x + .5 - width / 2;
@@ -42,23 +43,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cy = Math.max(dy, 0);
                 const length = Math.hypot(cx, cy);
                 const distance = length + Math.min(Math.max(dx, dy), 0) - radius;
-                const rim = Math.max(0, Math.min(1, 1 + distance / 5));
-                const shift = 114 * rim * rim;
+                const nx = Math.sign(ux) * (length ? cx / length : Number(dx > dy));
+                const ny = Math.sign(uy) * (length ? cy / length : Number(dy >= dx));
+                const t = Math.max(0, Math.min(1, 1 + distance / material.edge));
+                const shift = 114 * t * t * (3 - 2 * t);
                 const offset = (y * width + x) * 4;
-                pixels.data[offset] = 128 - shift * Math.sign(ux) * (length ? cx / length : Number(dx > dy));
-                pixels.data[offset + 1] = 128 - shift * Math.sign(uy) * (length ? cy / length : Number(dy >= dx));
+                pixels.data[offset] = 128 - shift * nx;
+                pixels.data[offset + 1] = 128 - shift * ny;
                 pixels.data[offset + 2] = 128;
                 pixels.data[offset + 3] = 255;
+                if (distance <= 0 && distance >= -5) {
+                    const light = -.4 * nx - .92 * ny;
+                    const rim = Math.max(0, 1 - Math.abs(distance + .75) / 1.2);
+                    const lip = Math.max(0, 1 - Math.abs(distance + 2.5) / 2.1);
+                    const shine = rim * (.12 + .67 * Math.max(0, light) ** 3);
+                    const shade = lip * .20 * Math.max(0, -light) ** 2;
+                    gloss.data[offset] = gloss.data[offset + 1] = gloss.data[offset + 2] = shine >= shade ? 255 : 25;
+                    gloss.data[offset + 3] = 255 * Math.max(shine, shade);
+                }
             }
         }
         context.putImageData(pixels, 0, 0);
 
+        const displacement = canvas.toDataURL();
+        context.putImageData(gloss, 0, 0);
+        record.pane.style.setProperty('--optic-glint', 'url("' + canvas.toDataURL() + '")');
         const id = 'ceshi-optic-' + ++nextFilter;
         const filter = svg('filter', {id, filterUnits: 'userSpaceOnUse', x: '-14', y: '-14', width: width + 28, height: height + 28, 'color-interpolation-filters': 'sRGB'});
         filter.append(
-            svg('feImage', {href: canvas.toDataURL(), width, height, preserveAspectRatio: 'none', result: 'field'}),
-            svg('feGaussianBlur', {in: 'SourceGraphic', stdDeviation: '.45', result: 'sample'}),
-            svg('feDisplacementMap', {in: 'sample', in2: 'field', scale: '13', xChannelSelector: 'R', yChannelSelector: 'G'})
+            svg('feImage', {href: displacement, width, height, preserveAspectRatio: 'none', result: 'field'}),
+            svg('feGaussianBlur', {in: 'SourceGraphic', stdDeviation: material.blur, result: 'sample'}),
+            svg('feDisplacementMap', {in: 'sample', in2: 'field', scale: material.strength, xChannelSelector: 'R', yChannelSelector: 'G', result: 'refracted'}),
+            svg('feColorMatrix', {in: 'refracted', type: 'saturate', values: material.saturation})
         );
         record.filter?.remove();
         defs.append(filter);
@@ -100,7 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const record = records.get(target) || createRecord(target);
             const corner = getComputedStyle(target).borderTopLeftRadius;
             const radius = Math.min(width / 2, height / 2, corner.includes('%') ? Infinity : parseFloat(corner) || 20);
-            if (!applyLens(record, width, height, radius)) continue;
+            const material = target.classList.contains('conversation-field')
+                ? {edge: 3.1, strength: 13, blur: .65, saturation: 1.14}
+                : target.classList.contains('conversation-name')
+                    ? {edge: 3.2, strength: 14, blur: .6, saturation: 1.16}
+                    : {edge: 2.6, strength: 11, blur: .45, saturation: 1.12};
+            if (!applyLens(record, width, height, radius, material)) continue;
             const sx = width / box.width;
             const sy = height / box.height;
             const wall = record.wall.style;

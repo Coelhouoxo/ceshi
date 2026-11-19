@@ -202,6 +202,16 @@ function measureConversationPhoto(picture) {
 }
 
 function refreshConversationPhotos(history) {
+    for (const wave of history.querySelectorAll('.voice-bubble .voice-animate-icon')) {
+        const pattern = [6, 12, 17, 9, 21, 33, 25, 13, 7, 17, 27, 21, 12, 6, 11, 18, 29, 36, 18, 11, 22, 28, 14, 8, 16, 24, 18, 8, 14, 25, 31, 19, 10, 17, 9, 5];
+        const bars = pattern.map(height => {
+            const bar = history.ownerDocument.createElement('span');
+            bar.className = 'voice-line';
+            bar.style.setProperty('--voice-height', height + 'px');
+            return bar;
+        });
+        wave.replaceChildren(...bars);
+    }
     history.querySelectorAll('.photo-frame img').forEach(picture => {
         if (picture.complete) measureConversationPhoto(picture);
         else picture.addEventListener('load', () => measureConversationPhoto(picture), {once:true});
