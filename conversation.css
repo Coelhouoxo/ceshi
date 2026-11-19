@@ -828,3 +828,4 @@
 #chatRoom:not(.active) > ceshi-kiss-view { display: none !important; }
 
 #appOverlay { overflow: clip !important; }
+#chatRoom:not(.active) { visibility: hidden !important; pointer-events: none !important; }
