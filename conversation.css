@@ -356,7 +356,7 @@
     transform: none;
 }
 #chatRoom .Miu-miu.conversation-tail .conversation-text::after {
-    content: "";
+    content: "" !important;
     display: block !important;
     position: absolute;
     inset: auto auto -4px 6px;
