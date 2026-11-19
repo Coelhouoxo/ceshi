@@ -1463,6 +1463,8 @@ function renderPersonalPreview(scene) {
     const source = document.getElementById('chatRoom');
     const room = preview.importNode(source, true);
     room.classList.add('active');
+    room.classList.remove('kiss-connected');
+    room.querySelector('ceshi-kiss-view')?.remove();
     overlay.append(room);
     shell.append(overlay);
     preview.getElementById('dynamic-chat-style').textContent = chat?.customCss || '';
