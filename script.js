@@ -1468,7 +1468,7 @@ function renderPersonalPreview(scene) {
     overlay.append(room);
     shell.append(overlay);
     preview.getElementById('dynamic-chat-style').textContent = chat?.customCss || '';
-    preview.getElementById('roomTitle').textContent = chat?.name || '聊天';
+    populateConversationContact(preview, chat);
     const messages = preview.getElementById('roomMessages');
     messages.replaceChildren();
     if (chat) renderMessages(chat, messages);
@@ -1853,43 +1853,10 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
 
         // 1. 判断是否为转账消息
         if (msg.type === 'transfer') {
-            specialClass = 'transfer-msg'; 
-            
-            const isDone = msg.status !== 'pending';
-            
-            // ★★★ 核心修改点 1：顶部永远显示金额 ★★★
-            let topText = "¥" + msg.amount; 
-
-            // ★★★ 核心修改点 2：底部文字根据状态变化 ★★★
-            let bottomText = "";
-            
-            if (msg.status === 'received') {
-                // 已收款状态
-                bottomText = msg.transferBy === 'me' ? "已被接收" : "已收款";
-            } else if (msg.status === 'refunded') {
-                // 已退还状态
-                bottomText = msg.transferBy === 'me' ? "已被退还" : "已退还";
-            } else {
-                // 进行中状态 (Pending)
-                bottomText = msg.transferBy === 'me' ? "待对方确认" : "请收款";
-            }
-
-            const arrowIcon = `<svg class="transfer-icon-svg" viewBox="0 0 24 24"><path d="M7 10h14l-4-4M17 14H3l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-            customContent = `
-                <div class="transfer-card ${isDone ? 'done' : ''}" onclick="handleTransferClick(${msg.id}, event)">
-                    <div class="transfer-top">
-                        <div class="transfer-info-col">
-                            <div class="transfer-amount-text">${topText}</div>
-                            <div class="transfer-status-text">${bottomText}</div>
-                        </div>
-                    </div>
-                    <div class="transfer-line"></div>
-                    <div class="transfer-footer">—— ＞ ＜ おやすみ .. ——</div>
-                </div>
-            `;
+            specialClass = 'transfer-msg';
+            customContent = conversationTransferMarkup(msg);
         }
-        
+
         else if (msg.type === 'relative_card') {
             specialClass = 'transfer-msg'; 
             
@@ -1947,8 +1914,13 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
     }
         // 2. 原有的判断逻辑 (保持兼容)
         else if (msg.text.includes('voice-inner-container')) specialClass = 'voice-bubble';
-        else if (msg.text.includes('photo-msg-img')) specialClass = 'photo-only';
-        else if (msg.text.includes('album-msg-img')) specialClass = 'album-only';
+        else if (msg.text.includes('photo-msg-img') || msg.text.includes('album-msg-img')) {
+            const photo = conversationPhotoCard(msg, container.ownerDocument);
+            if (photo) {
+                specialClass = 'conversation-media';
+                customContent = photo.outerHTML;
+            }
+        }
         else if (msg.text.includes('chat-sticker-img') && !msg.text.includes('span')) specialClass = 'sticker-only';
         else if (msg.text.includes('retweet-card') || msg.text.includes('转发的帖子')) specialClass = 'retweet-only'; 
         let displayText = customContent || msg.text || '';
@@ -2151,7 +2123,7 @@ function closeChatSettings() {
     document.getElementById('chatSettingsPage').classList.remove('active');
 }
 
-function editCharNameInSettings() { const chat = chatList.find(c => c.id === currentChatId); if(!chat) return; const realName = prompt("角色真实姓名:", chat.realName); const remark = prompt("备注名:", chat.name); if (realName) chat.realName = realName; if (remark) chat.name = remark; saveData(); openChatSettings(); document.getElementById('roomTitle').innerText = chat.name; renderChatList(); }
+function editCharNameInSettings() { const chat = chatList.find(c => c.id === currentChatId); if(!chat) return; const realName = prompt("角色真实姓名:", chat.realName); const remark = prompt("备注名:", chat.name); if (realName) chat.realName = realName; if (remark) chat.name = remark; saveData(); openChatSettings(); populateConversationContact(document, chat); renderChatList(); }
 function editUserNameInSettings() { const chat = chatList.find(c => c.id === currentChatId); if(!chat) return; const realName = prompt("我的真实姓名:", chat.userRealName || ""); const remark = prompt("角色对我的称呼(备注):", chat.userRemark || ""); if (realName) chat.userRealName = realName; if (remark) chat.userRemark = remark; saveData(); openChatSettings(); }
 
 function clearCurrentChat() {
@@ -2274,6 +2246,10 @@ function openChatRoom(id) {
     // ===========================================
 
     chat.showFullHistory = false;
+    if (chat.inboxUnread) {
+        chat.inboxUnread = false;
+        saveData();
+    }
 
     // 填充设置页面的数据
     document.getElementById('charPersona').value = chat.charPersona || '';
@@ -2283,7 +2259,7 @@ function openChatRoom(id) {
     
     // 应用样式和标题
     applyChatCustomCss(chat.customCss);
-    document.getElementById('roomTitle').innerText = chat.name;
+    populateConversationContact(document, chat);
 
     // 渲染消息 (此时因为上面重置了 flag，只会渲染最后 30 条)
     renderMessages(chat); 
@@ -2771,10 +2747,10 @@ async function sendMsg() {
 
     // 3. ★★★ 智能识别图片链接 ★★★
     // 正则判断：如果是 http 开头，并且以 jpg/png/gif/webp 结尾
-    if (text.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i)) {
+    if (text.match(/^https?:\/\/[^\s<>"']+\.(jpg|jpeg|png|gif|webp)([?#][^\s<>"']*)?$/i)) {
         console.log("检测到图片链接，正在转换为图片...");
         // 直接修改 text 变量，把它变成图片标签
-        text = `<img src="${text}" class="album-msg-img">`;
+        text = `<img src="${MiuApi.escapeHtml(text)}" class="album-msg-img">`;
     }
 
     // ★ 核心修复：获取当前虚拟时间快照 (true代表这是User发的消息)
@@ -2887,15 +2863,17 @@ function renderChatList() {
     if (!container) return;
     container.innerHTML = ''; // 清空旧内容
 
-    // 1. 排序
-    chatList.sort((a, b) => {
-        if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned; // 置顶优先
-        // 简单按ID降序(模拟时间)，如果你有 time 字段更好
-        return b.id - a.id; 
-    });
-
-    const pinnedItems = chatList.filter(c => c.isPinned);
-    const normalItems = chatList.filter(c => !c.isPinned);
+    const query = document.getElementById('inbox-query').value.trim().toLocaleLowerCase();
+    const visibleChats = chatList.filter(chat =>
+        [chat.name, chat.msg || chat.preview].some(value => String(value || '').toLocaleLowerCase().includes(query))
+    ).sort((a, b) => Number(!!b.isPinned) - Number(!!a.isPinned)
+        || (b.messages?.at(-1)?.timestamp || b.id) - (a.messages?.at(-1)?.timestamp || a.id));
+    const pinnedItems = visibleChats.filter(chat => chat.isPinned);
+    const normalItems = visibleChats.filter(chat => !chat.isPinned);
+    if (!visibleChats.length && query) {
+        container.textContent = '没有匹配的信息';
+        return;
+    }
 
     const createItemHTML = (chat) => {
         const pinText = chat.isPinned ? "取消" : "置顶";
@@ -2914,14 +2892,14 @@ function renderChatList() {
                 </div>
                 
                 <!-- 内容层 -->
-                <div class="chat-item-content" onclick="openChatRoom(${chat.id})">
-                    <img src="${chat.avatar}" class="chat-avatar">
+                <div class="chat-item-content${chat.inboxUnread ? ' inbox-unread' : ''}" onclick="openInboxConversation(${chat.id})">
+                    ${inboxAvatarMarkup(chat)}
                     <div class="chat-info">
                         <div class="chat-name-row">
-                            <span class="chat-name">${chat.name}</span>
-                            <span class="chat-time">${timeText}</span>
+                            <span class="chat-name">${MiuApi.escapeHtml(chat.name || '聊天')}</span>
+                            <span class="chat-time">${MiuApi.escapeHtml(timeText)} <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
                         </div>
-                        <div class="chat-preview">${previewText}</div>
+                        <div class="chat-preview">${MiuApi.escapeHtml(previewText)}</div>
                     </div>
                 </div>
             </div>
@@ -4450,38 +4428,15 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
     const contextMsgs = validMsgs.slice(-limit).map(m => {
         let contentToSend = m.contentDescription || m.text;
         
-        // 1. 尝试提取图片链接 (匹配表情包、拍照、相册图片的 img 标签)
-        const imgMatch = m.text.match(/<img[^>]+src="([^"]+)"[^>]*>/i);
-        
-        // 2. ★★★ 修复：智能判断图片类型 ★★★
-        const isSticker = m.text.includes('chat-sticker-img');
-        const isPhotoCard = m.text.includes('photo-msg-img'); // 【新增】识别是否为“文字描述图”
-
-        // 【核心修复】：增加 !isPhotoCard 判断
-        // 意思：只有当它“不是表情包”且“不是文字描述卡片”时，才调用 Vision API 去识图
-        if (m.isSelf && imgMatch && imgMatch[1] && !isSticker && !isPhotoCard) {
-            const imgSrc = imgMatch[1];
-            
-            // 提取辅助描述文字 (如果有)
-            let textDesc = "[图片]";
-            if (m.contentDescription) textDesc = m.contentDescription;
-            else if (m.text.includes('chat-sticker-img')) textDesc = "[表情包]";
-            
-            // ★★★ 新增修复点 1：Vision API 模式下也要带上引用内容 ★★★
-            if (m.replyCtx) {
-                textDesc = `[回复 ${m.replyCtx.name}: ${m.replyCtx.content}]\n${textDesc}`;
-            }
-
+        const images = m.isSelf && !m.isFailed && !m.isRecalled && !m.isHidden ? conversationVisionImages(m.text) : [];
+        if (images.length) {
+            const description = m.contentDescription || '[图片]';
+            const caption = m.replyCtx ? `[回复 ${m.replyCtx.name}: ${m.replyCtx.content}]\n${description}` : description;
             return {
-                role: "user",
+                role: 'user',
                 content: [
-                    { type: "text", text: textDesc }, 
-                    {
-                        type: "image_url",
-                        image_url: {
-                            url: imgSrc // 支持 URL 和 Base64
-                        }
-                    }
+                    { type: 'text', text: caption },
+                    ...images.map(url => ({ type: 'image_url', image_url: { url } }))
                 ]
             };
         }
@@ -4652,7 +4607,7 @@ const hasRelativeCard = chat.messages.some(m => m.type === 'relative_card');
         }
 
         if (document.getElementById('roomTitle') && currentChatId === chat.id) {
-            document.getElementById('roomTitle').innerText = chat.name;
+            populateConversationContact(document, chat);
         }
 
         const TRANS_SPLIT = "@@@TRANS@@@"; 
@@ -5379,6 +5334,10 @@ function updateChatLastMsg(chat) {
     
     // 更新时间
     chat.time = lastMsg.time;
+    if (lastMsg.timestamp && lastMsg.timestamp !== chat.inboxLastMessageAt) {
+        chat.inboxLastMessageAt = lastMsg.timestamp;
+        chat.inboxUnread = !lastMsg.isSelf && currentChatId !== chat.id && !lastMsg.isRecalled;
+    }
 
     // --- 1. 处理撤回消息 ---
     if (lastMsg.isRecalled) {
@@ -7928,54 +7887,61 @@ function triggerNativeAlbum() {
 }
 
 // 选图回调：直接发送，不弹窗
-function handleNativeAlbumSelect(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const base64Url = e.target.result;
-        // ★ 选完图直接发
-        sendDirectPhoto(base64Url); 
-    };
-    reader.readAsDataURL(file);
-    input.value = ''; 
+async function handleNativeAlbumSelect(input) {
+    const files = Array.from(input.files);
+    input.value = '';
+    const chat = chatList.find(item => item.id === currentChatId);
+    if (!chat || !files.length) return;
+    if (files.length > 10) {
+        alert('一次最多选择 10 张照片。');
+        return;
+    }
+    if (input.disabled) return;
+    input.disabled = true;
+    try {
+        const images = [];
+        for (const file of files) images.push(await readConversationPhoto(file));
+        if (chatList.includes(chat)) sendDirectPhoto(images, chat);
+    } catch (error) {
+        console.warn(error);
+        alert('有照片无法读取，请换成 JPG、PNG 或 WebP 后重试。');
+    } finally {
+        input.disabled = false;
+    }
 }
 
-// 直接发送图片函数
-function sendDirectPhoto(imgUrl) {
-    if (!currentChatId) return;
-    const chat = chatList.find(c => c.id === currentChatId);
-    
-    if (chat) {
-        const vt = window.getVirtualTimeData(chat, true);
-        const displayDesc = "图片"; 
-        const photoHtml = `<img src="${imgUrl}" class="album-msg-img" data-desc="${displayDesc}">`;
-
-        chat.messages.push({
-            text: photoHtml,
-            isSelf: true,
-            time: vt.timeStr,
-            virtualDate: vt.dateStr,
-            virtualTimestamp: vt.ms,
-            contentDescription: `[发送了一张图片]`,
-            timestamp: Date.now()
-        });
-
-        chat.msg = '[图片]';
-        chat.time = vt.timeStr;
-
-        if (!chat.isPinned) {
-            chatList = chatList.filter(c => c.id !== currentChatId);
-            chatList.unshift(chat);
-        }
-
-        saveData();
+function sendDirectPhoto(value, chat = chatList.find(item => item.id === currentChatId)) {
+    if (!chat) return;
+    const images = Array.isArray(value) ? value : [value];
+    const vt = window.getVirtualTimeData(chat, true);
+    const message = {
+        text: images.map(url => `<img src="${MiuApi.escapeHtml(url)}" class="album-msg-img" alt="照片">`).join(''),
+        isSelf: true,
+        time: vt.timeStr,
+        virtualDate: vt.dateStr,
+        virtualTimestamp: vt.ms,
+        contentDescription: images.length === 1 ? '[图片]' : `[${images.length} 张图片]`,
+        timestamp: Date.now()
+    };
+    if (chat.isUserBlocked) message.isFailed = true;
+    if (currentChatId === chat.id && activeReplyContext && !message.isFailed) {
+        message.replyCtx = { ...activeReplyContext };
+        cancelReply();
+    }
+    chat.messages.push(message);
+    updateChatLastMsg(chat);
+    saveData();
+    renderChatList();
+    if (currentChatId === chat.id && document.getElementById('chatRoom').classList.contains('active')) {
         renderMessages(chat);
-        
-        // 滚到底部
-        const container = document.getElementById('roomMessages');
-        if(container) container.scrollTop = container.scrollHeight;
+        const history = document.getElementById('roomMessages');
+        history.scrollTop = history.scrollHeight;
+        const lastCard = history.querySelector('.Miu-miu:last-child .conversation-photo');
+        lastCard?.querySelector('img')?.addEventListener('load', () => {
+            if (history.contains(lastCard) && history.scrollHeight - history.scrollTop - history.clientHeight < 240) {
+                history.scrollTop = history.scrollHeight;
+            }
+        }, { once: true });
     }
 }
 window.showPhotoDescription = function(desc, event) {

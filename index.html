@@ -19,6 +19,7 @@
     <!-- 引入样式文件 -->
      <link rel="manifest" href="manifest.json?v=7">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="conversation.css?v=1">
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
@@ -265,29 +266,26 @@
             <div class="chat-container" id="chatAppPage">
                 
                 <div id="view-messages" class="tab-view active">
-        <header style="padding-top: 10px; padding-bottom: 5px; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100; background: transparent;">
-
-        <div onclick="closeApp()" style="position: absolute; left: 0; top: 0; width: 60px; height: 100%; z-index: 200; cursor: pointer; background: transparent;"></div>
-        <div class="app-title" style="font-size: 17px; font-weight: 600; color: #333;">WeChat</div>
-        
-        <i class="fas fa-arrow-up" onclick="document.getElementById('importPersonaDocInput').click()" style="position: absolute; right: 55px; font-size: 18px; cursor: pointer; color: #333;" title="导入文本文档"></i>
-        
-        <div class="plus-btn" onclick="togglePlusMenu(event)" style="position: absolute; right: 15px; font-size: 26px; font-weight: 300; cursor: pointer;">+</div>
-    </header>
-    <!-- 【新增】：只接受 txt, md, docx 文档 -->
-    <input type="file" id="importPersonaDocInput" accept=".txt,.md,.docx" style="display: none;" onchange="handlePersonaDocImport(this)">
-
-
-                    <!-- 分组 Tab -->
-                    <div class="group-card">
-                        <div class="group-item active" onclick="selectGroup(this)">All</div>
-                        <div class="group-item" onclick="selectGroup(this)">Friends</div>
-                        <div class="group-item" onclick="selectGroup(this)">Groups</div>
-                        <div class="group-item" onclick="selectGroup(this)">Others</div>
-                    </div>
-
-                    <!-- 列表容器 -->
+                    <header class="inbox-heading">
+                        <div class="inbox-actions">
+                            <button type="button" class="conversation-glass" onclick="toggleInboxEdit(this)" aria-pressed="false">编辑</button>
+                            <button type="button" class="conversation-glass inbox-round" onclick="toggleInboxOptions()" aria-label="列表选项" aria-expanded="false" id="inbox-options-button"><i class="fas fa-sliders-h"></i></button>
+                        </div>
+                        <h1>信息</h1>
+                        <div id="inbox-options" class="conversation-glass inbox-options" hidden>
+                            <button type="button" onclick="switchInboxTab(1)">日记</button>
+                            <button type="button" onclick="switchInboxTab(2)">动态</button>
+                            <button type="button" onclick="switchInboxTab(3)">我的</button>
+                            <button type="button" onclick="toggleInboxOptions(false); document.getElementById('importPersonaDocInput').click()">导入文档</button>
+                            <button type="button" onclick="toggleInboxOptions(false); closeApp()">返回桌面</button>
+                        </div>
+                    </header>
+                    <input type="file" id="importPersonaDocInput" accept=".txt,.md,.docx" hidden onchange="handlePersonaDocImport(this)">
                     <div id="chat-list-container"></div>
+                    <div class="inbox-dock">
+                        <label class="conversation-glass inbox-search"><i class="fas fa-search" aria-hidden="true"></i><input id="inbox-query" type="search" aria-label="搜索联系人或消息" placeholder="搜索" oninput="renderChatList()"></label>
+                        <button type="button" class="conversation-glass inbox-round" onclick="openAddCharModal()" aria-label="新建聊天"><i class="far fa-edit"></i></button>
+                    </div>
                 </div>
 
                 <div id="view-diary" class="tab-view" style="background-color: #F2F3F5;">
@@ -475,19 +473,15 @@
             <div class="generic-page" id="genericAppPage" style="display:none;"><h2 id="appTitle">APP NAME</h2></div>
 
             <div class="chat-room" id="chatRoom">
-    <div class="folder-header-container">
-        <div class="folder-tab">
-            <div class="folder-back-btn" onclick="exitChatRoom()">&times;</div>
-            <div class="folder-title" id="roomTitle">Name</div>
-            <div class="folder-curve-connector"></div>
-        </div>
-        <div class="folder-right-space">
-            <div class="invisible-heart-btn" onclick="openHeartVoice()"></div>
-            <div class="folder-menu-btn" onclick="openChatSettings()">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </div>
+    <header class="conversation-header">
+        <button type="button" class="conversation-glass inbox-round" onclick="exitChatRoom()" aria-label="返回信息列表"><i class="fas fa-chevron-left"></i></button>
+        <button type="button" class="conversation-person" onclick="openChatSettings()" aria-label="聊天设置">
+            <img id="conversation-avatar" alt="" hidden>
+            <span id="conversation-initial" class="conversation-initial" aria-hidden="true"></span>
+            <span class="conversation-glass conversation-name"><strong id="roomTitle">聊天</strong><i class="fas fa-chevron-right" aria-hidden="true"></i></span>
+        </button>
+        <button type="button" class="conversation-glass inbox-round" onclick="startVideoCallUI()" aria-label="视频通话"><i class="fas fa-video"></i></button>
+    </header>
     <div id="floating-cd" onclick="openListenTogether()" style="display: none;">
         <img id="floating-cd-cover" src="https://placehold.co/100/ccc/fff?text=Music">
     </div>
@@ -541,12 +535,12 @@
     <div class="room-content" id="roomMessages"></div>
 
     <div class="room-footer" id="newRoomFooter">
-        <div class="footer-btn-side" id="plusBtn" onclick="toggleChatTools(event)">
+        <button type="button" class="footer-btn-side conversation-glass" id="plusBtn" onclick="toggleChatTools(event)" aria-label="聊天功能">
             <i class="fas fa-plus" id="plusIcon"></i>
-        </div>
-        <textarea class="msg-input" id="msgInput" placeholder="Aa" rows="1"></textarea>
-        <div class="footer-btn-side send-btn" onclick="sendMsg()">
-            <i class="fas fa-paper-plane"></i>
+        </button>
+        <div class="conversation-glass conversation-field">
+            <textarea class="msg-input" id="msgInput" placeholder="信息" aria-label="输入信息" rows="1"></textarea>
+            <button type="button" class="footer-btn-side send-btn" onclick="sendMsg()" aria-label="发送信息或获取回复"><i class="fas fa-arrow-up"></i><i class="fas fa-wave-square"></i></button>
         </div>
     </div>
 <div class="chat-tools-panel" id="chatToolsPanel">
@@ -589,6 +583,10 @@
         <div class="tool-icon-box"><i class="far fa-laugh-squint"></i></div>
         <div class="tool-name">Emoji</div>
     </div>
+    <div class="tool-item" onclick="toggleChatTools(); openHeartVoice()">
+        <div class="tool-icon-box"><i class="far fa-heart"></i></div>
+        <div class="tool-name">心声</div>
+    </div>
     <!-- 第2个：语音 -->
     <div class="tool-item" onclick="startVoiceSimulation()">
         <div class="tool-icon-box"><i class="fas fa-microphone"></i></div>
@@ -602,7 +600,7 @@
     <!-- 第4个：相册 -->
     <div class="tool-item" onclick="triggerNativeAlbum()">
         <div class="tool-icon-box"><div class="icon-album-bg"></div></div>
-        <div class="tool-name">Album</div>
+        <div class="tool-name">相册</div>
     </div>
     <!-- 第5个：转账 -->
     <div class="tool-item" onclick="openTransferModal()">
@@ -638,7 +636,7 @@
         <div class="tool-name">线下</div>
     </div>
 </div>
-<input type="file" id="native-file-input" accept="image/*" onchange="handleNativeAlbumSelect(this)" style="display:none;">
+<input type="file" id="native-file-input" accept="image/*" multiple onchange="handleNativeAlbumSelect(this)" style="display:none;">
 <div id="voiceRecordMask" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.6); color:white; padding:30px; border-radius:20px; z-index:9999; flex-direction:column; align-items:center; gap:15px; backdrop-filter:blur(5px);">
     <i class="fas fa-microphone fa-3x" style="animation: pulse 1s infinite;"></i>
     <div id="recordTimer" style="font-family: monospace; font-size: 20px;">0:00</div>
@@ -1526,7 +1524,8 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="script.js?v=9"></script>
+    <script data-cfasync="false" src="conversation.js?v=1"></script>
+    <script data-cfasync="false" src="script.js?v=10"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
