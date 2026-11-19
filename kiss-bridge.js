@@ -381,6 +381,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     for (const event of ['pointerup','pointercancel']) history.addEventListener(event,()=>clearTimeout(holdTimer));
     history.addEventListener('scroll',()=>{ $('.jump').hidden = history.scrollHeight-history.scrollTop-history.clientHeight<180; optics.schedule(); },{passive:true});
+    const rimObservers = new Map();
+    function traceIncomingBubble(bubble) {
+        const outline = bubble.querySelector('.incoming-rim path');
+        if (!outline) return;
+        const w = bubble.offsetWidth, h = bubble.offsetHeight;
+        if (!w || !h) return;
+        const tail = bubble.closest('.message-wrapper').classList.contains('tail');
+        const bottomLeft = tail
+            ? `H20 C17 ${h} 11 ${h+6} 8.4 ${h+6} C7.6 ${h+6} 7.6 ${h+5} 8.3 ${h+4} C10.7 ${h+.5} 10.7 ${h-2} 8 ${h-4.5} C4 ${h-8} .4 ${h-12} .4 ${h-18.5}`
+            : `H18.5 C8.5 ${h-.4} .4 ${h-8.5} .4 ${h-18.5}`;
+        outline.setAttribute('d', `M18.5 .4 H${w-18.5} C${w-8.5} .4 ${w-.4} 8.5 ${w-.4} 18.5 V${h-18.5} C${w-.4} ${h-8.5} ${w-8.5} ${h-.4} ${w-18.5} ${h-.4} ${bottomLeft} V18.5 C.4 8.5 8.5 .4 18.5 .4Z`);
+    }
+    function mountIncomingRims() {
+        for (const observer of rimObservers.values()) observer.disconnect();
+        rimObservers.clear();
+        if (!host.hasAttribute('wallpaper')) return;
+        for (const bubble of history.querySelectorAll('.received :is(.message-bubble:not(.html-bubble), .voice-bubble)')) {
+            const ns = 'http://www.w3.org/2000/svg';
+            const rim = document.createElementNS(ns, 'svg');
+            rim.setAttribute('class', 'incoming-rim');
+            rim.setAttribute('aria-hidden', 'true');
+            const path = document.createElementNS(ns, 'path');
+            path.setAttribute('stroke', 'url(#ki-incoming-rim)');
+            rim.append(path);
+            bubble.append(rim);
+            traceIncomingBubble(bubble);
+            if (typeof ResizeObserver === 'function') {
+                const observer = new ResizeObserver(() => {
+                    traceIncomingBubble(bubble);
+                    optics.invalidate(bubble.closest('.message-wrapper'));
+                });
+                observer.observe(bubble);
+                rimObservers.set(bubble, observer);
+            }
+        }
+    }
     function sync() {
         pending = 0;
         const changed = previousId !== currentChatId;
@@ -446,6 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         history.replaceChildren(...rows);
+        mountIncomingRims();
         const composer=$('.composer');
         let reply = $('.reply-compose');
         if (typeof activeReplyContext !== 'undefined' && activeReplyContext) {
