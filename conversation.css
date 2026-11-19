@@ -189,12 +189,15 @@
     padding-top: 0 !important;
 }
 #chatRoom[data-wallpaper] {
-    --incoming-color: linear-gradient(115deg, #d6d7f42f, #24304457 67%, #0d263459);
-    --sent-end: #0085f5e8;
+    --incoming-color: linear-gradient(125deg, #d5d7e5a6, #a5afb9a8);
+    --incoming-tail: #aab3bd;
+    --sent-end: #0085f5ed;
     --sent-surface: linear-gradient(165deg, #0094fae8, var(--sent-end));
 }
 #chatRoom[data-tone="dark"] {
     --chat-ink: #fff;
+    --incoming-color: linear-gradient(115deg, #444957c9, #2d3745ca);
+    --incoming-tail: #333d4b;
     --chat-muted: #ffffffb5;
     --glass-tint: linear-gradient(147deg, #c7e6ff48, #122c401f 51%, #88afd749);
     --edge-fade-top: #07101ea0;
@@ -342,47 +345,34 @@
 }
 #chatRoom .Miu-miu .conversation-glyph { min-width: 47px; text-align: center; }
 #chatRoom .Miu-miu.user .conversation-text { --bubble-paint: var(--sent-surface); color: #fff !important; }
-#chatRoom[data-wallpaper] .Miu-miu.ai .conversation-text:not(.conversation-tail .conversation-text) {
-    -webkit-backdrop-filter: blur(4px) saturate(116%);
-    backdrop-filter: blur(4px) saturate(116%);
+#chatRoom[data-wallpaper] .Miu-miu.ai .conversation-text {
+    -webkit-backdrop-filter: blur(2.4px) saturate(110%);
+    backdrop-filter: blur(2.4px) saturate(110%);
+    box-shadow: inset 0 0 0 .7px #ffffff4a !important;
 }
-#chatRoom .Miu-miu .conversation-text::before, #chatRoom .Miu-miu .conversation-text::after {
+#chatRoom .Miu-miu .conversation-text::before,
+#chatRoom .Miu-miu .conversation-text::after {
     display: none !important;
+    transform: none;
 }
-#chatRoom .conversation-tail .conversation-text::before {
-    content: '';
+#chatRoom .Miu-miu.conversation-tail .conversation-text::after {
+    content: "";
     display: block !important;
     position: absolute;
-    bottom: -5px;
-    left: 7px;
-    width: 14px;
-    height: 15px;
+    inset: auto auto -4px 6px;
+    width: 12px;
+    height: 10px;
+    background: var(--incoming-tail, #e9e9eb);
+    clip-path: path('M 5 0 H 12 C 10 3 6 7 1 9 C 0 9.5 0 8.5 1 8 C 3.5 5.6 5 3 5 0 Z');
+    transform: none;
     z-index: -1;
-    background: var(--bubble-paint);
-    clip-path: polygon(0 0, 100% 0, 100% 53%, 69% 58%, 38% 83%, 8% 100%, 15% 74%, 20% 47%);
+    pointer-events: none;
 }
-#chatRoom .conversation-tail.user .conversation-text::before { left: auto; right: 7px; scale: -1 1; }
-@supports (clip-path: shape(from 0 0, line to 1px 1px, close)) {
-    #chatRoom .conversation-tail .conversation-text { background: transparent !important; }
-    #chatRoom .conversation-tail .conversation-text::before {
-        inset: 0 0 -5px;
-        width: auto;
-        height: auto;
-        clip-path: shape(from 18.5px 0,
-            hline to calc(100% - 18.5px),
-            curve to 100% 18.5px with calc(100% - 7px) 0 / 100% 7px,
-            vline to calc(100% - 23.5px),
-            curve to calc(100% - 18.5px) calc(100% - 5px) with 100% calc(100% - 12px) / calc(100% - 7px) calc(100% - 5px),
-            hline to 21px,
-            curve to 8.2px 100% with 16px calc(100% - 5px) / 11px 100%,
-            curve to 8.1px calc(100% - 2px) with 7.4px 100% / 7.5px calc(100% - 1px),
-            curve to 8px calc(100% - 9px) with 10.8px calc(100% - 5px) / 10.6px calc(100% - 7.5px),
-            curve to 0 calc(100% - 23.5px) with 3px calc(100% - 13.5px) / 0 calc(100% - 18px),
-            vline to 18.5px,
-            curve to 18.5px 0 with 0 7px / 7px 0, close);
-    }
-    #chatRoom .conversation-tail.user .conversation-text::before { inset: 0 0 -5px; }
-    #chatRoom[data-wallpaper] .conversation-tail.ai .conversation-text::before { backdrop-filter: blur(4px) saturate(116%); }
+#chatRoom .Miu-miu.conversation-tail.user .conversation-text::after {
+    inset: auto 6px -4px auto;
+    background: var(--sent-end);
+    transform: scaleX(-1);
+    transform-origin: center;
 }
 #chatRoom .Miu-miu .content:is(.conversation-media, .sticker-only, .transfer-msg) {
     background: transparent !important;
@@ -581,8 +571,7 @@
 
 @media (prefers-reduced-transparency: reduce) {
     #chatRoom .conversation-header::before, #chatRoom #newRoomFooter::before,
-    #chatRoom[data-wallpaper] .Miu-miu.ai .conversation-text,
-    #chatRoom[data-wallpaper] .conversation-tail.ai .conversation-text::before {
+    #chatRoom[data-wallpaper] .Miu-miu.ai .conversation-text {
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
     }
@@ -595,4 +584,45 @@
     color: var(--chat-muted);
     font-size: 13px;
     text-align: center;
+}
+
+/* The lens samples the wallpaper and rows at their live screen positions. */
+#chatRoom .conversation-glass[data-refraction]:not(.photo-save) {
+    isolation: isolate;
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+#chatRoom .conversation-glass[data-refraction]::before { z-index: 0; }
+.chat-optic, .chat-optic-sample, .chat-optic-wall {
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+}
+.chat-optic {
+    z-index: -1;
+    overflow: hidden;
+    border-radius: inherit;
+}
+.chat-optic::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--glass-tint);
+}
+.chat-optic-wall {
+    background-color: var(--chat-surface);
+    background-position: center;
+    background-size: cover;
+}
+#chatRoom .chat-optic .chat-optic-row {
+    position: absolute !important;
+    margin: 0 !important;
+    pointer-events: none !important;
+}
+#chatRoom .chat-optic .chat-optic-row * { pointer-events: none !important; }
+.chat-optic-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
+@media (prefers-reduced-transparency: reduce) {
+    #chatRoom .chat-optic { display: none; }
+    #chatRoom .conversation-glass[data-refraction]:not(.photo-save) { background: var(--chat-surface); }
 }
