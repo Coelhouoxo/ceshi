@@ -219,7 +219,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         if (stacked) album.append(deck);
-        else album.append(deck.firstChild);
+        else {
+            const card = deck.firstChild;
+            const image = card.querySelector('img');
+            album.append(image);
+            album.tabIndex = 0;
+            album.setAttribute('role','button');
+            album.setAttribute('aria-label','查看照片');
+            album.onclick = card.onclick;
+            album.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); album.click(); }
+            });
+        }
         return album;
     }
     function makeRow(nativeRow) {
@@ -365,6 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const stick = changed || history.scrollHeight-history.scrollTop-history.clientHeight<180;
         const scroll = history.scrollTop;
         previousId = currentChatId;
+        if (changed && room.classList.contains('active')) {
+            window.scrollTo(0,0);
+            document.getElementById('appOverlay').scrollTop = 0;
+        }
         $('.name b').textContent = document.getElementById('roomTitle').textContent;
         const avatar = document.getElementById('conversation-avatar');
         const image = $('.contact .avatar');

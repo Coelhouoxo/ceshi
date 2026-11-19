@@ -824,3 +824,5 @@
 }
 #chatRoom.multi-select-mode > ceshi-kiss-view { display: none; }
 #chatRoom.multi-select-mode > #roomMessages { visibility: visible !important; pointer-events: auto !important; }
+
+#chatRoom:not(.active) > ceshi-kiss-view { display: none !important; }
