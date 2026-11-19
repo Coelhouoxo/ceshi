@@ -6690,69 +6690,65 @@ let activeMsgElement = null;
 function initMsgMenu() {
     if (document.getElementById('msgActionMenu')) return;
 
-    const menuHtml = `
-    <div id="msgActionMenu" class="msg-action-menu">
-        <div class="msg-action-item" onclick="handleMenuAction('copy')">复制</div>
-        <div class="msg-action-item" onclick="handleMenuAction('edit')">编辑</div>
-        <div class="msg-action-item" onclick="handleMenuAction('reply')">引用</div>
-        <div class="msg-action-item" onclick="handleMenuAction('multi')">多选</div>
-        <div class="msg-action-item" onclick="handleMenuAction('recall')">撤回</div>
-        <div class="msg-action-item" onclick="handleMenuAction('regen')">重生成</div>
-    </div>`;
-
-    document.body.insertAdjacentHTML('beforeend', menuHtml);
-    
-    // 点击空白关闭逻辑保持不变
-    document.addEventListener('click', (e) => {
-        const menu = document.getElementById('msgActionMenu');
-        if (menu && menu.classList.contains('active') && !e.target.closest('#msgActionMenu')) {
-            hideMsgMenu();
-        }
+    const actions = [
+        ['copy', '复制', 'far fa-copy'],
+        ['reply', '回复', 'fas fa-reply'],
+        ['edit', '编辑', 'fas fa-pen'],
+        ['recall', '撤回', 'fas fa-undo'],
+        ['regen', '重新生成', 'fas fa-redo'],
+        ['multi', '选择信息', 'far fa-check-circle']
+    ];
+    const menu = document.createElement('div');
+    menu.id = 'msgActionMenu';
+    menu.className = 'msg-action-menu conversation-actions';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', '消息操作');
+    for (const [action, label, icon] of actions) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'msg-action-item';
+        button.setAttribute('role', 'menuitem');
+        button.dataset.action = action;
+        button.innerHTML = '<span>' + label + '</span><i class="' + icon + '" aria-hidden="true"></i>';
+        button.addEventListener('click', () => handleMenuAction(action));
+        menu.append(button);
+    }
+    document.body.append(menu);
+    document.addEventListener('pointerdown', event => {
+        if (menu.classList.contains('active') && !event.target.closest('#msgActionMenu')) hideMsgMenu();
     });
-    const room = document.getElementById('roomMessages');
-    if(room) room.addEventListener('scroll', hideMsgMenu);
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') hideMsgMenu();
+    });
+    document.getElementById('roomMessages')?.addEventListener('scroll', hideMsgMenu, {passive: true});
 }
 
-// 2. 显示菜单 (位置计算保持不变，因为 CSS 改了，会自动变细长)
 function showMsgMenu(element, index, isSelf) {
     initMsgMenu();
     const menu = document.getElementById('msgActionMenu');
+    const room = document.getElementById('chatRoom');
+    const roomRect = room.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const viewportTop = viewport?.offsetTop || 0;
+    const bottom = Math.min(roomRect.bottom, viewportTop + (viewport?.height || innerHeight)) - 12;
+    const top = Math.max(roomRect.top, viewportTop) + 12;
     activeMsgIndex = index;
     activeMsgElement = element;
-    
-    if (navigator.vibrate) {
-        try { navigator.vibrate(15); } catch(err) {}
-    }
-
+    menu.querySelector('[data-action="regen"]').hidden = isSelf;
+    menu.querySelector('[data-action="recall"]').hidden = !isSelf;
+    menu.style.display = 'flex';
+    menu.style.opacity = '0';
+    menu.style.maxHeight = Math.max(100, bottom - top) + 'px';
+    menu.dataset.tone = room.dataset.tone || 'light';
     const rect = element.getBoundingClientRect();
-    
-    // 先显示以便计算
-    menu.style.display = 'flex'; 
-    menu.style.opacity = '0'; // 先透明
-    
-    const menuHeight = menu.offsetHeight || 50;
-    const menuWidth = menu.offsetWidth || 280;
-    
-    // 水平居中
-    let leftPos = rect.left + (rect.width / 2) - (menuWidth / 2);
-    // 边界检查
-    if (leftPos < 10) leftPos = 10;
-    if (leftPos + menuWidth > window.innerWidth - 10) leftPos = window.innerWidth - menuWidth - 10;
-
-    // 垂直定位 (优先上方)
-    let topPos;
-    if (rect.top > menuHeight + 20) {
-        topPos = rect.top - menuHeight - 8;
-        menu.style.transformOrigin = 'center bottom';
-    } else {
-        topPos = rect.bottom + 8;
-        menu.style.transformOrigin = 'center top';
-    }
-
-    menu.style.top = topPos + 'px';
-    menu.style.left = leftPos + 'px';
-    
-    // 激活动画
+    const width = menu.offsetWidth;
+    const height = menu.offsetHeight;
+    const left = Math.max(roomRect.left + 12, Math.min(rect.left + rect.width / 2 - width / 2, roomRect.right - width - 12));
+    const above = rect.top - height - 10;
+    const desiredTop = above >= top ? above : rect.bottom + 10;
+    menu.style.top = Math.max(top, Math.min(desiredTop, bottom - height)) + 'px';
+    menu.style.left = left + 'px';
+    menu.style.transformOrigin = above >= top ? 'center bottom' : 'center top';
     requestAnimationFrame(() => {
         menu.classList.add('active');
         menu.style.opacity = '1';

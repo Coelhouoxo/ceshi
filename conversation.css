@@ -727,3 +727,55 @@
     #chatRoom .chat-optic { display: none; }
     #chatRoom .conversation-glass[data-refraction]:not(.photo-save) { background: var(--chat-surface); }
 }
+
+
+/* Pixel paths are measured from each bubble, independent of CSS shape support. */
+#chatRoom .conversation-contour { border-radius: 0 !important; }
+#chatRoom .conversation-contour::after { content: none !important; display: none !important; }
+#chatRoom .Miu-miu .conversation-text { width: fit-content; max-width: 100%; }
+#chatRoom .Miu-miu .msg-stack { width: fit-content; max-width: 100%; }
+
+#msgActionMenu.conversation-actions {
+    position: fixed;
+    z-index: 12000;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 235px;
+    padding: 9px 0;
+    border-radius: 25px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: #f1f1f3ed;
+    color: #17191d;
+    border: 1px solid #ffffffa3;
+    box-shadow: 0 14px 38px #10203826, inset 0 1px 0 #ffffff9c;
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+    backdrop-filter: blur(12px) saturate(125%);
+    scrollbar-width: none;
+}
+#msgActionMenu.conversation-actions[data-tone="dark"] {
+    background: #222d3bea;
+    border-color: #ffffff30;
+    color: #fff;
+}
+#msgActionMenu.conversation-actions .msg-action-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 8px 22px;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font: 15px/22px -apple-system, BlinkMacSystemFont, sans-serif;
+    text-align: left;
+}
+#msgActionMenu.conversation-actions .msg-action-item[hidden] { display: none !important; }
+#msgActionMenu.conversation-actions .msg-action-item::after { display: none; }
+#msgActionMenu.conversation-actions .msg-action-item i { width: 20px; font-size: 16px; text-align: center; }
+#msgActionMenu.conversation-actions .msg-action-item:active { background: #8190a026; }
+#msgActionMenu.conversation-actions [data-action="multi"] { border-top: 1px solid #8882; margin-top: 6px; padding-top: 10px; }

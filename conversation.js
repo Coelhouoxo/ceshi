@@ -201,7 +201,52 @@ function measureConversationPhoto(picture) {
     }
 }
 
+function paintConversationContour(bubble) {
+    const contour = bubble.querySelector('.conversation-contour');
+    if (!contour) return;
+    const width = bubble.offsetWidth;
+    const height = bubble.offsetHeight;
+    if (width < 20 || height < 20) return;
+    const row = bubble.closest('.Miu-miu');
+    const tail = row?.classList.contains('conversation-tail');
+    const right = width;
+    const radius = Math.min(18.5, height / 2, width / 2);
+    let path = 'M' + radius + ' 0H' + (right - radius) +
+        'Q' + right + ' 0 ' + right + ' ' + radius +
+        'V' + (height - radius) + 'Q' + right + ' ' + height + ' ' + (right - radius) + ' ' + height;
+    if (tail) {
+        path += 'H20C17 ' + height + ' 11 ' + (height + 6) + ' 8.4 ' + (height + 6) +
+            'C6.5 ' + (height + 6) + ' 11 ' + (height + 1) + ' 8 ' + (height - 4.5) +
+            'Q0 ' + (height - 11) + ' 0 ' + (height - radius);
+    } else {
+        path += 'H' + radius + 'Q0 ' + height + ' 0 ' + (height - radius);
+    }
+    path += 'V' + radius + 'Q0 0 ' + radius + ' 0Z';
+    contour.style.clipPath = 'path("' + path + '")';
+    contour.style.bottom = tail ? '-6px' : '0';
+    contour.style.transform = row?.classList.contains('user') && tail ? 'scaleX(-1)' : 'none';
+}
+
 function refreshConversationPhotos(history) {
+    for (const contour of history.querySelectorAll('.conversation-contour')) {
+        const bubble = contour.parentElement;
+        const measure = () => paintConversationContour(bubble);
+        measure();
+        if (typeof ResizeObserver === 'function') {
+            const observer = new ResizeObserver(() => {
+                if (!bubble.isConnected) { observer.disconnect(); return; }
+                measure();
+            });
+            observer.observe(bubble);
+            // Removed message elements are released when their render container changes.
+            const cleanup = new MutationObserver(() => {
+                if (bubble.isConnected) return;
+                observer.disconnect();
+                cleanup.disconnect();
+            });
+            cleanup.observe(history, {childList: true});
+        }
+    }
     for (const wave of history.querySelectorAll('.voice-bubble .voice-animate-icon')) {
         const pattern = [6, 12, 17, 9, 21, 33, 25, 13, 7, 17, 27, 21, 12, 6, 11, 18, 29, 36, 18, 11, 22, 28, 14, 8, 16, 24, 18, 8, 14, 25, 31, 19, 10, 17, 9, 5];
         const bars = pattern.map(height => {
