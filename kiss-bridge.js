@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.setAttribute('role','menuitem');
             button.innerHTML = svg(action === 'reply' ? 'back' : 'plus');
             button.append(document.createTextNode(label));
-            button.onclick = () => { closeMenu(); handleMenuAction(action); };
+            button.onclick = () => { closeMenu(); handleMenuAction(action); schedule(); };
             menu.append(button);
         }
         layer.append(scrim,menu);
@@ -376,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const stick = changed || history.scrollHeight-history.scrollTop-history.clientHeight<180;
         const scroll = history.scrollTop;
         previousId = currentChatId;
+        document.getElementById('appOverlay').scrollTop = 0;
         if (changed && room.classList.contains('active')) {
             window.scrollTo(0,0);
             document.getElementById('appOverlay').scrollTop = 0;

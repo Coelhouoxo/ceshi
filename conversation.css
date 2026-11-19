@@ -826,3 +826,5 @@
 #chatRoom.multi-select-mode > #roomMessages { visibility: visible !important; pointer-events: auto !important; }
 
 #chatRoom:not(.active) > ceshi-kiss-view { display: none !important; }
+
+#appOverlay { overflow: clip !important; }
