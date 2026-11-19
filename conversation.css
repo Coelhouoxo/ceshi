@@ -228,6 +228,7 @@
 }
 #chatRoom .conversation-glass:not(.photo-save) {
     position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
     color: var(--chat-ink);
     background: var(--glass-tint);
     border: 0;
@@ -348,48 +349,54 @@
 }
 #chatRoom .Miu-miu .conversation-glyph { min-width: 47px; text-align: center; }
 #chatRoom .Miu-miu.user .conversation-text { --bubble-paint: var(--sent-surface); color: #fff !important; }
-#chatRoom[data-wallpaper] .Miu-miu.ai .conversation-text {
-    -webkit-backdrop-filter: blur(5px) saturate(116%);
-    backdrop-filter: blur(5px) saturate(116%);
-    box-shadow: inset 0 0 0 .7px #e8e7ff52 !important;
+/* Bubble paint is its own element so legacy pseudo-element transforms cannot reach it. */
+#chatRoom .Miu-miu .conversation-text {
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
 }
 #chatRoom .Miu-miu .conversation-text::before,
 #chatRoom .Miu-miu .conversation-text::after {
+    content: none !important;
     display: none !important;
-    transform: none;
+    transform: none !important;
 }
-#chatRoom .Miu-miu.conversation-tail .conversation-text::after {
-    content: "" !important;
-    display: block !important;
+#chatRoom .conversation-contour {
+    all: initial;
+    display: block;
     position: absolute;
-    inset: auto auto -4px 6px;
+    inset: 0;
+    z-index: -1;
+    border-radius: 18.5px;
+    pointer-events: none;
+    background: var(--bubble-paint);
+}
+#chatRoom[data-wallpaper] .ai .conversation-contour {
+    -webkit-backdrop-filter: blur(5px) saturate(116%);
+    backdrop-filter: blur(5px) saturate(116%);
+    box-shadow: inset 0 0 0 .75px #ffffff45;
+}
+#chatRoom .conversation-tail .conversation-contour::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 7px;
     width: 12px;
     height: 10px;
     background: var(--incoming-tail, #e9e9eb);
-    clip-path: path('M 5 0 H 12 C 10 3 6 7 1 9 C 0 9.5 0 8.5 1 8 C 3.5 5.6 5 3 5 0 Z');
-    transform: none;
-    z-index: -1;
-    pointer-events: none;
+    clip-path: path('M5 0H12C10 3 6 7 1 9C0 9.5 0 8.5 1 8C3.5 5.6 5 3 5 0Z');
 }
-#chatRoom .Miu-miu.conversation-tail.user .conversation-text::after {
-    inset: auto 6px -4px auto;
+#chatRoom .conversation-tail.user .conversation-contour::after {
+    left: auto;
+    right: 7px;
     background: var(--sent-end);
     transform: scaleX(-1);
-    transform-origin: center;
 }
-/* Draw the body and tail as one contour. Older engines keep the rounded body and CSS tail. */
 @supports (clip-path: shape(from 0 0, line to 1px 1px, close)) {
-    #chatRoom .Miu-miu.conversation-tail .conversation-text {
-        background: transparent !important;
-        box-shadow: none !important;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-    }
-    #chatRoom .Miu-miu.conversation-tail .conversation-text::after {
+    #chatRoom .conversation-tail .conversation-contour {
         inset: 0 0 -6px;
-        width: auto;
-        height: auto;
-        background: var(--bubble-paint);
+        border-radius: 0;
         clip-path: shape(from 18.5px 0,
             hline to calc(100% - 18.5px),
             curve to 100% 18.5px with calc(100% - 8px) 0 / 100% 8px,
@@ -401,18 +408,10 @@
             curve to 8px calc(100% - 10px) with 10px calc(100% - 5px) / 10px calc(100% - 7px),
             curve to 0 calc(100% - 24.5px) with 4px calc(100% - 14px) / 0 calc(100% - 18px),
             vline to 18.5px,
-            curve to 18.5px 0 with 0 8px / 8px 0,
-            close);
-        transform: none !important;
+            curve to 18.5px 0 with 0 8px / 8px 0, close);
     }
-    #chatRoom .Miu-miu.conversation-tail.user .conversation-text::after {
-        inset: 0 0 -6px;
-        transform: scaleX(-1) !important;
-    }
-    #chatRoom[data-wallpaper] .Miu-miu.ai.conversation-tail .conversation-text::after {
-        -webkit-backdrop-filter: blur(5px) saturate(116%);
-        backdrop-filter: blur(5px) saturate(116%);
-    }
+    #chatRoom .conversation-tail .conversation-contour::after { display: none; }
+    #chatRoom .conversation-tail.user .conversation-contour { transform: scaleX(-1); }
 }
 #chatRoom .Miu-miu .content:is(.conversation-media, .sticker-only, .transfer-msg) {
     background: transparent !important;

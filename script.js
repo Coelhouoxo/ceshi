@@ -1986,6 +1986,12 @@ if (isSelf) {
         lastSenderType = currentSenderType; 
         const textRow = row.querySelector('.conversation-text');
         if (textRow) {
+            const contour = container.ownerDocument.createElement('span');
+            contour.className = 'conversation-contour';
+            contour.setAttribute('aria-hidden', 'true');
+            textRow.prepend(contour);
+        }
+        if (textRow) {
             row.classList.add('conversation-tail');
             if (previousVisibleRow?.nextElementSibling === null
                 && previousVisibleRow.classList.contains(currentSenderType)

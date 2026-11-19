@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     record.sample.append(copy);
                     record.copies.set(row, copy);
                 }
+                copy.style.setProperty('--bubble-paint', getComputedStyle(row.querySelector('.conversation-text') || row).getPropertyValue('--bubble-paint'));
                 Object.assign(copy.style, {left: (area.left - box.left) * sx + 'px', top: (area.top - box.top) * sy + 'px', width: area.width * sx + 'px'});
             }
             for (const [row, copy] of record.copies) {
