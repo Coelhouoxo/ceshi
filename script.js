@@ -1720,6 +1720,7 @@ function closeGeneralSettings() { document.getElementById('generalSettingsPage')
 
 function renderMessages(chat, container = document.getElementById('roomMessages')) {
     const isPreview = container.ownerDocument !== document;
+    let previousVisibleRow;
     
     // 1. 记录当前的滚动位置
     const prevScrollHeight = container.scrollHeight;
@@ -1936,6 +1937,10 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
             displayText = displayText.replace(/\n/g, '<br>');
         }
 
+        if (!specialClass && !isRichContent) specialClass = 'conversation-text';
+        if (specialClass === 'conversation-text' && Array.from(displayText.trim()).length === 1) {
+            specialClass += ' conversation-glyph';
+        }
         const bubbleHtml = displayText 
             ? `<div class="content ${specialClass}" data-index="${realIndex}">${displayText}</div>` 
             : '';
@@ -1979,7 +1984,19 @@ if (isSelf) {
 
         
         lastSenderType = currentSenderType; 
-        container.appendChild(row); 
+        const textRow = row.querySelector('.conversation-text');
+        if (textRow) {
+            row.classList.add('conversation-tail');
+            if (previousVisibleRow?.nextElementSibling === null
+                && previousVisibleRow.classList.contains(currentSenderType)
+                && previousVisibleRow.classList.contains('conversation-tail')
+                && !msg.replyCtx) {
+                previousVisibleRow.classList.remove('conversation-tail');
+                row.classList.add('conversation-grouped');
+            }
+        }
+        container.appendChild(row);
+        previousVisibleRow = row;
         
         if (isPreview) return;
         // 事件绑定
@@ -2026,7 +2043,8 @@ if (isSelf) {
                 if (!isMultiSelectMode) showMsgMenu(bubbleNode, realIndex, isSelf); 
             });
         }
-    }); 
+    });
+    refreshConversationPhotos(container);
 
     if (isPreview || (!chat.showFullHistory && !isMultiSelectMode)) {
         container.scrollTop = container.scrollHeight; 
@@ -2265,7 +2283,10 @@ function openChatRoom(id) {
     renderMessages(chat); 
     
     // 显示聊天室
-    document.getElementById('chatRoom').classList.add('active'); 
+    const room = document.getElementById('chatRoom');
+    room.classList.add('active');
+    document.getElementById('appOverlay').scrollTop = 0;
+    document.getElementById('phoneFrame').scrollTop = 0;
 
     // ★★★ 修复点 2：延迟滚动到底部 (解决进入不跳转底部的问题) ★★★
     setTimeout(() => {
@@ -3360,7 +3381,7 @@ if (msgInputArea) {
                 if (window.visualViewport) {
                     const keyboardHeight = Math.round(window.innerHeight - window.visualViewport.height);
                     if (keyboardHeight > 150) {
-                        footer.style.bottom = keyboardHeight + 'px';
+                        footer.style.setProperty('--composer-keyboard', keyboardHeight + 'px');
                     }
                 }
                 const msgContainer = document.getElementById('roomMessages');
@@ -5916,7 +5937,7 @@ fixBottomNavPosition();
     msgInput.addEventListener('blur', function() {
         setTimeout(() => {
             // 1. 强制重置输入栏位置
-            footer.style.bottom = '0';
+            footer.style.removeProperty('--composer-keyboard');
             
             // 2. ★★★ 关键修复：重置聊天室容器的滚动位置 ★★★
             chatRoom.scrollTop = 0;
@@ -5941,10 +5962,10 @@ fixBottomNavPosition();
             
             if (keyboardHeight > 150) {
                 // 键盘弹出
-                footer.style.bottom = keyboardHeight + 'px';
+                footer.style.setProperty('--composer-keyboard', keyboardHeight + 'px');
             } else {
                 // 键盘收起
-                footer.style.bottom = '0';
+                footer.style.removeProperty('--composer-keyboard');
             }
         });
     }

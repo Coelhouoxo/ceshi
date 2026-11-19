@@ -38,9 +38,42 @@ function populateConversationContact(doc, chat) {
     doc.getElementById('conversation-initial').textContent = Array.from(name)[0];
     const avatar = doc.getElementById('conversation-avatar');
     avatar.onerror = () => { avatar.hidden = true; };
+    updateConversationPalette(doc.getElementById('chatRoom'));
     avatar.hidden = !chat?.avatar;
     if (chat?.avatar) avatar.src = chat.avatar;
     else avatar.removeAttribute('src');
+}
+
+const conversationWallpapers = new WeakMap();
+
+function updateConversationPalette(room) {
+    const background = room.style.backgroundImage;
+    if (conversationWallpapers.get(room) === background) return;
+    conversationWallpapers.set(room, background);
+    const source = background.match(/^url\(["']?(.*?)["']?\)$/)?.[1];
+    room.toggleAttribute('data-wallpaper', !!source);
+    delete room.dataset.tone;
+    if (!source) return;
+
+    const picture = new Image();
+    picture.onload = () => {
+        if (conversationWallpapers.get(room) !== background) return;
+        const square = document.createElement('canvas');
+        square.width = square.height = 12;
+        const context = square.getContext('2d', {willReadFrequently: true});
+        try {
+            context.drawImage(picture, 0, 0, 12, 12);
+            const pixels = context.getImageData(0, 0, 12, 12).data;
+            let sum = 0;
+            for (let i = 0; i < pixels.length; i += 4) {
+                sum += pixels[i] * .2126 + pixels[i + 1] * .7152 + pixels[i + 2] * .0722;
+            }
+            if (sum / 144 < 118) room.dataset.tone = 'dark';
+        } catch {
+            // External wallpaper hosts may prevent sampling the pixels.
+        }
+    };
+    picture.src = source;
 }
 
 function conversationTransferMarkup(message) {
@@ -118,6 +151,7 @@ function conversationPhotoCard(message, doc) {
         const picture = doc.createElement('img');
         picture.src = description ? covers[coverIndex] : source.getAttribute('src');
         picture.alt = '照片';
+        picture.draggable = false;
         if (index) picture.loading = 'lazy';
         frame.append(picture);
         if (description) {
@@ -135,7 +169,7 @@ function conversationPhotoCard(message, doc) {
         label.type = 'button';
         label.className = 'photo-stack-label';
         label.setAttribute('aria-expanded', 'false');
-        label.innerHTML = `<i class="far fa-images" aria-hidden="true"></i> ${images.length} 张照片`;
+        label.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></svg> ${images.length} 张照片`;
         card.append(label);
         setConversationPhotoIndex(card, 0);
     }
@@ -150,6 +184,37 @@ function conversationPhotoCard(message, doc) {
     return card;
 }
 
+function measureConversationPhoto(picture) {
+    const card = picture.closest('.conversation-photo');
+    if (!card || !picture.naturalWidth || !picture.naturalHeight) return;
+    const ratio = picture.naturalWidth / picture.naturalHeight;
+    const frame = picture.closest('.photo-frame');
+    frame.style.setProperty('--image-ratio', String(ratio));
+    if (!card.classList.contains('photo-stack')) {
+        card.style.setProperty('--single-photo-width', ratio > 1 ? '164px' : '176px');
+    }
+    if (frame.hasAttribute('data-front')) {
+        card.style.setProperty('--front-ratio', String(Math.max(.6, Math.min(1.6, ratio))));
+        card.style.setProperty('--photo-front-width', ratio > 1 ? '166px' : '184px');
+    }
+}
+
+function refreshConversationPhotos(history) {
+    history.querySelectorAll('.photo-frame img').forEach(picture => {
+        if (picture.complete) measureConversationPhoto(picture);
+        else picture.addEventListener('load', () => measureConversationPhoto(picture), {once:true});
+    });
+    const photos = history.querySelectorAll('.Miu-miu:has(.conversation-photo:not(.photo-stack))');
+    for (const row of photos) {
+        const prev = row.previousElementSibling;
+        if (!prev?.querySelector('.conversation-photo:not(.photo-stack)')) continue;
+        if (prev.classList.contains('user') !== row.classList.contains('user')) continue;
+        if (prev.querySelector('.reply-tiny-bubble') || row.querySelector('.reply-tiny-bubble')) continue;
+        row.classList.add('conversation-photo-run');
+        row.classList.toggle('conversation-photo-inset', !prev.classList.contains('conversation-photo-inset'));
+    }
+}
+
 function setConversationPhotoIndex(card, index) {
     const frames = [...card.querySelectorAll('.photo-frame')];
     card.dataset.current = String(index);
@@ -160,6 +225,8 @@ function setConversationPhotoIndex(card, index) {
         frame.toggleAttribute('data-deep', layer > 2);
         frame.tabIndex = layer ? -1 : 0;
     });
+    const front = frames[index]?.querySelector('img');
+    if (front?.complete) measureConversationPhoto(front);
 }
 
 function toggleConversationPhoto(card) {
@@ -216,6 +283,9 @@ function showConversationPhotoViewer(card, initialIndex) {
 document.addEventListener('DOMContentLoaded', () => {
     const inbox = document.getElementById('view-messages');
     const history = document.getElementById('roomMessages');
+    const room = document.getElementById('chatRoom');
+    new MutationObserver(() => updateConversationPalette(room)).observe(room, {attributes:true, attributeFilter:['style']});
+    updateConversationPalette(room);
     document.addEventListener('click', event => {
         if (!event.target.closest('#inbox-options, #inbox-options-button')) toggleInboxOptions(false);
     });
