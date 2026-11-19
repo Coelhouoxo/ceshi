@@ -8,15 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const host = document.createElement('ceshi-kiss-view');
     host.dataset.platform = /Android/i.test(navigator.userAgent) ? 'android' : 'other';
     const root = host.attachShadow({mode: 'open'});
-    const shapes = {
-        back: '<path d="m15 4-8 8 8 8"/>',
-        video: '<rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3"/>',
-        plus: '<path d="M12 3v18M3 12h18"/>',
-        wave: '<path d="M3 10v4m4-7v10m5-14v18m5-14v10m4-7v4"/>',
-        down: '<path d="m5 9 7 7 7-7"/>',
-        close: '<path d="m5 5 14 14M19 5 5 19"/>',
-        send: '<path d="M12 20V4m-7 7 7-7 7 7"/>'
-    };
+    const shapes = {smile:'<circle cx="12" cy="12" r="10"/><path d="M7 13a5 5 0 0 0 10 0Zm2-4h.01M15 9h.01"/>',copy:'<rect x="8" y="8" width="12" height="14" rx="2"/><path d="M16 8V2H3v15h5"/>',translate:'<path d="M3 5h12M9 2v3m4 0C11 11 8 15 3 17m2-9c2 4 5 7 9 9m0 3 4-11 4 11m-7-3h6"/>',select:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="m7 12 3 3 7-7"/>',edit:'<path d="m4 16 12-12 4 4L8 20H4Zm9-9 4 4"/>',trash:'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/>',back:'<path d="m14 4-8 8 8 8"/>',video:'<rect x="1.4" y="5.2" width="15.2" height="13.6" rx="2.8"/><path d="M16.6 9.8 21.2 6.4q1.2-.9 1.2.6v10q0 1.5-1.2.6l-4.6-3.4"/>',plus:'<path d="M12 5v14M5 12h14"/>',wave:'<path d="M4 10v4m4-7v10m4-14v18m4-14v10m4-7v4"/>',up:'<path d="M12 19V5m-6 6 6-6 6 6"/>',close:'<path d="m6 6 12 12M6 18 18 6"/>',down:'<path d="m5 9 7 7 7-7"/>',reply:'<path d="m9 5-7 6 7 6v-4h5c4 0 6 2 8 6-1-8-5-10-13-10Z"/>',more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',check:'<path d="m5 12 4 4L19 6"/>'};
+    shapes.send = shapes.up;
+    shapes.undo = '<circle cx="12" cy="12" r="9"/><path d="m10 8-3 3 3 3m-3-3h6a3 3 0 0 1 0 6"/>';
     const svg = name => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (shapes[name] || shapes.plus) + '</svg>';
     const layout = "<link rel=\"stylesheet\" href=\"${asset}\"><div class=\"surface\"><div class=\"wallpaper\"></div><svg class=\"bubble-outline-defs\" width=\"0\" height=\"0\" aria-hidden=\"true\"><defs><linearGradient id=\"ki-incoming-rim\" x1=\"0%\" y1=\"20%\" x2=\"100%\" y2=\"80%\"><stop offset=\"0%\" stop-color=\"#e8e7ff\" stop-opacity=\".34\"/><stop offset=\"60%\" stop-color=\"#aecbe6\" stop-opacity=\".20\"/><stop offset=\"100%\" stop-color=\"#60b3d5\" stop-opacity=\".07\"/></linearGradient></defs></svg><main class=\"history\" aria-label=\"\u804a\u5929\u4fe1\u606f\" tabindex=\"-1\"></main><div class=\"edge-haze edge-top\"></div><div class=\"edge-haze edge-bottom\"></div><section class=\"reply-focus\" aria-label=\"\u56de\u590d\u4f1a\u8bdd\" hidden><div class=\"reply-feed\"></div></section><header class=\"floating-header\"><button class=\"glass back\" aria-label=\"\u8fd4\u56de\u804a\u5929\u5217\u8868\">${svg('back')}<span class=\"unread-count\" hidden></span></button><button class=\"contact\" aria-label=\"\u6253\u5f00\u804a\u5929\u8bbe\u7f6e\"><img class=\"avatar\" alt=\"\"><span class=\"glass name\"><b></b><svg viewBox=\"0 0 6 13\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M1.11 1.08a1.22 1.22 0 0 1 1.66.49l2.25 4.42a1.16 1.16 0 0 1 0 1.02l-2.25 4.42a1.22 1.22 0 0 1-2.15-1.16L2.54 6.5.62 2.73a1.22 1.22 0 0 1 .49-1.65Z\"/></svg></span></button><button class=\"glass video\" aria-label=\"\u901a\u8bdd\">${svg('video')}</button><button class=\"glass reply-close\" aria-label=\"\u5173\u95ed\u56de\u590d\u4f1a\u8bdd\" hidden>${svg('close')}</button></header><div class=\"typing\" role=\"status\" hidden>\u2022\u2022\u2022</div><button class=\"glass jump\" aria-label=\"\u8df3\u5230\u6700\u65b0\u6d88\u606f\" hidden>${svg('down')}<span></span></button><footer class=\"composer\"><div class=\"compose-row\"><button class=\"glass add\" aria-label=\"\u804a\u5929\u529f\u80fd\" aria-expanded=\"false\">${svg('plus')}</button><div class=\"glass input-capsule\"><textarea rows=\"1\" aria-label=\"iMessage\u4fe1\u606f\" placeholder=\"iMessage\u4fe1\u606f\" enterkeyhint=\"send\"></textarea><button class=\"submit\" aria-label=\"\u83b7\u53d6\u56de\u590d\">${svg('wave')}</button></div></div></footer><button class=\"tools-dismiss\" aria-label=\"\u6536\u8d77\u529f\u80fd\" hidden></button><section class=\"tools glass\" aria-label=\"\u804a\u5929\u529f\u80fd\" hidden><div class=\"tools-scroll\"></div></section><section class=\"selection glass\" hidden><button data-original=\"cancel-multi-select-btn\">\u53d6\u6d88</button><b></b><button data-original=\"delete-selected-btn\">\u5220\u9664</button><button data-original=\"collect-selected-btn\">\u6536\u85cf</button></section><div class=\"menu-layer\" hidden></div></div>";
     root.innerHTML = layout.replace('${asset}', 'kiss-view.css?v=1').replace(/\$\{svg\('([^']+)'\)\}/g, (_, name) => svg(name));
@@ -218,6 +212,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 schedule();
             });
         }
+        if (row.classList.contains('received') && !description) {
+            const download = document.createElement('button');
+            download.className = 'im-photo-download';
+            download.setAttribute('aria-label', '下载照片');
+            download.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v13m-4-4 4 4 4-4M4 15v6h16v-6"/></svg>';
+            download.onclick = event => {
+                event.stopPropagation();
+                const link = document.createElement('a');
+                link.href = photos[state.index]?.querySelector('img').src || photos[0].querySelector('img').src;
+                link.download = '照片.jpg';
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.click();
+            };
+            album.classList.add('im-downloadable');
+            album.append(download);
+        }
         if (stacked) album.append(deck);
         else {
             const card = deck.firstChild;
@@ -341,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const button = document.createElement('button');
             button.className = 'message-action';
             button.setAttribute('role','menuitem');
-            button.innerHTML = svg(action === 'reply' ? 'back' : 'plus');
+            button.innerHTML = svg(action === 'multi' ? 'select' : ['recall','regen'].includes(action) ? 'undo' : action);
             button.append(document.createTextNode(label));
             button.onclick = () => { closeMenu(); handleMenuAction(action); schedule(); };
             menu.append(button);
@@ -383,13 +394,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         $('.name b').textContent = document.getElementById('roomTitle').textContent;
         const avatar = document.getElementById('conversation-avatar');
-        const image = $('.contact .avatar');
+        const image = $('.contact img.avatar');
         image.src = avatar?.getAttribute('src') || '';
         image.hidden = !avatar?.getAttribute('src');
         let initial = $('.avatar-initial');
         if (!initial) { initial=document.createElement('span');initial.className='avatar avatar-initial';$('.contact').prepend(initial); }
         initial.textContent = document.getElementById('conversation-initial').textContent;
         initial.hidden = !image.hidden;
+        image.onerror = () => { image.hidden = true; initial.hidden = false; };
         const background = getComputedStyle(room).backgroundImage;
         const url = background.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || '';
         host.toggleAttribute('wallpaper',!!url);
