@@ -1721,6 +1721,7 @@ function closeGeneralSettings() { document.getElementById('generalSettingsPage')
 function renderMessages(chat, container = document.getElementById('roomMessages')) {
     const isPreview = container.ownerDocument !== document;
     let previousVisibleRow;
+    let lastVisibleMessage;
     
     // 1. 记录当前的滚动位置
     const prevScrollHeight = container.scrollHeight;
@@ -1783,7 +1784,7 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
             
             // ★ 智能默认：如果这条消息的日期等于我们当下的时间，显示 Today，否则显示具体日期
             let isShowingToday = (currentDateStr === 'Today' || currentDateStr === nowVirtualDate);
-            dateDiv.innerText = isShowingToday ? `Today ${msg.time}` : `${currentDateStr} ${msg.time}`;
+            dateDiv.innerText = isShowingToday ? msg.time : `${currentDateStr} ${msg.time}`;
             
             // ★ 增加点击交互属性
             dateDiv.style.cursor = 'pointer'; // 给个小手鼠标样式提示可以点击
@@ -1799,7 +1800,7 @@ function renderMessages(chat, container = document.getElementById('roomMessages'
                     this.innerText = `${this.dataset.date} ${this.dataset.time}`; // 变成 05-19 10:30
                     this.dataset.showToday = "false";
                 } else {
-                    this.innerText = `Today ${this.dataset.time}`; // 变成 Today 10:30
+                    this.innerText = this.dataset.time; // 变成 Today 10:30
                     this.dataset.showToday = "true";
                 }
             };
@@ -1997,6 +1998,7 @@ if (isSelf) {
         }
         container.appendChild(row);
         previousVisibleRow = row;
+        lastVisibleMessage = msg;
         
         if (isPreview) return;
         // 事件绑定
@@ -2044,6 +2046,12 @@ if (isSelf) {
             });
         }
     });
+    if (lastVisibleMessage?.isSelf && !lastVisibleMessage.isFailed && !lastVisibleMessage.isRecalled) {
+        const delivery = container.ownerDocument.createElement('span');
+        delivery.className = 'conversation-delivery';
+        delivery.textContent = '已送达';
+        container.append(delivery);
+    }
     refreshConversationPhotos(container);
 
     if (isPreview || (!chat.showFullHistory && !isMultiSelectMode)) {
@@ -7957,7 +7965,7 @@ function sendDirectPhoto(value, chat = chatList.find(item => item.id === current
         renderMessages(chat);
         const history = document.getElementById('roomMessages');
         history.scrollTop = history.scrollHeight;
-        const lastCard = history.querySelector('.Miu-miu:last-child .conversation-photo');
+        const lastCard = history.querySelector('.Miu-miu:last-of-type .conversation-photo');
         lastCard?.querySelector('img')?.addEventListener('load', () => {
             if (history.contains(lastCard) && history.scrollHeight - history.scrollTop - history.clientHeight < 240) {
                 history.scrollTop = history.scrollHeight;
