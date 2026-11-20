@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const svg = name => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (shapes[name] || shapes.plus) + '</svg>';
     const layout = "<link rel=\"stylesheet\" href=\"${asset}\"><div class=\"surface\"><div class=\"wallpaper\"></div><svg class=\"bubble-outline-defs\" width=\"0\" height=\"0\" aria-hidden=\"true\"><defs><linearGradient id=\"ki-incoming-rim\" x1=\"0%\" y1=\"20%\" x2=\"100%\" y2=\"80%\"><stop offset=\"0%\" stop-color=\"#e8e7ff\" stop-opacity=\".34\"/><stop offset=\"60%\" stop-color=\"#aecbe6\" stop-opacity=\".20\"/><stop offset=\"100%\" stop-color=\"#60b3d5\" stop-opacity=\".07\"/></linearGradient></defs></svg><main class=\"history\" aria-label=\"\u804a\u5929\u4fe1\u606f\" tabindex=\"-1\"></main><div class=\"edge-haze edge-top\"></div><div class=\"edge-haze edge-bottom\"></div><section class=\"reply-focus\" aria-label=\"\u56de\u590d\u4f1a\u8bdd\" hidden><div class=\"reply-feed\"></div></section><header class=\"floating-header\"><button class=\"glass back\" aria-label=\"\u8fd4\u56de\u804a\u5929\u5217\u8868\">${svg('back')}<span class=\"unread-count\" hidden></span></button><button class=\"contact\" aria-label=\"\u6253\u5f00\u804a\u5929\u8bbe\u7f6e\"><img class=\"avatar\" alt=\"\"><span class=\"glass name\"><b></b><svg viewBox=\"0 0 6 13\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M1.11 1.08a1.22 1.22 0 0 1 1.66.49l2.25 4.42a1.16 1.16 0 0 1 0 1.02l-2.25 4.42a1.22 1.22 0 0 1-2.15-1.16L2.54 6.5.62 2.73a1.22 1.22 0 0 1 .49-1.65Z\"/></svg></span></button><button class=\"glass video\" aria-label=\"\u901a\u8bdd\">${svg('video')}</button><button class=\"glass reply-close\" aria-label=\"\u5173\u95ed\u56de\u590d\u4f1a\u8bdd\" hidden>${svg('close')}</button></header><div class=\"typing\" role=\"status\" hidden>\u2022\u2022\u2022</div><button class=\"glass jump\" aria-label=\"\u8df3\u5230\u6700\u65b0\u6d88\u606f\" hidden>${svg('down')}<span></span></button><footer class=\"composer\"><div class=\"compose-row\"><button class=\"glass add\" aria-label=\"\u804a\u5929\u529f\u80fd\" aria-expanded=\"false\">${svg('plus')}</button><div class=\"glass input-capsule\"><textarea rows=\"1\" aria-label=\"iMessage\u4fe1\u606f\" placeholder=\"iMessage\u4fe1\u606f\" enterkeyhint=\"send\"></textarea><button class=\"submit\" aria-label=\"\u83b7\u53d6\u56de\u590d\">${svg('wave')}</button></div></div></footer><button class=\"tools-dismiss\" aria-label=\"\u6536\u8d77\u529f\u80fd\" hidden></button><section class=\"tools glass\" aria-label=\"\u804a\u5929\u529f\u80fd\" hidden><div class=\"tools-scroll\"></div></section><section class=\"selection glass\" hidden><button data-original=\"cancel-multi-select-btn\">\u53d6\u6d88</button><b></b><button data-original=\"delete-selected-btn\">\u5220\u9664</button><button data-original=\"collect-selected-btn\">\u6536\u85cf</button></section><div class=\"menu-layer\" hidden></div></div>";
     root.innerHTML = layout.replace('${asset}', 'kiss-view.css?v=1').replace(/\$\{svg\('([^']+)'\)\}/g, (_, name) => svg(name));
+    const referenceStyle = document.createElement('link');
+    referenceStyle.rel = 'stylesheet';
+    referenceStyle.href = 'ios26-messages.css?v=1';
+    root.append(referenceStyle);
     const extra = document.createElement('style');
     extra.textContent = `
         .avatar-initial{display:grid;place-items:center;font-size:29px;color:white;background:linear-gradient(145deg,#b1cde6,#7d8bb7)}
@@ -313,9 +317,24 @@ document.addEventListener('DOMContentLoaded', () => {
             voice.append(play,wave,duration);
             line.append(voice);
         } else if (content.querySelector('.conversation-payment')) {
-            const payment = cleanClone(content.querySelector('.conversation-payment'));
-            payment.className = 'adapted-transfer';
-            payment.onclick = () => content.querySelector('.conversation-payment').click();
+            const sourcePayment = content.querySelector('.conversation-payment');
+            const payment = document.createElement('button');
+            payment.type = 'button';
+            payment.className = 'transfer-card ios26-transfer';
+            payment.innerHTML = '<span class="transfer-content"><span class="im-transfer-main"><span class="im-transfer-mark" aria-hidden="true"></span><span class="im-transfer-figure"><strong class="transfer-amount"></strong></span></span><span class="im-transfer-footer"><span class="transfer-label"></span><span>U&amp;Me</span></span></span>';
+            const amount = sourcePayment.querySelector('.payment-amount')?.textContent || '¥0.00';
+            payment.querySelector('.transfer-amount').textContent = amount;
+            const note = sourcePayment.querySelector('.payment-note')?.textContent;
+            if (note) {
+                const remark = document.createElement('span');
+                remark.className = 'transfer-remark';
+                remark.textContent = note;
+                payment.querySelector('.im-transfer-figure').append(remark);
+            }
+            const status = sourcePayment.querySelector('.payment-status')?.textContent.trim() || '';
+            payment.querySelector('.transfer-label').textContent = /已|退还/.test(status) ? status : (row.classList.contains('sent') ? '转账' : '给你转账');
+            payment.setAttribute('aria-label', `转账 ${amount} ${status}${note ? '，' + note : ''}`);
+            payment.onclick = () => sourcePayment.click();
             line.append(payment);
         } else {
             const rich = cleanClone(content);

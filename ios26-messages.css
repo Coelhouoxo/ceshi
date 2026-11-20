@@ -1,0 +1,33 @@
+/* Geometry and materials calibrated against the supplied iOS 26 references. */
+:is(:host([wallpaper]),.ki-preview-host[wallpaper]){
+ --incoming-frost:linear-gradient(115deg,#56656b24,#26393f20);
+ --incoming-blur:blur(.65px) saturate(105%);
+ --sent-blue-top:#009fff;
+ --sent-blue-bottom:#0095fc;
+ --sent-blue-opacity:94%;
+}
+:host([wallpaper][dark-backdrop]){
+ --incoming-frost:linear-gradient(115deg,#53656b32,#26393f25);
+}
+.incoming-rim path{stroke:#ecf5fa61;stroke-width:.7}
+.message-wrapper .message-bubble:not(.html-bubble){
+ font-size:14.5px;line-height:20px;padding:8.5px 14px;
+}
+/* Speech tails share the body silhouette, so no overlapping translucent patch. */
+.received .voice-bubble{--voice-fill:var(--incoming-frost)}
+:host([wallpaper]) .received .voice-bubble,
+:host([wallpaper]) .received.tail .voice-bubble:before{
+ -webkit-backdrop-filter:var(--incoming-blur);
+ backdrop-filter:var(--incoming-blur);
+}
+.ios26-transfer{width:238px;max-width:78%;text-align:left;border:0;padding:0;background:none}
+.ios26-transfer .transfer-content{display:block;border-radius:11px}
+.ios26-transfer .im-transfer-main{display:flex;min-height:65px;padding:8px 12px;gap:11px}
+.ios26-transfer .im-transfer-mark{display:block;width:40px;height:48px}
+.ios26-transfer .transfer-amount{display:block;font-size:27px;font-weight:700;line-height:1.1;margin:0;letter-spacing:0}
+.ios26-transfer .transfer-remark{display:block;margin-top:5px;font-size:11px;line-height:1.35}
+.ios26-transfer .im-transfer-footer{display:flex;min-height:24px;padding:4px 11px;font-size:12px;line-height:16px}
+@media(prefers-reduced-transparency:reduce){
+ :host([wallpaper]){--incoming-frost:#e9e9eb;--incoming-blur:none;--sent-blue-opacity:100%}
+ :host([wallpaper][dark-backdrop]){--incoming-frost:#323a40}
+}
