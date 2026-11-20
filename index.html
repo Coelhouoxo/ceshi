@@ -19,7 +19,7 @@
     <!-- 引入样式文件 -->
      <link rel="manifest" href="manifest.json?v=7">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="conversation.css?v=19">
+    <link rel="stylesheet" href="conversation.css?v=20">
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
@@ -268,7 +268,7 @@
                 <div id="view-messages" class="tab-view active">
                     <header class="inbox-heading">
                         <div class="inbox-actions">
-                            <button type="button" class="conversation-glass" onclick="toggleInboxEdit(this)" aria-pressed="false">编辑</button>
+                            <button type="button" class="conversation-glass inbox-edit-button" onclick="toggleInboxEdit(this)" aria-pressed="false">编辑</button>
                             <button type="button" class="conversation-glass inbox-round" onclick="toggleInboxOptions()" aria-label="列表选项" aria-expanded="false" id="inbox-options-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M6 12h12M9 18h6"/></svg></button>
                         </div>
                         <h1><button type="button" class="inbox-title-back" onclick="closeApp()" aria-label="信息，返回桌面">信息</button></h1>
@@ -283,8 +283,8 @@
                     <input type="file" id="importPersonaDocInput" accept=".txt,.md,.docx" hidden onchange="handlePersonaDocImport(this)">
                     <div id="chat-list-container"></div>
                     <div class="inbox-dock">
-                        <label class="conversation-glass inbox-search"><i class="fas fa-search" aria-hidden="true"></i><input id="inbox-query" type="search" aria-label="搜索联系人或消息" placeholder="搜索" oninput="renderChatList()"><button type="button" class="inbox-microphone" aria-label="语音搜索" onclick="startInboxVoiceSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v2a6 6 0 0 0 12 0v-2M12 18v4m-4 0h8"/></svg></button></label>
-                        <button type="button" class="conversation-glass inbox-round" onclick="openAddCharModal()" aria-label="新建聊天"><i class="far fa-edit"></i></button>
+                        <label class="conversation-glass inbox-search"><svg class="inbox-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.75"/><path d="m15.5 15.5 5.5 5.5"/></svg><input id="inbox-query" type="search" aria-label="搜索联系人或消息" placeholder="搜索" oninput="renderChatList()"><button type="button" class="inbox-microphone" aria-label="语音搜索" onclick="startInboxVoiceSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v2a6 6 0 0 0 12 0v-2M12 18v4m-4 0h8"/></svg></button></label>
+                        <button type="button" class="conversation-glass inbox-round" onclick="openAddCharModal()" aria-label="新建聊天"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="m18.4 2.8 2.8 2.8-10.4 10.4-3.6.8.8-3.6Z"/></svg></button>
                     </div>
                 </div>
 

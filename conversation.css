@@ -57,6 +57,31 @@
 #view-messages .inbox-microphone{display:grid;place-items:center;flex:none;width:6.6cqw;height:8.15cqw;padding:0;border:0;background:none;color:#080808;cursor:pointer}
 #view-messages .inbox-microphone svg{width:6.6cqw;height:7.1cqw;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
+/* Button silhouettes and glyphs traced against the supplied inbox reference. */
+#view-messages .inbox-actions>button,
+#view-messages .inbox-dock>.inbox-round{
+ appearance:none;-webkit-appearance:none;box-sizing:border-box;
+ border:0!important;background:#fff!important;color:#080808;
+ box-shadow:0 1.16cqw 4.35cqw #00000009,inset 0 .14cqw .2cqw #ffffffd9;
+ -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+#view-messages .inbox-actions>.inbox-edit-button{
+ width:14.5cqw;min-width:14.5cqw;padding:0;border-radius:7.25cqw;
+ font-weight:500;letter-spacing:0;
+}
+#view-messages .inbox-actions>.inbox-round{border-radius:50%}
+#view-messages .inbox-actions svg{width:7cqw;height:7cqw;stroke-width:1.55}
+#view-messages .inbox-dock>.inbox-round svg{
+ width:5.3cqw;height:5.3cqw;fill:none;stroke:currentColor;
+ stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+}
+#view-messages .inbox-search-icon{
+ flex:none;width:4.8cqw;height:4.8cqw;fill:none;stroke:currentColor;
+ stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+#view-messages .inbox-search{box-shadow:0 1.16cqw 4.93cqw #00000008,inset 0 .14cqw .2cqw #ffffffd9}
+#view-messages .inbox-microphone{appearance:none;-webkit-appearance:none;box-shadow:none;border-radius:0}
+
 /* Keep every floating element on the same chat-width canvas. */
 #appOverlay.chat-reading::before {
     content: '';
