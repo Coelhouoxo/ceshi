@@ -849,3 +849,6 @@
 
 #appOverlay { overflow: clip !important; }
 #chatRoom:not(.active) { visibility: hidden !important; pointer-events: none !important; }
+
+/* Remove inactive chat compositing layers from the inbox canvas. */
+#chatRoom:not(.active){display:none!important;}
