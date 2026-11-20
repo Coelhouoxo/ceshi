@@ -14,9 +14,9 @@
  font-size:14.5px;line-height:20px;padding:8.5px 14px;
 }
 /* Speech tails share the body silhouette, so no overlapping translucent patch. */
-.received .voice-bubble{--voice-fill:var(--incoming-frost)}
-:host([wallpaper]) .received .voice-bubble,
-:host([wallpaper]) .received.tail .voice-bubble:before{
+:is(:host([wallpaper]),.ki-preview-host[wallpaper]) .received .voice-bubble{--voice-fill:var(--incoming-frost)}
+:is(:host([wallpaper]),.ki-preview-host[wallpaper]) .received .voice-bubble,
+:is(:host([wallpaper]),.ki-preview-host[wallpaper]) .received.tail .voice-bubble:before{
  -webkit-backdrop-filter:var(--incoming-blur);
  backdrop-filter:var(--incoming-blur);
 }
