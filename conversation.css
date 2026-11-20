@@ -52,7 +52,8 @@
 #view-messages .inbox-search{display:flex;align-items:center;flex:1;min-width:0;height:11.9cqw;gap:2.55cqw;padding:0 4.35cqw;border:0;border-radius:8cqw;background:#fff;color:#080808;box-shadow:0 8px 34px #00000008;-webkit-backdrop-filter:none;backdrop-filter:none}
 #view-messages .inbox-search>i{font-size:3.8cqw}
 #view-messages .inbox-search input{min-width:0;width:100%;color:inherit;background:none;border:0;outline:0;font-size:4.1cqw!important;line-height:1.4}
-#view-messages .inbox-search:focus-within{outline:2px solid #008aff}
+#view-messages .inbox-search:focus-within{outline:none}
+#view-messages .inbox-search input:is(:focus,:focus-visible){outline:none;box-shadow:none}
 #view-messages .inbox-dock>.inbox-round{display:grid;place-items:center;flex:none;width:11.9cqw;min-width:11.9cqw;height:11.9cqw;padding:0;border:0;border-radius:50%;background:#fff;color:#080808;font-size:3.8cqw;box-shadow:0 8px 30px #00000005;-webkit-backdrop-filter:none;backdrop-filter:none;cursor:pointer}
 #view-messages .inbox-microphone{display:grid;place-items:center;flex:none;width:6.6cqw;height:8.15cqw;padding:0;border:0;background:none;color:#080808;cursor:pointer}
 #view-messages .inbox-microphone svg{width:5.5cqw;height:5.6cqw;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
