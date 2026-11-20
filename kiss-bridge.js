@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     root.innerHTML = layout.replace('${asset}', 'kiss-view.css?v=1').replace(/\$\{svg\('([^']+)'\)\}/g, (_, name) => svg(name));
     const referenceStyle = document.createElement('link');
     referenceStyle.rel = 'stylesheet';
-    referenceStyle.href = 'ios26-messages.css?v=3';
+    referenceStyle.href = 'ios26-messages.css?v=4';
     root.append(referenceStyle);
     const extra = document.createElement('style');
     extra.textContent = `
@@ -289,8 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const play = document.createElement('button');
             play.className = 'voice-play';
             play.setAttribute('aria-label','播放语音');
-            play.innerHTML = '<span class="play-icon">' + svg('video') + '</span>';
-            play.querySelector('.play-icon').innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="m7 3 15 9L7 21Z"/></svg>';
+            play.type = 'button';
+            play.innerHTML = '<svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
             const wave = document.createElement('span');
             wave.className = 'voice-wave';
             for (let i=0;i<48;i++) {
