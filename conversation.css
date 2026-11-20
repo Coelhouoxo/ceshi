@@ -21,7 +21,7 @@
     background: #fff;
 }
 
-.inbox-heading { padding: 15px 18px 5px; position: relative; z-index: 4; }
+.inbox-heading { padding: 15px 16px 13px; position: relative; z-index: 4; }
 .inbox-actions, .inbox-dock { display: flex; justify-content: space-between; gap: 13px; }
 .inbox-actions button, .inbox-round {
     display: grid;
@@ -29,11 +29,20 @@
     min-height: 43px;
     padding: 0 15px;
     border-radius: 24px;
-    font-weight: 620;
+    font-size: 17px;
+    font-weight: 500;
     cursor: pointer;
 }
 .inbox-round { width: 45px; min-width: 45px; height: 45px; padding: 0; font-size: 17px; }
-.inbox-heading h1 { margin: 17px 0 4px; font-size: 34px; font-weight: 750; letter-spacing: -.045em; }
+.inbox-heading h1 { margin: 17px 0 4px; font-size: 32px; font-weight: 750; letter-spacing: -.045em; }
+.inbox-title-back { font:inherit;letter-spacing:inherit;color:#000;background:none;border:0;padding:0;cursor:pointer; }
+.inbox-title-back:focus-visible { outline:2px solid #008aff;outline-offset:4px;border-radius:5px; }
+.inbox-actions>.conversation-glass,.inbox-dock>.conversation-glass {
+    border:0;background:#fff;color:#080808;
+    box-shadow:0 8px 30px #00000009;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+.inbox-actions svg,.inbox-microphone svg { width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
 .inbox-options {
     position: absolute;
     top: 66px;
@@ -69,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 0 17px 0 23px;
+    padding: 0 16px 0 26px;
     background: #fff;
 }
 #view-messages .inbox-unread::before {
@@ -97,23 +106,23 @@
     font-size: 22px;
 }
 .inbox-avatar img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
-#view-messages .chat-info { align-self: stretch; border-bottom: 1px solid #e7e9ee; }
+#view-messages .chat-info { align-self: stretch; position:relative; padding:12px 0;justify-content:flex-start;border-bottom: 1px solid #dedede; }
 #view-messages .chat-name-row { margin: 0 0 2px; gap: 5px; }
 #view-messages .chat-name {
     color: #15171c;
     font-size: 16px;
-    font-weight: 690;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-#view-messages .chat-time { color: #737a84; font-size: 12px; white-space: nowrap; }
+#view-messages .chat-time { color: #929292; font-size: 13px; white-space: nowrap; }
 #view-messages .chat-time i { margin-left: 5px; color: #a6acb5; font-size: 10px; }
 #view-messages .chat-preview {
     min-height: 32px;
-    color: #737a84;
-    font-size: 13px;
-    line-height: 16px;
+    color: #929292;
+    font-size: 14px;
+    line-height: 18px;
     white-space: normal;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -123,7 +132,8 @@
 .inbox-editing .chat-time i { color: #087eee !important; }
 .inbox-dock {
     position: absolute;
-    inset: auto 19px max(19px, env(safe-area-inset-bottom)) 19px;
+    inset: auto 27px max(27px, env(safe-area-inset-bottom)) 27px;
+    gap:12px;
     align-items: center;
     pointer-events: none;
     z-index: 5;
@@ -134,12 +144,15 @@
     align-items: center;
     flex: 1;
     min-width: 0;
-    height: 45px;
+    height: 48px;
     gap: 10px;
     padding: 0 15px;
     border-radius: 30px;
-    background: #ffffffed;
-    box-shadow: 0 8px 30px #24354d19;
+    background: #fff;
+    border:0;
+    color:#080808;
+    box-shadow: 0 8px 34px #0000000b;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
 }
 .inbox-search input {
     min-width: 0;
@@ -152,6 +165,8 @@
 }
 .inbox-search:focus-within { outline: 2px solid #008aff; }
 .inbox-dock .inbox-round { background: #fffffff5; }
+.inbox-dock>.inbox-round { width:48px;min-width:48px;height:48px;font-size:21px; }
+.inbox-microphone { display:grid;place-items:center;flex:none;width:25px;height:32px;padding:0;border:0;background:none;color:#080808;cursor:pointer; }
 
 /* Keep every floating element on the same chat-width canvas. */
 #appOverlay.chat-reading::before {

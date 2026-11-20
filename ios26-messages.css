@@ -1,13 +1,13 @@
 /* Geometry and materials calibrated against the supplied iOS 26 references. */
 :is(:host([wallpaper]),.ki-preview-host[wallpaper]){
- --incoming-frost:linear-gradient(115deg,#56656b24,#26393f20);
- --incoming-blur:blur(.65px) saturate(105%);
+ --incoming-frost:linear-gradient(115deg,#dce0e4a6,#adb5bd91);
+ --incoming-blur:blur(13px) saturate(115%);
  --sent-blue-top:#009fff;
  --sent-blue-bottom:#0095fc;
  --sent-blue-opacity:94%;
 }
 :host([wallpaper][dark-backdrop]){
- --incoming-frost:linear-gradient(115deg,#53656b32,#26393f25);
+ --incoming-frost:linear-gradient(115deg,#515b68a8,#293541a3);
 }
 .incoming-rim path{stroke:#ecf5fa61;stroke-width:.7}
 .message-wrapper .message-bubble:not(.html-bubble){

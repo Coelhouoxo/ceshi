@@ -1,5 +1,19 @@
 'use strict';
 
+function startInboxVoiceSearch() {
+    const input = document.getElementById('inbox-query');
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) { input.focus(); return; }
+    const recognition = new Recognition();
+    recognition.lang = 'zh-CN';
+    recognition.onresult = event => {
+        input.value = event.results[0][0].transcript;
+        renderChatList();
+    };
+    recognition.onerror = () => input.focus();
+    recognition.start();
+}
+
 function toggleInboxOptions(force) {
     const menu = document.getElementById('inbox-options');
     const open = typeof force === 'boolean' ? force : menu.hidden;

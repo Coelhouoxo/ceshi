@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     root.innerHTML = layout.replace('${asset}', 'kiss-view.css?v=1').replace(/\$\{svg\('([^']+)'\)\}/g, (_, name) => svg(name));
     const referenceStyle = document.createElement('link');
     referenceStyle.rel = 'stylesheet';
-    referenceStyle.href = 'ios26-messages.css?v=1';
+    referenceStyle.href = 'ios26-messages.css?v=2';
     root.append(referenceStyle);
     const extra = document.createElement('style');
     extra.textContent = `
