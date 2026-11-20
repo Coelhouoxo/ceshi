@@ -19,7 +19,7 @@
     <!-- 引入样式文件 -->
      <link rel="manifest" href="manifest.json?v=7">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="conversation.css?v=20">
+    <link rel="stylesheet" href="conversation.css?v=21">
     <link rel="stylesheet" href="forum_app.css">
     <link rel="stylesheet" href="check_phone.css">
     <link rel="stylesheet" href="gallery_app.css">
@@ -269,7 +269,7 @@
                     <header class="inbox-heading">
                         <div class="inbox-actions">
                             <button type="button" class="conversation-glass inbox-edit-button" onclick="toggleInboxEdit(this)" aria-pressed="false">编辑</button>
-                            <button type="button" class="conversation-glass inbox-round" onclick="toggleInboxOptions()" aria-label="列表选项" aria-expanded="false" id="inbox-options-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M6 12h12M9 18h6"/></svg></button>
+                            <button type="button" class="conversation-glass inbox-round" onclick="toggleInboxOptions()" aria-label="列表选项" aria-expanded="false" id="inbox-options-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M6 12h12M9 18h6"/></svg><span class="inbox-filter-badge" id="inbox-unread-badge" hidden></span></button>
                         </div>
                         <h1><button type="button" class="inbox-title-back" onclick="closeApp()" aria-label="信息，返回桌面">信息</button></h1>
                         <div id="inbox-options" class="conversation-glass inbox-options" hidden>
@@ -583,7 +583,7 @@
         <div class="tool-icon-box"><i class="far fa-laugh-squint"></i></div>
         <div class="tool-name">表情包</div>
     </div>
-    <div class="tool-item" onclick="toggleChatTools(); openHeartVoice()">
+    <div class="tool-item" data-chat-tool="heart" onclick="toggleChatTools(); openHeartVoice()">
         <div class="tool-icon-box"><i class="far fa-heart"></i></div>
         <div class="tool-name">心声</div>
     </div>
@@ -607,31 +607,31 @@
         <div class="tool-icon-box"><div class="icon-transfer-bg"></div></div>
         <div class="tool-name">转账</div>
     </div>
-    <div class="tool-item" onclick="startVoiceCallUI()">
+    <div class="tool-item" data-chat-tool="call" onclick="startVoiceCallUI()">
         <div class="tool-icon-box">
             <i class="fas fa-phone-volume"></i>
         </div>
         <div class="tool-name">Call</div>
     </div>
-    <div class="tool-item" onclick="startVideoCallUI()">
+    <div class="tool-item" data-chat-tool="video" onclick="startVideoCallUI()">
     <div class="tool-icon-box">
         <i class="fas fa-video"></i>
     </div>
     <div class="tool-name">Video</div>
 </div>
-    <div class="tool-item" onclick="openRelativeCardModal()">
+    <div class="tool-item" data-chat-tool="family" onclick="openRelativeCardModal()">
     <div class="tool-icon-box">
         <div class="icon-relative-bg"></div>
     </div>
     <div class="tool-name">FamilyCard</div>
 </div>
-<div class="tool-item" onclick="openSecurityQuiz()">
+<div class="tool-item" data-chat-tool="quiz" onclick="openSecurityQuiz()">
     <div class="tool-icon-box">
         <i class="fas fa-shield-alt" style="color: #666;"></i>
     </div>
     <div class="tool-name">Quiz</div>
 </div>
-<div class="tool-item" onclick="enterOfflineStage()">
+<div class="tool-item" data-chat-tool="offline" onclick="enterOfflineStage()">
         <div class="tool-icon-box"><i class="fas fa-theater-masks"></i></div>
         <div class="tool-name">线下</div>
     </div>
@@ -1524,9 +1524,9 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="conversation.js?v=7"></script>
+    <script data-cfasync="false" src="conversation.js?v=8"></script>
     <script defer src="kiss-liquid.js?v=1"></script>
-    <script defer src="kiss-bridge.js?v=10"></script>
+    <script defer src="kiss-bridge.js?v=11"></script>
     <script data-cfasync="false" src="script.js?v=15"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>

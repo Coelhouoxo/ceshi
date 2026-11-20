@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .avatar-initial{display:grid;place-items:center;font-size:29px;color:white;background:linear-gradient(145deg,#b1cde6,#7d8bb7)}
         .back,.video,.add{flex-shrink:0}
         .photo-description{position:absolute;inset:0;background:white;color:#222;padding:15px;overflow:auto;font-size:14px;line-height:1.5;white-space:pre-wrap}
-        .tool-icon svg{fill:none;stroke:currentColor;stroke-width:1.6}
+        .tool-icon svg{color:inherit}
+        .tool-icon svg[fill="none"]{fill:none}
         .voice-transcript.active{display:block}
         .native-rich{padding:12px;border-radius:18px;background:var(--incoming);max-width:79%;overflow:hidden}
         .native-rich img{max-width:100%}
@@ -99,14 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const glyph = entry.querySelector('.tool-icon-box');
             // Source icons are kept as text-independent shapes in the isolated theme.
             const key = entry.dataset.chatTool;
-            const paths = {
-                album: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="8" r="2"/><path d="m4 18 5-5 4 3 3-5 5 6"/>',
-                photo: '<rect x="3" y="6" width="18" height="15" rx="3"/><path d="m8 6 2-3h4l2 3"/><circle cx="12" cy="13" r="4"/>',
-                emoji: '<path d="M20 13A9 9 0 1 1 9 3c1.4 5.1 5.9 9.6 11 10Z"/><path d="M9 3c.7 4.9 5.7 9.9 11 10"/>',
-                voice: shapes.wave,
-                payment: '<path d="M7 8h13l-4-4M17 16H4l4 4"/>'
-            };
-            icon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths[key] || '<circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8"/>') + '</svg>';
+            const glyphs = {"album": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z\"/></svg>", "photo": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><g fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"><path d=\"M15 8h.01M11.5 21H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5.5\"/><path d=\"M15 18a3 3 0 1 0 6 0a3 3 0 1 0-6 0m5.2 2.2L22 22M3 16l5-5c.928-.893 2.072-.893 3 0l2 2\"/></g></svg>", "payment": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8H20V18ZM4 6H20V6H4Z\"/></svg>", "call": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\" class=\"bi bi-telephone-outbound\" viewBox=\"0 0 16 16\">                                 <path d=\"M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511zM11 .5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V1.707l-4.146 4.147a.5.5 0 0 1-.708-.708L14.293 1H11.5a.5.5 0 0 1-.5-.5z\"/>                             </svg>", "video": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M4 5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1.7l4.2 2.8c.8.5 1.8 0 1.8-1V7.9c0-1-1-1.5-1.8-1L17 9.7V8a3 3 0 0 0-3-3Z\"/></svg>", "heart": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M12 21 3.2 12.6C-3 6.2 5.6-1 12 5.2 18.4-1 27 6.2 20.8 12.6Z\"/></svg>", "family": "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M3 4h18a2 2 0 0 1 2 2v3H1V6a2 2 0 0 1 2-2ZM1 11h22v7a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2Zm11 7 4.1-3.8c2.1-2.1-.9-4.5-2.6-2.4L12 12.2l-1.5-.4c-1.7-2.1-4.7.3-2.6 2.4Z\"/></svg>", "quiz": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2 3 6v6c0 5 6 9 9 10 3-1 9-5 9-10V6Z\"/><path d=\"M9.5 9a2.5 2.5 0 1 1 4.4 1.6c-1.4 1-1.9 1.2-1.9 2.9m0 3h.01\"/></svg>", "offline": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m2 3 12 2-1.4 8C11.8 18 4.4 19 3.2 12ZM5 7l1 .2m3 .5 1 .2M5.3 11c1.2 1.5 2.5 1.8 4 .5M15 5l7-1-1 9c-.6 5-6 7.6-9 4m4-9 1-.2m2.5-.4 1-.2m-5.8 5.5c1.5-1 2.8-1.1 4-.1\"/></svg>"};
+            if (key === 'voice') icon.innerHTML = svg('wave');
+            else if (key === 'emoji') icon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#f4f1ff" d="M20 13A9 9 0 1 1 9 3c1.4 5.1 5.9 9.6 11 10Z"/><path fill="#ccb8f7" d="M9 3c.7 4.9 5.7 9.9 11 10-4.3.2-7.7-.9-9.4-2.7C8.8 8.4 8.6 5.6 9 3Z"/></svg>';
+            else icon.innerHTML = glyphs[key] || svg('more');
             const label = document.createElement('span');
             label.textContent = key === 'emoji' ? '贴纸' : entry.querySelector('.tool-name')?.textContent || glyph?.textContent || '更多';
             button.append(icon,label);

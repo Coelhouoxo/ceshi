@@ -354,6 +354,15 @@ function showConversationPhotoViewer(card, initialIndex) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const inbox = document.getElementById('view-messages');
+    const list = document.getElementById('chat-list-container');
+    const updateInboxBadge = () => {
+        const badge = document.getElementById('inbox-unread-badge');
+        const count = chatList.filter(chat => chat.inboxUnread).length;
+        badge.hidden = !count;
+        badge.textContent = count > 99 ? '99+' : String(count);
+    };
+    new MutationObserver(updateInboxBadge).observe(list, {childList:true, subtree:true, attributes:true, attributeFilter:['class']});
+    updateInboxBadge();
     const history = document.getElementById('roomMessages');
     const room = document.getElementById('chatRoom');
     new MutationObserver(() => updateConversationPalette(room)).observe(room, {attributes:true, attributeFilter:['style']});
