@@ -18,6 +18,7 @@
     overflow: hidden;
     padding: max(22px, env(safe-area-inset-top)) 0 0 !important;
     color: #15171c;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
     background: #fff;
 }
 
@@ -35,7 +36,7 @@
 }
 .inbox-round { width: 45px; min-width: 45px; height: 45px; padding: 0; font-size: 17px; }
 .inbox-heading h1 { margin: 17px 0 4px; font-size: 32px; font-weight: 750; letter-spacing: -.045em; }
-.inbox-title-back { font:inherit;letter-spacing:inherit;color:#000;background:none;border:0;padding:0;cursor:pointer; }
+.inbox-title-back { font:inherit;font-size:32px!important;line-height:1.2;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;letter-spacing:inherit;color:#000;background:none;border:0;padding:0;cursor:pointer; }
 .inbox-title-back:focus-visible { outline:2px solid #008aff;outline-offset:4px;border-radius:5px; }
 .inbox-actions>.conversation-glass,.inbox-dock>.conversation-glass {
     border:0;background:#fff;color:#080808;
