@@ -1,9 +1,17 @@
-/* Geometry and materials calibrated against the supplied iOS 26 references. */
-/* Bubble materials and outlines come from kiss-view.css without overrides. */
-.ios26-transfer{width:238px;max-width:78%;text-align:left;border:0;padding:0;background:none}
-.ios26-transfer .transfer-content{display:block;border-radius:11px}
-.ios26-transfer .im-transfer-main{display:flex;min-height:65px;padding:8px 12px;gap:11px}
-.ios26-transfer .im-transfer-mark{display:block;width:40px;height:48px}
-.ios26-transfer .transfer-amount{display:block;font-size:27px;font-weight:700;line-height:1.1;margin:0;letter-spacing:0}
-.ios26-transfer .transfer-remark{display:block;margin-top:5px;font-size:11px;line-height:1.35}
-.ios26-transfer .im-transfer-footer{display:flex;min-height:24px;padding:4px 11px;font-size:12px;line-height:16px}
+/* Text and voice materials remain owned by the original KISS stylesheet. */
+.ios26-transfer{display:flex;flex-direction:column;align-items:stretch;gap:0;width:232px;max-width:78%;padding:15px 16px 0;text-align:left;color:#17212b;background:linear-gradient(145deg,#fffffff0,#f1f5f9e6);border:1px solid #ffffffd9;border-radius:24px;overflow:hidden;box-shadow:0 5px 18px #142a3a0d,inset 0 1px 0 #fff;-webkit-backdrop-filter:blur(18px) saturate(125%);backdrop-filter:blur(18px) saturate(125%)}
+.payment-card-header{display:flex;align-items:center;gap:9px}
+.payment-card-symbol{display:grid;place-items:center;width:31px;height:31px;flex:none;border-radius:50%;color:#007aff;background:#dcecff}
+.payment-card-symbol svg{width:18px;height:18px}
+.payment-card-title{font-size:13px;font-weight:600;line-height:18px;color:#52606d}
+.payment-card-amount{display:block;margin:12px 0 10px;font-size:31px;font-weight:650;line-height:1.1;letter-spacing:-.035em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.payment-card-note{font-size:12px;line-height:1.5;color:#687582;white-space:pre-wrap;overflow-wrap:anywhere;padding-bottom:12px}
+.payment-card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;margin-top:3px;border-top:1px solid #7e8a971c;font-size:11px;line-height:15px;color:#7b8793}
+.payment-card-footer svg{width:12px;height:12px;color:#9ba5af}
+.ios26-transfer[data-state=received] .payment-card-state{color:#21885c}
+:host([wallpaper][dark-backdrop]) .ios26-transfer{color:#f4f7fa;background:linear-gradient(145deg,#293642eb,#1d2934e8);border-color:#ffffff35;box-shadow:0 5px 18px #0002,inset 0 1px 0 #ffffff20}
+:host([dark-backdrop]) .payment-card-symbol{background:#2285e431;color:#82c6ff}
+:host([dark-backdrop]) .payment-card-title,:host([dark-backdrop]) .payment-card-note{color:#cfdae4}
+:host([dark-backdrop]) .payment-card-footer{border-color:#ffffff20;color:#a8b9c9}
+:host([dark-backdrop]) .ios26-transfer[data-state=received] .payment-card-state{color:#89d9b5}
+@media(prefers-reduced-transparency:reduce){.ios26-transfer{background:#f6f8fa;-webkit-backdrop-filter:none;backdrop-filter:none}:host([dark-backdrop]) .ios26-transfer{background:#25313d}}

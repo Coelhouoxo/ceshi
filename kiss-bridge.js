@@ -16,18 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     root.innerHTML = layout.replace('${asset}', 'kiss-view.css?v=1').replace(/\$\{svg\('([^']+)'\)\}/g, (_, name) => svg(name));
     const referenceStyle = document.createElement('link');
     referenceStyle.rel = 'stylesheet';
-    referenceStyle.href = 'ios26-messages.css?v=4';
+    referenceStyle.href = 'ios26-messages.css?v=5';
     root.append(referenceStyle);
     const extra = document.createElement('style');
     extra.textContent = `
         .avatar-initial{display:grid;place-items:center;font-size:29px;color:white;background:linear-gradient(145deg,#b1cde6,#7d8bb7)}
         .back,.video,.add{flex-shrink:0}
-        .adapted-transfer{width:208px;max-width:79%;border-radius:17px;overflow:hidden;background:linear-gradient(155deg,#f0f6ff,#e7effc);color:#182338;padding:12px 13px 0}
-        .payment-head,.payment-status{display:flex;justify-content:space-between;gap:7px;font-size:12px}
-        .payment-amount{display:block;margin:7px 0;font-size:25px}
-        .payment-note{display:block;font-size:13px;line-height:1.4;white-space:pre-wrap;margin-bottom:7px}
-        .payment-status{padding:8px 13px;margin:0 -13px;background:#dce9fa}
-        .adapted-transfer i{display:none}
         .photo-description{position:absolute;inset:0;background:white;color:#222;padding:15px;overflow:auto;font-size:14px;line-height:1.5;white-space:pre-wrap}
         .tool-icon svg{fill:none;stroke:currentColor;stroke-width:1.6}
         .voice-transcript.active{display:block}
@@ -321,18 +315,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const payment = document.createElement('button');
             payment.type = 'button';
             payment.className = 'transfer-card ios26-transfer';
-            payment.innerHTML = '<span class="transfer-content"><span class="im-transfer-main"><span class="im-transfer-mark" aria-hidden="true"></span><span class="im-transfer-figure"><strong class="transfer-amount"></strong></span></span><span class="im-transfer-footer"><span class="transfer-label"></span><span>U&amp;Me</span></span></span>';
+            payment.innerHTML = '<span class="payment-card-header"><span class="payment-card-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14m-4-4 4 4-4 4M19 16H5m4-4-4 4 4 4"/></svg></span><span class="payment-card-title"></span></span><strong class="payment-card-amount"></strong><span class="payment-card-note" hidden></span><span class="payment-card-footer"><span class="payment-card-state"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></span>';
             const amount = sourcePayment.querySelector('.payment-amount')?.textContent || '¥0.00';
-            payment.querySelector('.transfer-amount').textContent = amount;
+            payment.querySelector('.payment-card-amount').textContent = amount;
             const note = sourcePayment.querySelector('.payment-note')?.textContent;
             if (note) {
-                const remark = document.createElement('span');
-                remark.className = 'transfer-remark';
+                const remark = payment.querySelector('.payment-card-note');
+                remark.hidden = false;
                 remark.textContent = note;
-                payment.querySelector('.im-transfer-figure').append(remark);
             }
             const status = sourcePayment.querySelector('.payment-status')?.textContent.trim() || '';
-            payment.querySelector('.transfer-label').textContent = /已|退还/.test(status) ? status : (row.classList.contains('sent') ? '转账' : '给你转账');
+            payment.querySelector('.payment-card-title').textContent = row.classList.contains('sent') ? '转账' : '给你转账';
+            payment.querySelector('.payment-card-state').textContent = status;
+            payment.dataset.state = /退还/.test(status) ? 'refunded' : /已收款/.test(status) ? 'received' : 'pending';
             payment.setAttribute('aria-label', `转账 ${amount} ${status}${note ? '，' + note : ''}`);
             payment.onclick = () => sourcePayment.click();
             line.append(payment);
@@ -461,6 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = background.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || '';
         host.toggleAttribute('wallpaper',!!url);
         $('.wallpaper').style.backgroundImage = background;
+        // The masked scroll layer must own its backdrop, just as in KISS.
+        history.style.backgroundImage = background;
         optics.setBackground(url);
         for (const row of history.children) optics.invalidate(row);
         frameMap = new WeakMap();
