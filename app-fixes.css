@@ -11,8 +11,8 @@
 .inbox-selection-toolbar .selection-danger{color:#ff3b30}
 #view-messages.inbox-editing .inbox-dock{visibility:hidden}
 body:has(#userMaskPage.active) #wechat-bottom-nav{display:none!important}
-#apiSettingsPage .ios-api-utilities .ios-api-row-text{font-size:16px!important;line-height:1.3}
-#apiSettingsPage .ios-api-utilities .ios-api-row-text strong{display:block;font-size:16px!important;font-weight:400}
+#apiSettingsPage .ios-api-utilities .ios-api-row-text{font-size:inherit!important;line-height:inherit;font-weight:inherit}
+#apiSettingsPage .ios-api-utilities .ios-api-row-text strong{display:block;font-size:inherit!important;font-weight:inherit;line-height:inherit}
 #apiSettingsPage .ios-api-utilities .ios-api-row-text small{display:block;font-size:12px!important;line-height:1.3;margin-top:3px}
 #apiSettingsPage .ios-api-row[aria-checked=true] .ios-api-switch{background:#34c759}
 #apiSettingsPage .ios-api-row[aria-checked=true] .ios-api-switch::after{transform:translateX(18px)}
