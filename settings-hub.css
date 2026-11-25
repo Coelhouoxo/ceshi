@@ -1,0 +1,25 @@
+#view-me.ios-account-page{background:#f2f2f7;color:#1c1c1e;padding:0 0 calc(74px + env(safe-area-inset-bottom))!important;max-width:480px;align-self:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif}
+.ios-account-header{padding:max(22px,env(safe-area-inset-top)) 20px 16px}
+.ios-account-back{display:grid;place-items:center;width:44px;height:44px;border:1px solid #fff;border-radius:50%;background:#ffffffc9;color:#111;box-shadow:0 4px 18px #1b283b09;cursor:pointer}
+.ios-account-back svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ios-account-header h1{margin:22px 0 0;font-size:34px;font-weight:750;line-height:1.2;letter-spacing:-.04em}
+.ios-account-content{padding:0 16px}
+.ios-account-group{border:1px solid #fff;border-radius:25px;overflow:hidden;background:#ffffffeb;box-shadow:0 6px 24px #18253805}
+.ios-account-mask{display:flex;align-items:center;gap:13px;min-height:70px;width:100%;padding:12px 17px;border:0;background:none;color:#1c1c1e;cursor:pointer;text-align:left;font-size:17px!important}
+.ios-account-mask-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;background:linear-gradient(145deg,#9cc5f2,#5d8bc7);color:#fff;border-radius:12px}
+.ios-account-mask-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ios-account-chevron{margin-left:auto;width:15px;height:18px;fill:none;stroke:#b8b8be;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ios-account-mask:active{background:#e9edf4}
+#view-me .music-area,#music-panel,#music-panel-overlay,#floating-cd,#legacyMusicControls{display:none!important}
+.inbox-edit-placeholder{display:block;width:16.4cqw;height:11cqw;pointer-events:none}
+#view-messages .swipe-btn.btn-edit{display:none!important}
+#fontSettingsPage.active{z-index:var(--z-settings-sub,3500)!important;background:#f2f2f7}
+#apiSettingsPage .ios-api-glyph svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#apiSettingsPage #apiKeepAliveToggle strong{font-size:16px;font-weight:400}
+#apiSettingsPage #apiKeepAliveStatus{color:#8e8e93;font-size:12px;margin-top:3px}
+#userMaskPage{background:#f2f2f7;color:#1c1c1e;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+#userMaskPage .api-header{background:#ffffffbf;border-bottom:0;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+#userMaskPage .api-back-btn,#userMaskPage .wb-add-icon{color:#007aff}
+#userMaskPage #maskListContainer{padding:20px 16px}
+#userMaskPage .chat-swipe-row{border:1px solid #fff!important;border-radius:22px!important;height:78px;box-shadow:0 4px 16px #00000004}
+#view-messages .chat-swipe-actions .swipe-btn{width:86.6667px;flex:0 0 86.6667px}

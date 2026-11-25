@@ -35,11 +35,7 @@ function toggleInboxEdit(button) {
 function openInboxConversation(key) {
     const id = chatList.find(chat => String(chat.id) === String(key))?.id;
     if (id == null) return;
-    if (document.getElementById('view-messages').classList.contains('inbox-editing')) {
-        editChat(id);
-    } else {
-        openChatRoom(id);
-    }
+    openChatRoom(id);
 }
 
 function inboxAvatarMarkup(chat) {
@@ -356,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inbox = document.getElementById('view-messages');
     const list = document.getElementById('chat-list-container');
     const updateInboxBadge = () => {
+        list.querySelectorAll('.swipe-btn.btn-edit').forEach(button => button.remove());
         const badge = document.getElementById('inbox-unread-badge');
         const count = chatList.filter(chat => chat.inboxUnread).length;
         badge.hidden = !count;

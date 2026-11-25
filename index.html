@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="home.css?v=10">
     <link rel="stylesheet" href="api-settings.css?v=4">
     <link rel="stylesheet" href="personal-settings.css?v=2">
+    <link rel="stylesheet" href="settings-hub.css?v=1">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -268,7 +269,7 @@
                 <div id="view-messages" class="tab-view active">
                     <header class="inbox-heading">
                         <div class="inbox-actions">
-                            <button type="button" class="conversation-glass inbox-edit-button" onclick="toggleInboxEdit(this)" aria-pressed="false">编辑</button>
+                            <span class="inbox-edit-placeholder" aria-hidden="true"></span>
                             <button type="button" class="conversation-glass inbox-round" onclick="toggleInboxOptions()" aria-label="列表选项" aria-expanded="false" id="inbox-options-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M6 12h12M9 18h6"/></svg><span class="inbox-filter-badge" id="inbox-unread-badge" hidden></span></button>
                         </div>
                         <h1><button type="button" class="inbox-title-back" onclick="closeApp()" aria-label="信息，返回桌面">信息</button></h1>
@@ -407,9 +408,11 @@
     </div>
 </div>
                 
-                <div id="view-me" class="tab-view">
-                    <!-- 1. 播放器卡片 -->
-                    <div class="me-main-card">
+                <div id="view-me" class="tab-view ios-account-page">
+                    <header class="ios-account-header"><button type="button" class="ios-account-back" onclick="closeApp()" aria-label="返回桌面"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg></button><h1>我的</h1></header>
+                    <div class="ios-account-content"><div class="ios-account-group"><button type="button" class="ios-account-mask" onclick="openUserMaskPage()"><span class="ios-account-mask-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v7c0 5-4 9-8 10-4-1-8-5-8-10Z"/><path d="M7 9h2m6 0h2m-9 5c2.5 2 5.5 2 8 0"/></svg></span><span>面具</span><svg class="ios-account-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button></div></div>
+                </div>
+                <div id="legacyMusicControls" hidden inert aria-hidden="true" style="display:none!important">                    <div class="me-main-card">
                         <div class="music-area">
                             <div class="player-top">
                                 <div class="player-avatar" onclick="showMenu(event, 'meAvatar')">
@@ -444,14 +447,7 @@
                         <div class="doll-deco"></div>
                     </div>
 
-                    <!-- 设置列表 -->
-                    <div class="settings-list">
-                        <div class="setting-item" onclick="openFontSettings()"><div class="icon-img icon-theme"></div>字体</div>
-                        <div class="setting-item" onclick="openUserMaskPage()"><div class="icon-img icon-theme"></div>面具</div>
-                        <div class="setting-item" onclick="openDataModal()"><div class="icon-img icon-theme"></div>数据备份与重置</div>
-                    </div>
-                </div>
-                
+</div>
                 <nav id="wechat-bottom-nav">
     <div class="nav-item active" onclick="switchAppTab(0)">
         <div class="nav-icon"></div>
@@ -1019,7 +1015,11 @@
                     <div class="ios-api-group">
                     <button type="button" class="ios-api-row" data-api-view="voice" data-api-search="语音消息 MiniMax Fish Audio ElevenLabs 音色 角色声线 通话自动朗读 语音世界书"><span class="ios-api-glyph ios-api-purple" aria-hidden="true"><i class="fa-solid fa-microphone"></i></span><span class="ios-api-row-text">语音消息</span><span id="iosVoiceSummary" class="ios-api-summary">MiniMax</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
                     <button type="button" class="ios-api-row" data-api-view="image" data-api-search="生图配置 NovelAI NAI GPT Image Vibe 画师串 标签"><span class="ios-api-glyph ios-api-green" aria-hidden="true"><i class="fa-solid fa-image"></i></span><span class="ios-api-row-text">生图配置</span><span id="iosImageSummary" class="ios-api-summary">关闭</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
-                    <button type="button" class="ios-api-row" data-api-view="time" data-api-search="时间感知 自定义 模糊 时间"><span class="ios-api-glyph ios-api-orange" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span><span class="ios-api-row-text">时间感知</span><span id="iosTimeSummary" class="ios-api-summary">真实时间</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div><p id="iosApiNoResults" class="ios-api-note" hidden>没有匹配的设置</p>
+                    <button type="button" class="ios-api-row" data-api-view="time" data-api-search="时间感知 自定义 模糊 时间"><span class="ios-api-glyph ios-api-orange" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span><span class="ios-api-row-text">时间感知</span><span id="iosTimeSummary" class="ios-api-summary">真实时间</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button></div><div class="ios-api-group ios-api-utilities">
+<button type="button" class="ios-api-row" data-api-search="字体 全局字体 字号 导入 TTF WOFF" onclick="openFontSettings()"><span class="ios-api-glyph ios-api-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 19 6-14 6 14M5 14h8m3-7h6m-3 0v12"/></svg></span><span class="ios-api-row-text">字体</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+<button type="button" class="ios-api-row" data-api-search="后台播放保活 循环播放 音频 后台" id="apiKeepAliveToggle" role="switch" aria-checked="false"><span class="ios-api-glyph ios-api-green" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4m4-7v10m4-14v18m4-14v10m4-7v4"/></svg></span><span class="ios-api-row-text"><strong>后台播放保活</strong><small id="apiKeepAliveStatus">已关闭</small></span><span class="ios-api-switch" aria-hidden="true"></span></button>
+<button type="button" class="ios-api-row" data-api-search="数据备份与重置 导出 导入 恢复 清空 备份" onclick="openDataModal()"><span class="ios-api-glyph ios-api-orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4ZM8 5V2h8v3M8 10h8m-4 0v6m-3-3 3 3 3-3"/></svg></span><span class="ios-api-row-text">数据备份与重置</span><i class="fa-solid fa-chevron-right ios-api-chevron" aria-hidden="true"></i></button>
+</div><p id="iosApiNoResults" class="ios-api-note" hidden>没有匹配的设置</p>
                     </section>
                     <section data-api-section="main" hidden>
 <div class="ios-api-group">
@@ -1524,13 +1524,14 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="conversation.js?v=8"></script>
+    <script data-cfasync="false" src="conversation.js?v=9"></script>
     <script defer src="kiss-liquid.js?v=1"></script>
     <script defer src="kiss-bridge.js?v=11"></script>
     <script data-cfasync="false" src="script.js?v=15"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
+    <script src="settings-hub.js?v=1" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>
