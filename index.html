@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="api-settings.css?v=4">
     <link rel="stylesheet" href="personal-settings.css?v=2">
     <link rel="stylesheet" href="settings-hub.css?v=2">
-    <link rel="stylesheet" href="app-fixes.css?v=4">
+    <link rel="stylesheet" href="app-fixes.css?v=5">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -942,14 +942,14 @@
   <!-- Font Settings (Fix: Moved out) -->
             <div class="api-settings-page" id="fontSettingsPage">
                 <div class="api-header">
-                    <span class="ios-font-header-spacer" aria-hidden="true"></span>
+                    <button type="button" class="ios-font-back" onclick="closeFontSettings()" aria-label="返回 API 设置"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
                     <span class="api-title">全局字体</span>
-                    <button type="button" class="ios-font-done" onclick="closeFontSettings()">完成</button>
+                    <span aria-hidden="true"></span>
                 </div>
                 <div class="api-content ios-font-content">
                     <div class="ios-font-preview" id="fontPreviewBox"><div class="font-text-cn">把喜欢的字，留在每一天。</div><div class="font-text-en">The little things, in your own type.</div></div>
                     <p id="fontLoadStatus" role="status" hidden></p>
-                    <section class="ios-font-group"><label class="ios-font-url"><span>字体链接</span><input id="fontSourceUrl" type="url" placeholder="TTF / OTF / WOFF / WOFF2 / CSS"></label><button type="button" onclick="setFontByLink()">应用链接字体 <span>↗</span></button><button type="button" onclick="document.getElementById('fontFileInput').click()">从文件导入 <span>＋</span></button><button type="button" onclick="resetDefaultFont()">恢复系统字体</button><input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2,.ttc" hidden onchange="handleFontFile(this)"></section>
+                    <section class="ios-font-group"><label class="ios-font-url"><span>字体链接</span><input id="fontSourceUrl" type="url" placeholder="TTF / OTF / WOFF / WOFF2 / CSS"></label><button type="button" onclick="setFontByLink()">应用链接字体</button><button type="button" onclick="document.getElementById('fontFileInput').click()">从文件导入 <span>＋</span></button><button type="button" onclick="resetDefaultFont()">恢复系统字体</button><input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2,.ttc" hidden onchange="handleFontFile(this)"></section>
                     <section class="ios-font-group"><div class="ios-font-size-row"><label for="fontSizeSlider">文字大小</label><span id="fontSizeDisplay">16px</span></div><input type="range" id="fontSizeSlider" min="12" max="30" step="1" value="16"></section>
                     <section class="ios-font-group"><label class="ios-font-url"><span>方案名称</span><input id="fontSchemeName" placeholder="为当前字体命名"></label><button type="button" onclick="saveFontScheme()">保存当前字体 <span>＋</span></button></section>
                     <h2 class="ios-font-caption">我的字体</h2><div id="fontSchemeList"></div>

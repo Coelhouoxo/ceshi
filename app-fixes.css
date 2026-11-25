@@ -50,8 +50,9 @@ body:has(#userMaskPage.active) #wechat-bottom-nav{display:none!important}
 
 #apiSettingsPage #apiKeepAliveStatus{display:none!important}
 
-#fontSettingsPage .api-header{display:grid;grid-template-columns:68px 1fr 68px;align-items:center;gap:8px;padding-inline:16px;min-height:54px}
-#fontSettingsPage .api-title{text-align:center}
-#fontSettingsPage .ios-font-done{display:grid;place-items:center;min-height:36px;width:68px;padding:0 12px;box-sizing:border-box;border:1px solid #fff;border-radius:22px;background:#fff;color:#007aff;box-shadow:0 3px 14px #142a4507;font-size:15px!important;font-weight:600;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#fontSettingsPage .ios-font-done:active{background:#e8edf5;transform:scale(.97)}
-#fontSettingsPage .ios-font-done:focus-visible{outline:2px solid #007aff;outline-offset:3px}
+#fontSettingsPage .api-header{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;height:auto;min-height:60px;flex:none;margin:0;padding:8px 16px;box-sizing:border-box;overflow:visible}
+#fontSettingsPage .api-title{display:block;text-align:center;font-size:17px!important;line-height:1.5;padding:4px 0;white-space:normal;overflow:visible}
+#fontSettingsPage .ios-font-back{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;background:transparent;color:#007aff;cursor:pointer}
+#fontSettingsPage .ios-font-back svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#fontSettingsPage .ios-font-preview{height:auto;min-height:0;max-height:none;box-sizing:border-box;overflow:visible;padding:30px 18px}
+#fontSettingsPage .ios-font-preview>div{height:auto;max-height:none;overflow:visible;white-space:normal;overflow-wrap:anywhere;text-overflow:clip;line-height:1.65}
