@@ -23,3 +23,11 @@
 #userMaskPage #maskListContainer{padding:20px 16px}
 #userMaskPage .chat-swipe-row{border:1px solid #fff!important;border-radius:22px!important;height:78px;box-shadow:0 4px 16px #00000004}
 #view-messages .chat-swipe-actions .swipe-btn{width:86.6667px;flex:0 0 86.6667px}
+#wechat-bottom-nav .ios-account-nav-svg{display:none}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav{left:50%!important;bottom:max(12px,env(safe-area-inset-bottom))!important;transform:translateX(-50%);width:calc(100% - 32px);max-width:448px;padding:6px!important;align-items:center;gap:4px;border:1px solid #fff;border-radius:34px;background:#ffffffcf;box-shadow:0 8px 32px #18253812;backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%)}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav .nav-item{flex:1;min-height:48px;gap:2px;padding:5px 0;border-radius:25px;color:#8e8e93}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav .nav-item.active{color:#007aff;background:#e6effb}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav .nav-icon{width:23px;height:23px;margin:0;background:none;filter:none;opacity:1}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav .ios-account-nav-svg{display:block;width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav .nav-item>span{font-size:0!important}
+#chatAppPage:has(#view-me.active) #wechat-bottom-nav .nav-item>span::after{content:attr(data-ios-label);font-size:10px;line-height:12px}
