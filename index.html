@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="api-settings.css?v=4">
     <link rel="stylesheet" href="personal-settings.css?v=2">
     <link rel="stylesheet" href="settings-hub.css?v=2">
-    <link rel="stylesheet" href="app-fixes.css?v=3">
+    <link rel="stylesheet" href="app-fixes.css?v=4">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -942,9 +942,9 @@
   <!-- Font Settings (Fix: Moved out) -->
             <div class="api-settings-page" id="fontSettingsPage">
                 <div class="api-header">
-                    <i class="fas fa-chevron-left api-back-btn" onclick="closeFontSettings()"></i>
+                    <span class="ios-font-header-spacer" aria-hidden="true"></span>
                     <span class="api-title">全局字体</span>
-                    <div style="width:40px"></div>
+                    <button type="button" class="ios-font-done" onclick="closeFontSettings()">完成</button>
                 </div>
                 <div class="api-content ios-font-content">
                     <div class="ios-font-preview" id="fontPreviewBox"><div class="font-text-cn">把喜欢的字，留在每一天。</div><div class="font-text-en">The little things, in your own type.</div></div>

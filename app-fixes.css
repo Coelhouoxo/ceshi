@@ -49,3 +49,9 @@ body:has(#userMaskPage.active) #wechat-bottom-nav{display:none!important}
 #backup-modal .modal-btn.cancel{justify-content:center;margin-top:12px!important;border-radius:18px!important;border:0!important;font-weight:600}
 
 #apiSettingsPage #apiKeepAliveStatus{display:none!important}
+
+#fontSettingsPage .api-header{display:grid;grid-template-columns:68px 1fr 68px;align-items:center;gap:8px;padding-inline:16px;min-height:54px}
+#fontSettingsPage .api-title{text-align:center}
+#fontSettingsPage .ios-font-done{display:grid;place-items:center;min-height:36px;width:68px;padding:0 12px;box-sizing:border-box;border:1px solid #fff;border-radius:22px;background:#fff;color:#007aff;box-shadow:0 3px 14px #142a4507;font-size:15px!important;font-weight:600;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#fontSettingsPage .ios-font-done:active{background:#e8edf5;transform:scale(.97)}
+#fontSettingsPage .ios-font-done:focus-visible{outline:2px solid #007aff;outline-offset:3px}
