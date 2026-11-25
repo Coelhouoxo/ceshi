@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="personal-settings.css?v=2">
     <link rel="stylesheet" href="settings-hub.css?v=2">
     <link rel="stylesheet" href="app-fixes.css?v=5">
+    <link rel="stylesheet" href="masks.css?v=1">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -1503,6 +1504,7 @@
     <script src="settings-hub.js?v=2" defer></script>
     <script src="font-manager.js?v=1" defer></script>
     <script src="app-fixes.js?v=1" defer></script>
+    <script src="masks.js?v=1" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>
@@ -2202,63 +2204,29 @@
 </div>
 </div>
 <!-- ★★★ 新增：面具管理页面 ★★★ -->
-<div class="api-settings-page" id="userMaskPage">
-    <div class="api-header">
-        <i class="fas fa-chevron-left api-back-btn" onclick="closeUserMaskPage()"></i>
-        <span class="api-title">面具</span>
-        <div class="wb-add-icon" onclick="openAddMaskModal()"><i class="fas fa-plus"></i></div>
-    </div>
-    <div class="api-content" id="maskListContainer">
-        <!-- JS 会在这里渲染面具列表 -->
-        <div style="text-align:center;color:#ccc;margin-top:50px;font-size:13px;">暂无面具<br>点击右上角创建</div>
-    </div>
+<div class="api-settings-page ios-masks" id="userMaskPage">
+  <header class="mask-library-header"><div class="mask-library-tools"><button class="mask-glass mask-back" type="button" onclick="closeUserMaskPage()" aria-label="返回信息"><svg viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></svg></button><div class="mask-library-actions"><button type="button" class="mask-text-button" id="maskEditToggle" onclick="toggleMaskListEdit()">编辑</button><button class="mask-glass" type="button" onclick="openAddMaskModal()" aria-label="新建面具"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></button></div></div><h1>面具</h1></header>
+  <main class="mask-library-content"><p class="mask-caption">我的面具</p><div id="maskListContainer"></div><p class="mask-footnote">在聊天中使用不同的自己。</p></main>
 </div>
-
-<!-- ★★★ 修复后的面具弹窗 (直接覆盖原有的 addMaskModal 代码块) ★★★ -->
-<div class="modal-overlay" id="addMaskModal">
-    <div class="modal-box">
-        <div class="modal-title">创建新面具</div>
-        
-       <img src="https://placehold.co/100/e0e0e0/888?text=Mask"
-     class="modal-avatar"
-     id="newMaskAvatar"
-     onclick="showMaskAvatarMenu(event)">
-        
-        <div class="modal-input-group">
-            <label class="modal-label">你的姓名</label>
-            <input type="text" class="modal-input" id="newMaskName" placeholder="例如：林晚晚">
-        </div>
-        
-        <div class="modal-input-group">
-            <label class="modal-label">你的设定 (Persona)</label>
-            <textarea class="modal-input" id="newMaskPersona" placeholder="输入你的性格、外貌或背景..."></textarea>
-        </div>
-        
-        <div class="modal-btns">
-            <button class="modal-btn btn-cancel-modal" onclick="closeAddMaskModal()">取消</button>
-            <button class="modal-btn btn-confirm-modal" onclick="confirmSaveMask()">确认创建</button>
-        </div>
-    </div>
-</div>
-<!-- ★★★ 新增：选择面具的弹窗 (用于创建角色时) ★★★ -->
-<div class="wb-modal-overlay" id="maskSelectorModal">
-    <div class="wb-modal-box">
-        <div class="wb-header">选择一个人设面具</div>
-        <div id="maskSelectorList" class="wb-list">
-            <!-- JS 填充 -->
-        </div>
-        <div class="wb-confirm-btn" onclick="closeMaskSelector()">取消</div>
-    </div>
-</div>
-<div id="maskAvatarMenu" class="mask-avatar-menu" onclick="event.stopPropagation()">
-  <div class="menu-item" onclick="changeMaskAvatarByLink(event)">
-    <i class="fas fa-link"></i> 图片链接
+<div class="modal-overlay ios-mask-editor" id="addMaskModal" role="dialog" aria-modal="true" aria-labelledby="maskEditorTitle">
+ <div class="mask-editor-page">
+  <header class="mask-editor-header"><button type="button" class="mask-text-button" onclick="closeAddMaskModal()">取消</button><h2 class="modal-title" id="maskEditorTitle">新建面具</h2><button type="button" class="mask-blue-pill btn-confirm-modal" onclick="confirmSaveMask()">完成</button></header>
+  <div class="mask-editor-scroll"><div class="mask-avatar-area"><button type="button" class="mask-avatar-button" onclick="showMaskAvatarMenu(event)" aria-label="更换面具头像"><img id="newMaskAvatar" alt="面具头像"><span class="mask-camera"><svg viewBox="0 0 24 24"><path d="M8 5 9.5 3h5L16 5h4v15H4V5Z"/><circle cx="12" cy="12" r="4"/></svg></span></button><button type="button" class="mask-text-button" onclick="showMaskAvatarMenu(event)">更换头像</button></div>
+   <p class="mask-caption">基本信息</p><div class="mask-form-group"><label class="mask-name-row" for="newMaskName"><span>姓名</span><input id="newMaskName" class="modal-input" autocomplete="off" placeholder="为面具起个名字"></label></div>
+   <p class="mask-caption">人物设定</p><div class="mask-form-group"><textarea id="newMaskPersona" class="modal-input" aria-label="人物设定" placeholder="性格、外貌、经历，以及你希望对方了解的事…"></textarea></div><p id="maskFormError" class="mask-form-error" role="status" hidden></p>
+   <button type="button" id="maskEditorDelete" class="mask-delete-row" onclick="deleteMask(editingMaskId,event)" hidden>删除面具</button>
   </div>
-  <div class="menu-item" onclick="triggerMaskAvatarFile(event)">
-    <i class="fas fa-image"></i> 本地图片
-  </div>
+ </div>
 </div>
-<input type="file" id="maskAvatarFileInput" accept="image/*" style="display:none;" />
+<div id="maskSelectorModal" class="wb-modal-overlay mask-sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="maskSelectorTitle" onclick="if(event.target===this)closeMaskSelector()">
+ <section class="mask-sheet"><div class="mask-sheet-handle"></div><header class="mask-sheet-header"><h2 id="maskSelectorTitle">选择面具</h2><button type="button" class="mask-glass mask-close" onclick="closeMaskSelector()" aria-label="关闭面具选择">×</button></header><div id="maskSelectorList" class="mask-select-list" role="radiogroup" aria-label="面具"></div><button type="button" class="mask-sheet-done" onclick="confirmMaskSelection()">完成</button></section>
+</div>
+<div id="maskAvatarMenu" class="mask-sheet-overlay" role="dialog" aria-modal="true" aria-label="更换头像" onclick="if(event.target===this)hideMaskAvatarMenu();event.stopPropagation()">
+ <div class="mask-avatar-sheet"><div class="mask-avatar-options"><p>更换头像</p><button type="button" onclick="triggerMaskAvatarFile(event)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1.5"/><path d="m3 17 6-5 4 3 4-5 4 5"/></svg>从相册选择</button><button type="button" onclick="changeMaskAvatarByLink(event)"><svg viewBox="0 0 24 24"><path d="m10 13 4-4M8 15l-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 3 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(1 0)"/></svg>使用图片链接</button></div><button type="button" class="mask-avatar-cancel" onclick="hideMaskAvatarMenu()">取消</button></div>
+</div>
+<div id="maskLinkDialog" class="mask-alert-overlay" role="dialog" aria-modal="true" aria-labelledby="maskLinkTitle" hidden><form class="mask-alert" onsubmit="event.preventDefault();confirmMaskAvatarLink()"><h2 id="maskLinkTitle">图片链接</h2><input type="url" id="maskAvatarUrl" placeholder="https://…" aria-label="图片链接" required><p class="mask-form-error" id="maskLinkError" role="status" hidden></p><div class="mask-alert-actions"><button type="button" onclick="closeMaskLinkDialog()">取消</button><button type="submit" id="maskLinkConfirm">确定</button></div></form></div>
+<div id="maskDeleteDialog" class="mask-alert-overlay" role="alertdialog" aria-modal="true" aria-labelledby="maskDeleteTitle" aria-describedby="maskDeleteDescription" hidden><div class="mask-alert"><h2 id="maskDeleteTitle">删除面具？</h2><p id="maskDeleteDescription"></p><p class="mask-form-error" id="maskDeleteError" role="status" hidden></p><div class="mask-alert-actions"><button type="button" onclick="closeMaskDeleteDialog()">取消</button><button type="button" class="mask-danger" id="maskConfirmDelete" onclick="confirmMaskDelete()">删除</button></div></div></div>
+<input type="file" id="maskAvatarFileInput" accept="image/*" hidden>
 <div id="forumPage" style="display: none; width: 100%; height: 100%; background: #fff; overflow: hidden; position: absolute; top: 0; left: 0; z-index: 3500;">
     <div id="forumPageContent" style="width: 100%; height: 100%;"></div>
 </div>
