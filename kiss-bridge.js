@@ -178,7 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (description) {
                     let copy = card.querySelector('.photo-description');
                     if (copy) copy.remove();
-                    else card.append(cleanClone(description));
+                    else {
+                        copy = cleanClone(description);
+                        copy.hidden = false;
+                        card.append(copy);
+                    }
+                    card.setAttribute('aria-expanded', String(!!card.querySelector('.photo-description')));
                     optics.invalidate(row);
                 } else {
                     sourceFrame.dispatchEvent(new MouseEvent('click', {bubbles:true}));
@@ -192,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             label.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h6v6H1zm8 0h6v6H9zM1 9h6v6H1zm8 0h6v6H9z"/></svg>';
             label.append(document.createTextNode(photos.length + ' 张照片'));
             label.setAttribute('aria-expanded', String(state.expanded));
-            label.onclick = () => { state.expanded = !state.expanded; schedule(); };
+            label.onclick = () => { if (description) { deck.querySelector('button')?.click(); return; } state.expanded = !state.expanded; schedule(); };
             album.append(label);
             let gesture;
             deck.addEventListener('pointerdown', event => { gesture = [event.clientX,event.clientY]; });

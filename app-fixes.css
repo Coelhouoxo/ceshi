@@ -1,0 +1,49 @@
+#view-messages .chat-swipe-actions{display:none!important}
+#view-messages .chat-item-content{transform:none!important;transition:none!important}
+#view-messages.inbox-editing .chat-item-content{padding-left:12cqw}
+#view-messages.inbox-editing .chat-item-content::before{content:'';position:absolute;left:3cqw;top:50%;width:5.2cqw;height:5.2cqw;border:1.5px solid #c7c7cc;border-radius:50%;transform:translateY(-50%);box-sizing:border-box}
+#view-messages.inbox-editing .contact-selected::before{content:'✓';display:grid;place-items:center;color:white;background:#007aff;border-color:#007aff;font-size:3.8cqw}
+.inbox-selection-toolbar{position:absolute;z-index:40;bottom:max(15px,env(safe-area-inset-bottom));left:3%;width:94%;box-sizing:border-box;padding:15px 12px;display:flex;align-items:center;gap:12px;border:1px solid white;border-radius:28px;background:#fffffff5;box-shadow:0 6px 25px #00000012}
+.inbox-selection-toolbar[hidden]{display:none}
+.inbox-selection-toolbar button{border:0;background:none;color:#007aff;font-size:15px!important;padding:6px 0;white-space:nowrap}
+.inbox-selection-toolbar button:disabled{opacity:.35}
+.inbox-selection-toolbar span{flex:1;color:#8e8e93;font-size:13px!important;text-align:center}
+.inbox-selection-toolbar .selection-danger{color:#ff3b30}
+#view-messages.inbox-editing .inbox-dock{visibility:hidden}
+body:has(#userMaskPage.active) #wechat-bottom-nav{display:none!important}
+#apiSettingsPage .ios-api-utilities .ios-api-row-text{font-size:16px!important;line-height:1.3}
+#apiSettingsPage .ios-api-utilities .ios-api-row-text strong{display:block;font-size:16px!important;font-weight:400}
+#apiSettingsPage .ios-api-utilities .ios-api-row-text small{display:block;font-size:12px!important;line-height:1.3;margin-top:3px}
+#apiSettingsPage .ios-api-row[aria-checked=true] .ios-api-switch{background:#34c759}
+#apiSettingsPage .ios-api-row[aria-checked=true] .ios-api-switch::after{transform:translateX(18px)}
+#fontSettingsPage .api-header{background:#f2f2f7;border:0;color:#1c1c1e;padding-top:max(12px,env(safe-area-inset-top))}
+#fontSettingsPage .api-back-btn{color:#007aff}
+#fontSettingsPage .ios-font-content{padding:20px 16px calc(32px + env(safe-area-inset-bottom));overflow-y:auto;background:#f2f2f7}
+.ios-font-preview{text-align:center;padding:32px 16px;margin:0 0 22px;background:white;border-radius:26px;color:#1c1c1e}
+.ios-font-preview .font-text-cn{font-size:21px!important;line-height:1.6}
+.ios-font-preview .font-text-en{font-size:13px!important;color:#8e8e93;margin-top:12px}
+.ios-font-group{background:white;border-radius:22px;padding:0 17px;margin:0 0 22px;overflow:hidden}
+.ios-font-group>button,.ios-font-url{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;width:100%;box-sizing:border-box;margin:0;background:none;border:0;border-bottom:1px solid #e5e5ea;color:#007aff;text-align:left;font-size:16px!important}
+.ios-font-group>:last-child{border-bottom:0}
+.ios-font-url{color:#1c1c1e;flex-wrap:wrap;padding:14px 0}
+.ios-font-url input{flex:1;min-width:140px;text-align:right;border:0!important;outline:0;background:none!important;color:#1c1c1e;padding:5px 0!important;font-size:14px!important;box-shadow:none!important;border-radius:0!important}
+.ios-font-size-row{display:flex;justify-content:space-between;padding:17px 0 8px;font-size:16px}
+.ios-font-size-row span{color:#8e8e93}
+#fontSizeSlider{width:100%;margin:12px 0 24px;accent-color:#007aff}
+.ios-font-caption{margin:0 17px 9px;color:#8e8e93;font-size:13px!important;font-weight:400}
+.ios-font-empty{color:#8e8e93;text-align:center;font-size:14px!important}
+.ios-font-scheme{display:flex;gap:12px;background:white;border-radius:18px;margin-bottom:8px;padding:5px 17px}
+.ios-font-scheme button{min-height:48px;border:0;background:none;color:#007aff;text-align:left}
+.ios-font-scheme button:first-child{flex:1;color:#1c1c1e}
+.ios-font-scheme button:last-child{color:#ff3b30;font-size:14px!important}
+#fontLoadStatus{font-size:13px!important;color:#23864a;padding:0 12px 8px;overflow-wrap:anywhere}
+#fontLoadStatus.font-error{color:#c9342d}
+#backup-modal{z-index:4000!important;align-items:flex-end!important;padding:12px!important;box-sizing:border-box;background:#0005;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#backup-modal .modal-card{width:100%!important;max-width:480px!important;max-height:calc(90dvh - env(safe-area-inset-top));overflow-y:auto;border:1px solid #fff9;border-radius:30px!important;background:#f2f2f7!important;padding:22px 18px max(18px,env(safe-area-inset-bottom))!important;color:#1c1c1e;box-shadow:0 12px 60px #0002;box-sizing:border-box}
+#backup-modal .modal-title{font-size:21px!important;font-weight:650;margin:0 0 20px;text-align:center}
+#backup-modal .storage-status-box{border-radius:16px!important;background:#e7e7ec!important;padding:14px!important}
+#backup-modal .modal-btn{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:50px;box-sizing:border-box;margin:0!important;border:0!important;border-bottom:1px solid #e5e5ea!important;border-radius:0!important;background:white!important;padding:13px 15px!important;font-size:16px!important;font-weight:400;color:#007aff!important;text-align:left}
+#backup-modal .modal-btn i{width:22px;text-align:center}
+#backup-modal #btn-smart-export{border-radius:18px 18px 0 0!important}
+#backup-modal .modal-btn.danger{color:#ff3b30!important;border-radius:0 0 18px 18px!important;border-bottom:0!important}
+#backup-modal .modal-btn.cancel{justify-content:center;margin-top:12px!important;border-radius:18px!important;border:0!important;font-weight:600}

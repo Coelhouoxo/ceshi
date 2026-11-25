@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="api-settings.css?v=4">
     <link rel="stylesheet" href="personal-settings.css?v=2">
     <link rel="stylesheet" href="settings-hub.css?v=2">
+    <link rel="stylesheet" href="app-fixes.css?v=1">
 </head>
 <body>
     <div class="phone-frame" id="phoneFrame">
@@ -269,7 +270,7 @@
                 <div id="view-messages" class="tab-view active">
                     <header class="inbox-heading">
                         <div class="inbox-actions">
-                            <span class="inbox-edit-placeholder" aria-hidden="true"></span>
+                            <button type="button" class="conversation-glass inbox-edit-button" onclick="toggleInboxEdit(this)" aria-pressed="false">编辑</button>
                             <button type="button" class="conversation-glass inbox-round" onclick="toggleInboxOptions()" aria-label="列表选项" aria-expanded="false" id="inbox-options-button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M6 12h12M9 18h6"/></svg><span class="inbox-filter-badge" id="inbox-unread-badge" hidden></span></button>
                         </div>
                         <h1><button type="button" class="inbox-title-back" onclick="closeApp()" aria-label="信息，返回桌面">信息</button></h1>
@@ -282,7 +283,7 @@
                         </div>
                     </header>
                     <input type="file" id="importPersonaDocInput" accept=".txt,.md,.docx" hidden onchange="handlePersonaDocImport(this)">
-                    <div id="chat-list-container"></div>
+                    <div id="chat-list-container"></div><div class="inbox-selection-toolbar" hidden><button type="button" data-contact-select="all">全选</button><span id="inboxSelectionCount">已选 0 项</span><button type="button" data-contact-select="pin">置顶</button><button type="button" class="selection-danger" data-contact-select="delete">删除</button></div>
                     <div class="inbox-dock">
                         <label class="conversation-glass inbox-search"><svg class="inbox-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.75"/><path d="m15.5 15.5 5.5 5.5"/></svg><input id="inbox-query" type="search" aria-label="搜索联系人或消息" placeholder="搜索" oninput="renderChatList()"><button type="button" class="inbox-microphone" aria-label="语音搜索" onclick="startInboxVoiceSearch()"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v2a6 6 0 0 0 12 0v-2M12 18v4m-4 0h8"/></svg></button></label>
                         <button type="button" class="conversation-glass inbox-round" onclick="openAddCharModal()" aria-label="新建聊天"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="m18.4 2.8 2.8 2.8-10.4 10.4-3.6.8.8-3.6Z"/></svg></button>
@@ -945,45 +946,13 @@
                     <span class="api-title">全局字体</span>
                     <div style="width:40px"></div>
                 </div>
-                <div class="api-content">
-                    <div class="api-input-group">
-                        <label>字体预览</label>
-                        <div class="font-preview-box" id="fontPreviewBox">
-                            <div class="font-text-cn">跟你聊天很开心，被你老公打死也值了</div>
-                            <div class="font-text-en">Miu Phone is really fun, so fun</div>
-                        </div>
-                    </div>
-
-                    <div class="api-input-group">
-                        <label>设置新字体</label>
-                        <div class="edit-btns-row">
-                            <button class="edit-btn" onclick="setFontByLink()">链接导入 (URL)</button>
-                            <button class="edit-btn" onclick="document.getElementById('fontFileInput').click()">本地文件导入 (TTF/WOFF)</button>
-                            <button class="edit-btn" style="color:red" onclick="resetDefaultFont()">恢复默认</button>
-                        </div>
-                        <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display:none" onchange="handleFontFile(this)">
-                    </div>
-
-                    <div class="api-divider" style="height:1px; background:#eee; margin:10px 0;"></div>
-
-                    <div class="api-input-group">
-                        <label>保存当前字体为方案</label>
-                        <div class="api-row-flex">
-                            <input type="text" class="api-input" id="fontSchemeName" placeholder="方案名称 (例如: 圆圆的字体)">
-                            <button class="api-btn-small" onclick="saveFontScheme()">保存</button>
-                        </div>
-                    </div>
-                    <div class="font-slider-wrapper">
-                        <div class="font-slider-header">
-                            <span class="font-slider-label">字体大小 (Font Size)</span>
-                            <span id="fontSizeDisplay" class="font-slider-value">16px</span>
-                        </div>
-                        <input type="range" id="fontSizeSlider" min="12" max="30" step="1" value="16" oninput="document.getElementById('fontSizeDisplay').innerText = this.value + 'px'">
-                    </div>
-                    <div class="api-input-group">
-                        <label>已保存的字体方案</label>
-                        <div id="fontSchemeList" style="margin-top:5px;"></div>
-                    </div>
+                <div class="api-content ios-font-content">
+                    <div class="ios-font-preview" id="fontPreviewBox"><div class="font-text-cn">把喜欢的字，留在每一天。</div><div class="font-text-en">The little things, in your own type.</div></div>
+                    <p id="fontLoadStatus" role="status" hidden></p>
+                    <section class="ios-font-group"><label class="ios-font-url"><span>字体链接</span><input id="fontSourceUrl" type="url" placeholder="TTF / OTF / WOFF / WOFF2 / CSS"></label><button type="button" onclick="setFontByLink()">应用链接字体 <span>↗</span></button><button type="button" onclick="document.getElementById('fontFileInput').click()">从文件导入 <span>＋</span></button><button type="button" onclick="resetDefaultFont()">恢复系统字体</button><input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2,.ttc" hidden onchange="handleFontFile(this)"></section>
+                    <section class="ios-font-group"><div class="ios-font-size-row"><label for="fontSizeSlider">文字大小</label><span id="fontSizeDisplay">16px</span></div><input type="range" id="fontSizeSlider" min="12" max="30" step="1" value="16"></section>
+                    <section class="ios-font-group"><label class="ios-font-url"><span>方案名称</span><input id="fontSchemeName" placeholder="为当前字体命名"></label><button type="button" onclick="saveFontScheme()">保存当前字体 <span>＋</span></button></section>
+                    <h2 class="ios-font-caption">我的字体</h2><div id="fontSchemeList"></div>
                 </div>
             </div>
 
@@ -1524,14 +1493,16 @@
     <script data-cfasync="false" src="wallet.js"></script>
     <script data-cfasync="false" src="forum_app.js"></script>
     <script src="gallery_app.js"></script>
-    <script data-cfasync="false" src="conversation.js?v=9"></script>
+    <script data-cfasync="false" src="conversation.js?v=10"></script>
     <script defer src="kiss-liquid.js?v=1"></script>
-    <script defer src="kiss-bridge.js?v=11"></script>
+    <script defer src="kiss-bridge.js?v=12"></script>
     <script data-cfasync="false" src="script.js?v=15"></script>
     <script data-cfasync="false" src="api-settings.js?v=4" defer></script>
     <script src="image-workshop.js?v=4" defer></script>
     <script data-cfasync="false" src="home.js?v=9" defer></script>
     <script src="settings-hub.js?v=2" defer></script>
+    <script src="font-manager.js?v=1" defer></script>
+    <script src="app-fixes.js?v=1" defer></script>
 <div class="glass-popup-overlay" id="glassPopup">
     <div class="glass-popup-box">
         <div class="glass-popup-title" id="glassTitle">标题</div>
