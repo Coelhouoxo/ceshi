@@ -18,7 +18,7 @@ body:has(#userMaskPage.active) #wechat-bottom-nav{display:none!important}
 #apiSettingsPage .ios-api-row[aria-checked=true] .ios-api-switch::after{transform:translateX(18px)}
 #fontSettingsPage .api-header{background:#f2f2f7;border:0;color:#1c1c1e;padding-top:max(12px,env(safe-area-inset-top))}
 #fontSettingsPage .api-back-btn{color:#007aff}
-#fontSettingsPage .ios-font-content{padding:20px 16px calc(32px + env(safe-area-inset-bottom));overflow-y:auto;background:#f2f2f7}
+#fontSettingsPage .ios-font-content{display:block;min-height:0;padding:20px 16px calc(32px + env(safe-area-inset-bottom));overflow-y:auto;background:#f2f2f7}
 .ios-font-preview{text-align:center;padding:32px 16px;margin:0 0 22px;background:white;border-radius:26px;color:#1c1c1e}
 .ios-font-preview .font-text-cn{font-size:21px!important;line-height:1.6}
 .ios-font-preview .font-text-en{font-size:13px!important;color:#8e8e93;margin-top:12px}
@@ -47,3 +47,5 @@ body:has(#userMaskPage.active) #wechat-bottom-nav{display:none!important}
 #backup-modal #btn-smart-export{border-radius:18px 18px 0 0!important}
 #backup-modal .modal-btn.danger{color:#ff3b30!important;border-radius:0 0 18px 18px!important;border-bottom:0!important}
 #backup-modal .modal-btn.cancel{justify-content:center;margin-top:12px!important;border-radius:18px!important;border:0!important;font-weight:600}
+
+#apiSettingsPage #apiKeepAliveStatus{display:none!important}
